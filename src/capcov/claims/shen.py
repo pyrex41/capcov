@@ -47,7 +47,7 @@ from .static.certificate import DEFAULT_MAX_DEPTH, DEFAULT_MAX_NODES, rules_dige
 
 DEFAULT_TIMEOUT = 60.0
 IMPL = "shen-go"
-LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen")
+LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen")
 BEGIN_MARKER = "<<<CAPCOV-SHEN-JSON-BEGIN>>>"
 END_MARKER = "<<<CAPCOV-SHEN-JSON-END>>>"
 _EXACT_INT_LIMIT = 2 ** 53  # shen-go numbers are float64
@@ -264,6 +264,8 @@ def _facts(bundle: Bundle) -> list[str]:
 
 def _request_literal(request: Mapping[str, Any]) -> str:
     kind = request["kind"]
+    if kind == "compile-spec":
+        return "[capcov.compile-spec]"
     if kind == "authority":
         return "[capcov.authority]"
     tag = {"derive": "capcov.derive", "why-not": "capcov.why-not"}[kind]
@@ -287,6 +289,19 @@ def render_driver(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | N
     lines.append(f"(do (set capcov.*in-bounds* [{int(max_depth)} {int(max_nodes)}]) ok)")
     lines.append(f"(do (set capcov.*in-digests* [{_string(bundle_digest)} {_string(rules_digest_value)}]) ok)")
     lines.append(f"(do (set capcov.*in-request* {_request_literal(request)}) ok)")
+    lines.append(f"(do (set capcov.*schema-version* {bundle.schema_version}) ok)")
+    capabilities = [[c.name, c.witness, c.left_dimension, c.right_dimension,
+                     c.left_column, c.right_column, list(c.left_targets),
+                     list(c.right_targets), c.symmetric] for c in bundle.compatibility_capabilities]
+    scopes = [[s.relation, s.target, [list(p) for p in s.mapping]] for s in bundle.completeness_scopes]
+    bridges = [[b.name, b.left_dimension, b.right_dimension, list(b.left_targets),
+                list(b.right_targets)] for b in bundle.required_bridges]
+    policies = [[p.name, p.rule, p.relation, p.rule_digest] for p in bundle.derived_completeness_policies]
+    def data_literal(value):
+        return "[" + " ".join(data_literal(v) for v in value) + "]" if isinstance(value, list) else _literal(value)
+
+    for name, data in (("capabilities", capabilities), ("scopes", scopes), ("bridges", bridges), ("derived-policies", policies)):
+        lines.append(f"(do (set capcov.*{name}* {data_literal(data)}) ok)")
     lines.append("(capcov.main)")
     return "\n".join(lines) + "\n"
 
@@ -388,6 +403,8 @@ def run(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | None = None
     Raises ``ShenUnavailable`` when the runtime is missing and ``ShenFailure``
     for every run that does not yield a well-formed, non-error payload.
     """
+    if bundle.schema_version == 2 and request.get("kind") not in {"authority", "compile-spec"}:
+        raise ShenFailure("unsupported-construct", "native v2 derivations require the versioned evaluation-basis protocol")
     rt = runtime()
     if max_depth < 1 or max_nodes < 1:
         raise ShenFailure("invalid-input", "max_depth and max_nodes must be positive")

@@ -309,7 +309,32 @@ def main(argv: list[str]) -> int:
                     help="write the certificate, transcript, model_well_formed.json and model_operation_checked.json here")
     mc.add_argument("--timeout", type=float, default=None, help="seconds before the runtime is killed")
     mc.add_argument("--keep", action="store_true", help="keep the generated driver and units")
+    spec = claims_sub.add_parser("spec", help="compile or check restricted Shen declarations")
+    spec_sub = spec.add_subparsers(dest="command", required=True)
+    for name in ("build", "check"):
+        command = spec_sub.add_parser(name)
+        command.add_argument("--source", required=True)
+        command.add_argument("--out" if name == "build" else "--artifacts", required=True)
+        command.add_argument("--timeout", type=float, default=60)
     args = parser.parse_args(argv)
+    if args.tool == "spec":
+        from .spec import compile_spec, check_spec, SpecError
+        from .shen import ShenFailure, ShenUnavailable
+        try:
+            if args.command == "build":
+                compiled = compile_spec(args.source, timeout=args.timeout)
+                compiled.write(args.out)
+                _emit({"ok": True, "artifacts": [name for name, _ in compiled.artifacts]}, None)
+                return 0
+            report = check_spec(args.source, args.artifacts, timeout=args.timeout)
+            _emit(report.as_dict(), None)
+            return 0 if report.ok else 1
+        except (ShenFailure, ShenUnavailable) as exc:
+            _emit({"operational_failure": exc.operational_failure, "error": str(exc)}, None)
+            return 3
+        except (SpecError, ValueError, OSError) as exc:
+            _emit({"ok": False, "error": str(exc)}, None)
+            return 2
     if args.tool == "assumptions":
         return _assumptions(args)
     if args.tool == "modelcheck":

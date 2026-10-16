@@ -58,6 +58,19 @@ def combine(*bundles: Bundle, claims: Iterable[Claim] = (), facts: Iterable[Atom
     """
     if not bundles:
         raise CombineError("combine needs at least one bundle")
+    version = bundles[0].schema_version
+    if any(bundle.schema_version != version for bundle in bundles):
+        raise CombineError("cannot combine different Bundle schema versions")
+    contracts = {}
+    for field in ("compatibility_capabilities", "required_bridges", "completeness_scopes", "derived_completeness_policies"):
+        merged = {}
+        for bundle in bundles:
+            for record in getattr(bundle, field):
+                key = getattr(record, "name", getattr(record, "relation", None))
+                if key in merged and merged[key] != record:
+                    raise CombineError(f"conflicting {field} declaration {key!r}")
+                merged[key] = record
+        contracts[field] = tuple(merged.values())
     policy = bundles[0].diagnostic_policy
     for bundle in bundles[1:]:
         if bundle.diagnostic_policy != policy:
@@ -77,6 +90,8 @@ def combine(*bundles: Bundle, claims: Iterable[Claim] = (), facts: Iterable[Atom
     combined_metadata.update(dict(metadata or {}))
     result = Bundle(
         relations,
+        schema_version=version,
+        **contracts,
         facts=tuple({*(f for b in bundles for f in b.facts), *facts}),
         rules=tuple({*(r for b in bundles for r in b.rules), *rules}),
         claims=tuple({*(c for b in bundles for c in b.claims), *claims}),

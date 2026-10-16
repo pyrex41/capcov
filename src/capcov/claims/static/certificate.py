@@ -69,6 +69,14 @@ class RecheckResult:
     problems: tuple[str, ...] = ()
     unchecked: tuple[str, ...] = ()
 
+    @property
+    def structural_validity(self) -> bool:
+        return self.ok
+
+    @property
+    def fully_checked(self) -> bool:
+        return self.ok and not self.unchecked
+
 
 # ---------------------------------------------------------------------------
 # value helpers
@@ -130,6 +138,10 @@ def _compare(comparison: Comparison, env: Mapping[str, Any]) -> bool:
 
 def rules_digest(bundle: Bundle) -> str:
     """Digest of the bundle's (canonically ordered) rules alone."""
+    if bundle.schema_version == 2:
+        raw = canonical_dict(bundle)
+        return digest({key: raw[key] for key in ("schema_version", "relations", "rules",
+                       "compatibility_capabilities", "required_bridges", "completeness_scopes", "derived_completeness_policies")})
     return digest([canonical_dict(rule) for rule in bundle.rules])
 
 
@@ -478,15 +490,22 @@ def certify(bundle: Bundle, relations: Any, relation: str, row: Iterable[Any], *
     The result is JSON-serializable and independent of which engine produced
     the rows.
     """
+    if bundle.schema_version == 2:
+        from ..validation import assert_valid
+        assert_valid(bundle)
     certifier = _Certifier(bundle, relations, max_depth, max_nodes)
     conclusion = {"relation": relation, "row": [_plain(value) for value in row]}
     base = {
-        "certificate_version": CERTIFICATE_VERSION,
+        "certificate_version": CERTIFICATE_VERSION if bundle.schema_version == 1 else "capcov-static-certificate-v2",
         "bundle_digest": digest(bundle),
         "rules_digest": rules_digest(bundle),
         "bounds": {"max_depth": max_depth, "max_nodes": max_nodes},
         "conclusion": conclusion,
     }
+    if bundle.schema_version == 2:
+        from ..authority import judge
+        base["authority_witnesses"] = [canonical_dict(w) for w in judge(bundle).witnesses]
+        base["closure_digest"] = digest(normalize_relations(relations))
     try:
         node = certifier.derive(relation, tuple(conclusion["row"]), 0)
     except _Truncated as exc:
@@ -544,11 +563,32 @@ def claim_conclusions(bundle: Bundle, relations: Any, claim: Claim) -> list[tupl
     return out
 
 
-def recheck(bundle: Bundle, certificate: Mapping[str, Any], relations: Any = None) -> RecheckResult:
+def recheck(bundle: Bundle, certificate: Mapping[str, Any], relations: Any = None, *, evaluation_basis=None) -> RecheckResult:
     """Ground re-check of a certificate against the bundle; no search."""
     problems: list[str] = []
     unchecked: list[str] = []
-    if certificate.get("certificate_version") != CERTIFICATE_VERSION:
+    if bundle.schema_version == 2:
+        from ..validation import validate_bundle
+        from ..authority import judge
+        problems.extend(str(issue) for issue in validate_bundle(bundle))
+        if problems:
+            return RecheckResult(False, tuple(problems), ())
+        if not problems and certificate.get("authority_witnesses") != [canonical_dict(w) for w in judge(bundle).witnesses]:
+            problems.append("authority witnesses do not match reconstructed obligations")
+        if evaluation_basis is None:
+            unchecked.append("complete evaluation basis not checked")
+        else:
+            from ..evaluation_basis import check_basis
+            if not check_basis(bundle, evaluation_basis):
+                problems.append("evaluation basis does not match a complete evaluation of this bundle")
+            else:
+                if relations is not None and normalize_relations(relations) != normalize_relations(evaluation_basis.relations):
+                    problems.append("provided closure differs from evaluation basis")
+                relations = evaluation_basis.relations
+        if relations is not None and certificate.get("closure_digest") != digest(normalize_relations(relations)):
+            problems.append("certificate was issued against a different closure")
+    expected_version = CERTIFICATE_VERSION if bundle.schema_version == 1 else "capcov-static-certificate-v2"
+    if certificate.get("certificate_version") != expected_version:
         problems.append("unknown certificate version")
     if certificate.get("bundle_digest") != digest(bundle):
         problems.append("certificate was issued for a different bundle digest")

@@ -179,29 +179,11 @@ _RELATIONSHIP_KINDS = (
 # never widen or narrow what the pack says (section 29, reconciliation item 2).
 # ``scip_definition_site_at`` is the (index, path, line) projection the
 # per-document witness ``scip_definitions_closed`` closes.
-_DERIVED_TARGET_DECLS = (
-    RelationDecl("scip_document_path",
-                 (Column("index", "digest", True), Column("path", "symbol")),
-                 modality="derived", binding="static", primitive=False,
-                 context_indices=("index",)),
-    RelationDecl("scip_definition_site_at",
-                 (Column("index", "digest", True), Column("path", "symbol"),
-                  Column("line", "unsigned")),
-                 modality="derived", binding="static", primitive=False,
-                 context_indices=("index",)),
-    RelationDecl("static_route_declared_surface",
-                 (Column("index", "digest", True), Column("surface", "symbol")),
-                 modality="derived", binding="static", primitive=False, finite=True,
-                 nonempty=True, context_indices=("index",)),
-    RelationDecl("static_reaches",
-                 (Column("index", "digest", True), Column("src", "symbol"),
-                  Column("dst", "symbol")),
-                 modality="derived", binding="static", primitive=False,
-                 context_indices=("index",)),
-    RUNTIME_ROUTE_OBSERVED,
-    *TRACE_PRIMITIVE_DECLS,
-    RUNTIME_ROUTE_REACHES_SQL,
-)
+from .pack import pack_bundle as _installed_pack_bundle
+
+_PACK_DECLS = {decl.name: decl for decl in _installed_pack_bundle().relations}
+_DERIVED_TARGET_DECLS = tuple(_PACK_DECLS[name] for name in ('scip_document_path', 'scip_definition_site_at', 'static_route_declared_surface', 'static_reaches', 'runtime_route_observed', 'runtime_function_entered', 'runtime_sql_executed', 'runtime_tx_committed', 'runtime_route_completed', 'runtime_route_reaches_sql_on_index'))
+
 STUB_RELATIONS = frozenset(decl.name for decl in _DERIVED_TARGET_DECLS)
 
 

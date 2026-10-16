@@ -1,0 +1,498 @@
+{
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "other",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "claim",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "derived",
+        "primitive": false,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "permit",
+        "columns": [
+          {
+            "name": "from",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "to",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "extra",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "compatibility",
+        "primitive": true,
+        "context_indices": []
+      }
+    ],
+    "compatibility_capabilities": [
+      {
+        "name": "run-pair",
+        "witness": "permit",
+        "left_dimension": "run",
+        "right_dimension": "run",
+        "left_column": "from",
+        "right_column": "to",
+        "left_targets": [
+          "seen",
+          "other",
+          "claim"
+        ],
+        "right_targets": [
+          "seen",
+          "other",
+          "claim"
+        ],
+        "symmetric": false
+      }
+    ],
+    "rules": [
+      {
+        "name": "join",
+        "head": {
+          "relation": "claim",
+          "terms": [
+            {
+              "variable": "A"
+            },
+            {
+              "variable": "T"
+            },
+            {
+              "variable": "X"
+            }
+          ],
+          "negated": false
+        },
+        "body": [
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "A"
+              },
+              {
+                "variable": "T"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "other",
+            "terms": [
+              {
+                "variable": "B"
+              },
+              {
+                "variable": "T"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "permit",
+            "terms": [
+              {
+                "variable": "A"
+              },
+              {
+                "variable": "B"
+              },
+              {
+                "variable": "Noise"
+              }
+            ],
+            "negated": false
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "exact-positive-endpoints",
+      "changes": [],
+      "categories": []
+    },
+    {
+      "name": "wrong-endpoint",
+      "changes": [
+        {
+          "path": "/rules/0/body/2/terms/1",
+          "value": {
+            "variable": "Noise"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "reversed-asymmetric",
+      "changes": [
+        {
+          "path": "/rules/0/body/2/terms",
+          "value": [
+            {
+              "variable": "B"
+            },
+            {
+              "variable": "A"
+            },
+            {
+              "variable": "Noise"
+            }
+          ]
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "explicit-symmetric",
+      "changes": [
+        {
+          "path": "/rules/0/body/2/terms",
+          "value": [
+            {
+              "variable": "B"
+            },
+            {
+              "variable": "A"
+            },
+            {
+              "variable": "Noise"
+            }
+          ]
+        },
+        {
+          "path": "/compatibility_capabilities/0/symmetric",
+          "value": true
+        }
+      ],
+      "categories": []
+    },
+    {
+      "name": "irrelevant-target",
+      "changes": [
+        {
+          "path": "/compatibility_capabilities/0/right_targets",
+          "value": [
+            "seen"
+          ]
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "self-join-occurrences",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/relation",
+          "value": "seen"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "name": "self-join-wrong-endpoint",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/relation",
+          "value": "seen"
+        },
+        {
+          "path": "/rules/0/body/2/terms/1",
+          "value": {
+            "variable": "Noise"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "separate-tenant-authorization-required",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/1",
+          "value": {
+            "variable": "T2"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "head-payload-laundering",
+      "changes": [
+        {
+          "path": "/rules/0/head/terms/0",
+          "value": {
+            "variable": "Noise"
+          }
+        }
+      ],
+      "categories": [
+        "head"
+      ]
+    },
+    {
+      "name": "head-through-exact-capability",
+      "changes": [
+        {
+          "path": "/rules/0/head/terms/0",
+          "value": {
+            "variable": "B"
+          }
+        }
+      ],
+      "categories": []
+    },
+    {
+      "name": "mistyped-capability",
+      "changes": [
+        {
+          "path": "/relations/3/columns/1/type",
+          "value": "unsigned"
+        }
+      ],
+      "categories": [
+        "contracts"
+      ]
+    },
+    {
+      "name": "legacy-metadata-mixed",
+      "changes": [
+        {
+          "path": "/relations/3/compatibility_targets",
+          "value": [
+            "seen",
+            "other"
+          ]
+        }
+      ],
+      "categories": [
+        "contracts"
+      ]
+    },
+    {
+      "name": "no-transitive-authorization",
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "Noise"
+                }
+              ]
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "Noise"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "negative-witness-not-authorization",
+      "changes": [
+        {
+          "path": "/rules/0/body/2",
+          "value": {
+            "relation": "permit",
+            "terms": [
+              {
+                "variable": "A"
+              },
+              {
+                "variable": "B"
+              },
+              {
+                "variable": "A"
+              }
+            ],
+            "negated": true
+          }
+        }
+      ],
+      "categories": [
+        "compatibility",
+        "completeness"
+      ]
+    },
+    {
+      "name": "untyped-constant-endpoint",
+      "changes": [
+        {
+          "path": "/rules/0/head/terms/0",
+          "value": {
+            "value": "a",
+            "type": "symbol"
+          }
+        },
+        {
+          "path": "/rules/0/body/0/terms/0",
+          "value": {
+            "value": "a",
+            "type": "symbol"
+          }
+        },
+        {
+          "path": "/rules/0/body/2/terms/0",
+          "value": {
+            "value": "a"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    }
+  ]
+}

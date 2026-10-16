@@ -245,7 +245,7 @@ def certify_claims(bundle: Bundle, result: Any, *,
                     raise AssertionError(f"{claim.id}: certificates differ between closures ({backend})")
             for closure, backend in closures:
                 checked = recheck(bundle, certificate, closure)
-                if not checked.ok:
+                if not checked.fully_checked:
                     raise AssertionError(f"{claim.id}: recheck failed against {backend}: {checked}")
             certificates.setdefault(claim.id, certificate)
             row_certificates.setdefault(claim.id, []).append(certificate)

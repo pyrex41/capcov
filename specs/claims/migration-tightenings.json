@@ -1,0 +1,15 @@
+{
+  "format": "capcov-authority-tightenings-v1",
+  "scope": "experimental Bundle v2 only; no production default switch",
+  "review_status": "implementation-tested; release review pending",
+  "changes": [
+    {"id": "exact-endpoints", "meaning": "Compatibility requires positive, typed, directly matching endpoint terms; target membership alone is insufficient."},
+    {"id": "direction-and-dimensions", "meaning": "Every differing shared dimension and every applicable distinct-dimension bridge needs separate authorization; symmetry is explicit and transitivity is absent."},
+    {"id": "occurrence-identity", "meaning": "Self-joins are checked by premise occurrence, including negated ordinary premises and mapped completeness carriers."},
+    {"id": "head-carriers", "meaning": "Witness payload membership cannot supply a head context; an ordinary positive carrier or exact authorized endpoint must supply it."},
+    {"id": "total-closure-mapping", "meaning": "All closure columns map to distinct typed target columns; target contexts are covered and every mapped scope term must match."},
+    {"id": "named-derived-closure", "meaning": "Derived completeness requires an explicit named exact-rule policy retaining a positive completeness premise."},
+    {"id": "evaluation-basis", "meaning": "A v2 derivation without a matching, independently recomputed complete evaluation basis is partially checked and cannot be promoted."},
+    {"id": "no-legacy-mix", "meaning": "V2 contracts reject legacy compatibility fields, mixed Bundle versions, and conflicting declarations."}
+  ]
+}

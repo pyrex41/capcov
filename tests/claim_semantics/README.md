@@ -80,3 +80,67 @@ capcov experiment claims assumptions invalidate --receipt DIR --drop ID
 refuses. Exit 0 when the documents were produced, 2 for a refusal (an unknown id, or a
 withdrawal that would refute a claim rather than leave a premise missing), 3
 when the kernels disagree. Needs Soufflé, no replay environment.
+
+### Specification migration work in progress
+
+`specs/claims/` contains restricted bracketed data declarations for all 154
+frozen v1 pack rules and the two shared static/runtime bridge rules.
+`baseline-v1.json` pins the existing canonical Bundle identities and the
+unchanged `model_min` fixture. This is a baseline transcription, **not a
+completed migration of the three packs to v2**. Installed profiles still use
+v1. The preserved-behavior and authority-tightening reports in that directory
+record the current boundaries and remaining work.
+
+The compiler requires the pinned native Shen runtime:
+
+```sh
+nix develop .#shen --command capcov experiment claims spec build \
+  --source specs/claims/static.claims --out /tmp/static-spec
+nix develop .#shen --command capcov experiment claims spec check \
+  --source specs/claims/static.claims --artifacts /tmp/static-spec
+```
+
+From an uninstalled checkout, use `env PYTHONPATH=src python -m capcov` instead
+of `capcov`. `compile_spec(source, timeout=60)` returns data without writing;
+`check_spec(source, artifacts)` recompiles and reports missing, changed, and
+unexpected artifacts without updating the directory. The manifest binds the
+import closure, compiler sources, Python/native runtime identities, and output
+digests. It omits timestamps and absolute paths. Missing Shen is an operational
+failure. Installed pack evaluation reads JSON and does not require Shen.
+
+Sources have one `[claims-spec 1 ...]` form. Declarations include `pack`,
+`primitive`, `supplementary-primitive`, `derived`, `rule`, `capability`,
+`required-bridge`, `completeness-scope`, and `derived-completeness-policy`.
+Payloads are `[object [field value] ...]` records and `[array ...]` arrays;
+strings use JSON quoting. Imports are literal paths relative to the entry
+source's directory; escaping that root, cycles, executable forms, and unknown
+constructs are rejected. Templates and operation declarations are not yet
+implemented. V2 closure insertion runs in Shen and is reconstructed
+independently in Python; generated obligations never create closure facts.
+
+Bundle v2 adds explicit directional capability endpoints, required bridges,
+complete closure-column maps, and named derived-completeness policies bound to
+exact rule identities. A derived closure policy must retain a positive
+completeness premise. V1 canonical serialization omits all v2 fields.
+`convert_v1` requires explicit contracts and returns the old and new identities;
+it never converts certificates. Combining versions or conflicting contracts
+fails. V2 mapping admission, aggregation closure, and universal-domain
+admission are explicitly unsupported pending their independent checks.
+
+`test_authority_v2.py` gives the same authored corpus independently to Python
+and Shen. Native tests call `authority(..., validate=False)` and retain native
+diagnostic identifiers. `test_v2_certificates.py` covers mutated obligations
+and evaluation bases. `recheck(...).ok` means structural validity;
+`fully_checked` additionally requires no unchecked obligations. V2 promotion
+requires an independently recomputed complete evaluation basis. This does not
+prove external-world completeness or replace producer admission. Native v2
+certificate generation is deliberately refused until its versioned basis
+protocol is implemented.
+
+Current compilation exposes three pre-existing native/Python authority
+mismatches: replay's `learn_consistent` and `model_scope_excluded`, and
+observation's `masked_admitted`, fail native `declaration-promoted-to-effect`.
+The compiler reports these failures; it does not waive them. The static pack
+and shared bridges compile. Resolving these rule-purpose declarations is a
+release prerequisite, alongside the remaining operation framework, templates,
+profile migration, Prolog search, reporting metadata, and complete release CI.

@@ -1,0 +1,25 @@
+{
+  "format": "capcov-migration-report-v1",
+  "release_ready": false,
+  "preserved": [
+    "All 71 replay, 27 static, and 56 observation rules decode from declarations to their frozen v1 Bundle digests.",
+    "Bundle v1 canonical bytes omit v2 fields; old evidence and fact records retain their shapes.",
+    "model_min remains unchanged and is hashed in baseline-v1.json.",
+    "Static and replay exporter stubs now load exact declarations from installed packs.",
+    "Static/runtime bridge constants load generated installed JSON with a checked artifact digest.",
+    "Installed static, replay, and observation packs evaluate without a source checkout or Shen."
+  ],
+  "pending": [
+    "Full v2 replay, static, and observation profile migrations and default selection.",
+    "V2 mapping, aggregation, universal-domain, and native derivation admission.",
+    "Declaration templates, declarative reporting policies, and full operation specifications.",
+    "Reusable operation transitions, analysis, model variants, and construction certificates.",
+    "Shen Prolog explanations, bounded scenarios, and discrepancy search.",
+    "Independent transition corpora and complete pinned release CI gates."
+  ],
+  "native_authority_disagreements": [
+    {"pack": "replay", "rule": "learn_consistent", "native_id": "declaration-promoted-to-effect", "status": "unresolved; compilation fails"},
+    {"pack": "replay", "rule": "model_scope_excluded", "native_id": "declaration-promoted-to-effect", "status": "unresolved; compilation fails"},
+    {"pack": "observation", "rule": "masked_admitted", "native_id": "declaration-promoted-to-effect", "status": "unresolved; compilation fails"}
+  ]
+}

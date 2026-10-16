@@ -280,14 +280,23 @@
               (capcov.check "non-linear-recursion" true (cn "rule kind " (capcov.kind-name (capcov.rule-kind Rule))))))
 
 (define capcov.rule-verdict
-  Rule -> (let Checks [(capcov.check-undeclared Rule)
+  Rule -> (let Checks (append
+                      (if (= (value capcov.*schema-version*) 2)
+                          [(capcov.check "typed-rule" (capcov.v2-rule-types? Rule) "rule terms agree with declaration types")] [])
+                      [(capcov.check-undeclared Rule)
                        (capcov.check-head-grounding Rule)
                        (capcov.check-side-grounding Rule)
-                       (capcov.check-context-loss Rule)
-                       (capcov.check-widening Rule)
-                       (capcov.check-completeness Rule)
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "context-index-loss" (function capcov.v2-head?) Rule)
+                           (capcov.check-context-loss Rule))
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "unsupported-context-widening" (function capcov.v2-widening?) Rule)
+                           (capcov.check-widening Rule))
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "negative-conclusion-without-completeness" (function capcov.v2-completeness?) Rule)
+                           (capcov.check-completeness Rule))
                        (capcov.check-promotion Rule)
-                       (capcov.check-linear Rule)]
+                       (capcov.check-linear Rule)])
             (capcov.obj [(@p "rule" (capcov.rule-name Rule))
                          (@p "rule_digest" (capcov.rule-digest Rule))
                          (@p "ok" (capcov.all? (function capcov.check-ok?) Checks))
@@ -299,13 +308,15 @@
 \\ ---------------------------------------------------------------- pack-level checks and output
 
 (define capcov.pack-checks
-  -> [(if (value capcov.*unstratifiable*)
+  -> (append (if (= (value capcov.*schema-version*) 2)
+                 [(capcov.check "evidence-contracts" (capcov.v2-contracts-ok?) "versioned evidence contracts")] [])
+      [(if (value capcov.*unstratifiable*)
           (capcov.check "stratified-negation" false "negation through recursion has no stratification")
           (capcov.check "stratified-negation" true "negation is stratified"))
       (capcov.check "frozen-pack-mismatch" true
                     (if (= (value capcov.*in-frozen*) capcov.null)
                         "no frozen checksum supplied; this run establishes one"
-                        "elaborated pack checksum equals the frozen checksum"))])
+                        "elaborated pack checksum equals the frozen checksum"))]))
 
 (define capcov.authority-json
   -> (let Verdicts (map (function capcov.rule-verdict) (value capcov.*rules*))

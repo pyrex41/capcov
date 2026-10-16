@@ -588,7 +588,7 @@ def evaluate_python(join: ObservationJoin) -> ObservationJoin:
                 if certificate.get("truncated"):
                     continue
                 checked = recheck(join.bundle, certificate, report.relations)
-                if not checked.ok:
+                if not checked.fully_checked:
                     raise ValueError("certificate failed recheck")
                 join.certificates.setdefault(claim.id, certificate)
                 join.row_certificates.setdefault(claim.id, []).append(certificate)

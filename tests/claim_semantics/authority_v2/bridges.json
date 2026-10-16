@@ -1,0 +1,223 @@
+{
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "model",
+        "columns": [
+          {
+            "name": "model",
+            "type": "digest",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "model"
+        ]
+      },
+      {
+        "name": "run",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "claim",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "derived",
+        "primitive": false,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "association",
+        "columns": [
+          {
+            "name": "model_id",
+            "type": "digest",
+            "context": false
+          },
+          {
+            "name": "run_id",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "compatibility",
+        "primitive": true,
+        "context_indices": []
+      }
+    ],
+    "compatibility_capabilities": [
+      {
+        "name": "association",
+        "witness": "association",
+        "left_dimension": "model",
+        "right_dimension": "run",
+        "left_column": "model_id",
+        "right_column": "run_id",
+        "left_targets": [
+          "model"
+        ],
+        "right_targets": [
+          "run",
+          "claim"
+        ],
+        "symmetric": false
+      }
+    ],
+    "required_bridges": [
+      {
+        "name": "model-run",
+        "left_dimension": "model",
+        "right_dimension": "run"
+      }
+    ],
+    "rules": [
+      {
+        "name": "bridge",
+        "head": {
+          "relation": "claim",
+          "terms": [
+            {
+              "variable": "R"
+            },
+            {
+              "variable": "X"
+            }
+          ],
+          "negated": false
+        },
+        "body": [
+          {
+            "relation": "model",
+            "terms": [
+              {
+                "variable": "M"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "run",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "association",
+            "terms": [
+              {
+                "variable": "M"
+              },
+              {
+                "variable": "R"
+              }
+            ],
+            "negated": false
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "exact-model-run",
+      "changes": [],
+      "categories": []
+    },
+    {
+      "name": "wrong-model-run",
+      "changes": [
+        {
+          "path": "/rules/0/body/2/terms/0",
+          "value": {
+            "variable": "Other"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    },
+    {
+      "name": "absent-model-run",
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "model",
+              "terms": [
+                {
+                  "variable": "M"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "run",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ],
+      "categories": [
+        "compatibility"
+      ]
+    }
+  ]
+}

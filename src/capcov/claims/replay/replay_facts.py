@@ -485,17 +485,11 @@ _RECEIPT_KEYS = frozenset({
 # is the (run, mutant) projection of ``mutant_killed``; ``op_qualified_rt`` is
 # the (index, run, op) join of a statically declared op with a replayed request
 # for it, which is why it carries both contexts and is runtime-bound.
-_DERIVED_TARGET_DECLS = (
-    RelationDecl("mutant_killed_in",
-                 (Column("run", "symbol", True), Column("mutant", "symbol")),
-                 modality="derived", binding="runtime", primitive=False,
-                 context_indices=("run",)),
-    RelationDecl("op_qualified_rt",
-                 (Column("index", "digest", True), Column("run", "symbol", True),
-                  Column("op", "symbol")),
-                 modality="derived", binding="runtime", primitive=False,
-                 context_indices=("index", "run")),
-)
+from .pack import pack_bundle as _installed_pack_bundle
+
+_PACK_DECLS = {decl.name: decl for decl in _installed_pack_bundle().relations}
+_DERIVED_TARGET_DECLS = tuple(_PACK_DECLS[name] for name in ('mutant_killed_in', 'op_qualified_rt'))
+
 STUB_RELATIONS = frozenset(decl.name for decl in _DERIVED_TARGET_DECLS)
 
 

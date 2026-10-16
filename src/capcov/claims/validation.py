@@ -168,9 +168,9 @@ def _structural_issues(bundle: Bundle) -> tuple[ValidationIssue, ...]:
         issues.append(ValidationIssue(
             "metadata-type", "metadata must contain canonical string-keyed pairs",
             "metadata"))
-    if not isinstance(bundle.schema_version, int) or isinstance(bundle.schema_version, bool):
+    if type(bundle.schema_version) is not int or bundle.schema_version not in (1, 2):
         issues.append(ValidationIssue(
-            "schema-version", "schema version must be an integer",
+            "schema-version", "unsupported schema version",
             "schema_version"))
 
     for index, relation in enumerate(bundle.relations if isinstance(bundle.relations, tuple) else ()):
@@ -382,9 +382,37 @@ def validate_bundle(bundle: Bundle) -> tuple[ValidationIssue, ...]:
         value = getattr(policy, field_name, None)
         if not isinstance(value, str) or value not in allowed:
             issues.append(ValidationIssue("diagnostic-policy", f"invalid {field_name} policy value", f"diagnostic_policy.{field_name}"))
+    from .contracts import CONTRACT_FIELDS
+    from dataclasses import fields
+    for name, cls in CONTRACT_FIELDS.items():
+        try:
+            records = getattr(bundle, name)
+            if not isinstance(records, tuple):
+                raise TypeError("contract collections must be tuples")
+            for record in records:
+                if not isinstance(record, cls):
+                    raise TypeError("invalid contract type")
+                rebuilt = cls(**{f.name: getattr(record, f.name) for f in fields(cls)})
+                if rebuilt != record:
+                    raise ValueError("noncanonical contract")
+            if bundle.schema_version == 1 and records:
+                raise ValueError("v1 cannot carry v2 contracts")
+        except (TypeError, ValueError, AttributeError) as exc:
+            issues.append(ValidationIssue("evidence-contract-shape", str(exc), name))
+    if any(i.code == "evidence-contract-shape" for i in issues):
+        return tuple(issues)
     structural = _structural_issues(bundle)
     if structural:
         return tuple((*issues, *structural))
+    if bundle.schema_version == 2:
+        from .authority import judge
+        issues.extend(judge(bundle).issues)
+        if bundle.mappings:
+            issues.append(ValidationIssue("unsupported-v2-mapping", "v2 mapping admission is not implemented; use checked explicit rules", "mappings"))
+        if any(rule.aggregation for rule in bundle.rules):
+            issues.append(ValidationIssue("unsupported-v2-aggregation", "v2 aggregation closure admission is not implemented", "rules"))
+        if any(claim.quantifier == Quantifier.FORALL for claim in bundle.claims):
+            issues.append(ValidationIssue("unsupported-v2-forall", "v2 universal-domain admission is not implemented", "claims"))
     # Bundle construction enforces these top-level member types.  Keep the
     # filters here as defense in depth for callers that deliberately mutate a
     # frozen instance with ``object.__setattr__`` while testing the untrusted
@@ -408,7 +436,7 @@ def validate_bundle(bundle: Bundle) -> tuple[ValidationIssue, ...]:
                  for relation in structurally_typed_relations}
     for relation in bundle.relations:
         if isinstance(relation, RelationDecl):
-            _validate_relation(relation, relations, issues)
+            _validate_relation(relation, relations, issues, explicit=bundle.schema_version == 2)
         else:
             issues.append(ValidationIssue(
                 "relation-type", "expected RelationDecl", "relations"))
@@ -486,7 +514,7 @@ def validate_bundle(bundle: Bundle) -> tuple[ValidationIssue, ...]:
         if key is not None and key not in evidence_keys:
             issues.append(ValidationIssue("fact-without-evidence", "every fact requires an evidence record", f"facts[{i}]"))
     for i, rule in enumerate(bundle.rules):
-        if isinstance(rule, Rule): _validate_rule(rule, relations, issues, f"rules[{i}]")
+        if isinstance(rule, Rule): _validate_rule(rule, relations, issues, f"rules[{i}]", explicit=bundle.schema_version == 2)
         else: issues.append(ValidationIssue("rule-type", "expected Rule", f"rules[{i}]"))
     for i, claim in enumerate(bundle.claims):
         if isinstance(claim, Claim): _validate_claim(claim, relations, issues, f"claims[{i}]")
@@ -701,7 +729,7 @@ def assert_valid(bundle: Bundle) -> Bundle:
 def validate(bundle: Bundle): return validate_bundle(bundle)
 
 
-def _validate_relation(r, relations, issues):
+def _validate_relation(r, relations, issues, *, explicit=False):
     if (not isinstance(r.name, str) or not r.name
             or not r.name.replace("_", "a").isalnum()
             or r.name[0].isdigit()):
@@ -721,7 +749,7 @@ def _validate_relation(r, relations, issues):
         # legacy column flags.  New scoped declarations and all static inputs
         # must make the two representations agree exactly.
         issues.append(ValidationIssue("context-index", "context flags must exactly equal declared context indices", f"relations.{r.name}"))
-    if r.binding.value == "static" and r.modality.value in {"observation", "assumption", "completeness"}:
+    if not explicit and r.binding.value == "static" and r.modality.value in {"observation", "assumption", "completeness"}:
         index_column = next((column for column in r.columns if column.name == "index"), None)
         fingerprint = (r.name, tuple((column.name, column.type, column.context)
                                      for column in r.columns), r.context_indices)
@@ -745,7 +773,7 @@ def _validate_relation(r, relations, issues):
                 "completeness relation binding must match its target relation",
                 f"relations.{r.name}"))
     elif r.completes is not None: issues.append(ValidationIssue("completeness-target", "only completeness relations may name a target", f"relations.{r.name}"))
-    if r.modality.value == "compatibility":
+    if r.modality.value == "compatibility" and not explicit:
         if len(r.compatibility_targets) < 2: issues.append(ValidationIssue("compatibility-target", "compatibility relation must name at least two target relations", f"relations.{r.name}"))
         for target in r.compatibility_targets:
             if target not in relations: issues.append(ValidationIssue("compatibility-target", f"unknown target {target!r}", f"relations.{r.name}"))
@@ -755,7 +783,7 @@ def _validate_relation(r, relations, issues):
         if len(r.compatibility_context_indices) != len(set(r.compatibility_context_indices)):
             issues.append(ValidationIssue("compatibility-context", "compatibility payload positions must be unique", f"relations.{r.name}"))
         if len(r.compatibility_targets) != len(set(r.compatibility_targets)): issues.append(ValidationIssue("compatibility-target", "compatibility targets must be unique", f"relations.{r.name}"))
-    elif r.compatibility_targets or r.compatibility_context_indices:
+    elif r.modality.value != "compatibility" and (r.compatibility_targets or r.compatibility_context_indices):
         issues.append(ValidationIssue("compatibility-target", "only compatibility relations may declare targets/positions", f"relations.{r.name}"))
 
 
@@ -808,7 +836,7 @@ def _validate_atom(atom, relations, issues, path, env, fact_only=False):
         _validate_term(term, column.type, env, issues, f"{path}.terms[{i}]", fact_only)
 
 
-def _validate_rule(rule, relations, issues, path):
+def _validate_rule(rule, relations, issues, path, *, explicit=False):
     env = {}
     if not isinstance(rule.body, tuple):
         issues.append(ValidationIssue(
@@ -842,9 +870,10 @@ def _validate_rule(rule, relations, issues, path):
     if (isinstance(rule.head, Atom) and isinstance(rule.head.terms, tuple)
             and not _atom_vars(rule.head).issubset(bound)):
         issues.append(ValidationIssue("unsafe-variable", "head variables must be positively bound", path))
-    _validate_context_joins(rule, relations, issues, path)
-    for neg in (a for a in body if isinstance(a, Atom) and a.negated):
-        _validate_completeness(neg, rule, relations, issues, path)
+    if not explicit:
+        _validate_context_joins(rule, relations, issues, path)
+        for neg in (a for a in body if isinstance(a, Atom) and a.negated):
+            _validate_completeness(neg, rule, relations, issues, path)
     if rule.aggregation:
         if isinstance(rule.aggregation, Aggregation): _validate_aggregation(rule.aggregation, rule, relations, issues, path)
         else: issues.append(ValidationIssue("aggregation-type", "expected Aggregation", path))
