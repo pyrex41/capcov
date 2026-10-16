@@ -17,7 +17,7 @@ from ..validation import assert_valid
 from ..authority import judge
 from .. import shen
 
-LANGUAGE_VERSION = 1
+LANGUAGE_VERSION = 2
 
 
 def _json(value):

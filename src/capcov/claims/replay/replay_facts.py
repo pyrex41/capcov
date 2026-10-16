@@ -1036,6 +1036,7 @@ def export_bundle(
     describes_indexes: Iterable[str] = (),
     reviewer_admissions: Iterable[Mapping[str, Any]] = (),
     limits: ExportLimits | None = None,
+    profile=None,
 ) -> ExportResult:
     """Export one receipt directory as a validated replay-facts ``Bundle``.
 
@@ -1057,7 +1058,12 @@ def export_bundle(
     if not isinstance(run, str) or not run:
         return ExportResult(STATUS_INVALID_INPUT, None, {}, ("run must be a non-empty string",))
 
-    relations = {decl.name: decl for decl in replay_relations()}
+    from ..pack_resources import resolve_profile, PackProfile
+    profile = resolve_profile('replay') if profile is None else profile
+    if not isinstance(profile, PackProfile) or profile.domain != 'replay' or profile.version != profile.bundle.schema_version:
+        raise ValueError('export requires a matching replay pack profile')
+    declarations = replay_relations() if profile.version == 1 else profile.bundle.relations
+    relations = {decl.name: decl for decl in declarations}
     facts = _Facts(_PLACEHOLDER_IDENTITY, relations)
     try:
         header = _read_receipt(receipt_dir, run, limits)
@@ -1246,8 +1252,14 @@ def export_bundle(
         "receipts": header["receipts"],
         "receipt_dir": str(receipt_dir),
     }
+    from ..contracts import CONTRACT_FIELDS
+    contracts = {key:getattr(profile.bundle,key) for key in CONTRACT_FIELDS
+                 if key != 'derived_completeness_policies'} if profile.version == 2 else {}
+    if profile.version == 2:
+        metadata['pack_profile'] = profile.id
+        metadata['specification_manifest'] = profile.manifest_digest
     bundle = Bundle(tuple(relations.values()), fact_atoms, (), (), tuple(metadata.items()),
-                    evidence=evidence)
+                    evidence=evidence, schema_version=profile.version, **contracts)
     try:
         assert_valid(bundle)
     except ValidationError as exc:

@@ -44,6 +44,8 @@ def categories(issues):
             result.add('compatibility')
         elif issue.code in {'missing-completeness','negative-compatibility'}:
             result.add('completeness')
+        elif issue.code == 'declaration-promoted-to-effect':
+            result.add('promotion')
         elif issue.code == 'head-context':
             result.add('head')
         else:
@@ -79,6 +81,9 @@ class AuthorityV2Tests(unittest.TestCase):
                         self.assertFalse(check_witnesses(bundle, (witness, *judgment.witnesses[1:])))
                         self.assertFalse(check_witnesses(bundle, ()))
 
+
+@unittest.skipUnless(NATIVE, 'real pinned Shen runtime required')
+class NativeAuthorityV2Tests(unittest.TestCase):
     @unittest.skipUnless(NATIVE, 'real pinned Shen runtime required')
     def test_native_named_closure_policy(self):
         from capcov.claims.ir import Atom, Rule, CompletenessScope, DerivedCompletenessPolicy
@@ -110,7 +115,8 @@ class AuthorityV2Tests(unittest.TestCase):
 
     @unittest.skipUnless(NATIVE, 'real pinned Shen runtime required')
     def test_independent_native_authority(self):
-        mapping = {'unsupported-context-widening': 'compatibility',
+        mapping = {'declaration-promoted-to-effect': 'promotion',
+                   'unsupported-context-widening': 'compatibility',
                    'context-index-loss': 'head',
                    'negative-conclusion-without-completeness': 'completeness'}
         for name, bundle, expected in cases():
@@ -122,3 +128,26 @@ class AuthorityV2Tests(unittest.TestCase):
                           else {mapping.get(c, c) for _, c in failed})
                 self.assertEqual(actual, expected, failed)
                 self.assertEqual(native.ok, not expected)
+
+    def test_mapping_api_and_frozen_contract_identity(self):
+        from capcov.claims.ir import canonical_dict
+        from capcov.claims.contracts import RequiredBridge, DerivedCompletenessPolicy
+        _, bundle, _ = next(c for c in cases() if c[0] == 'exact-positive-endpoints')
+        original = shen.authority(bundle, validate=False)
+        mapped = shen.authority(rules=canonical_dict(bundle), validate=False)
+        self.assertEqual(original.elaborated, mapped.elaborated)
+        self.assertEqual(mapped.elaborated['schema_version'], 2)
+        mutations = [replace(bundle, compatibility_capabilities=(replace(bundle.compatibility_capabilities[0], symmetric=True),)),
+                     replace(bundle, required_bridges=(RequiredBridge('new', 'run', 'tenant'),)),
+                     replace(bundle, derived_completeness_policies=(DerivedCompletenessPolicy('new','missing','missing','0'*64),))]
+        _, scoped, _ = next(c for c in cases() if c[0] == 'exact-mapped-closure')
+        frozen = shen.authority(scoped, validate=False).elaborated_checksum
+        scope = scoped.completeness_scopes[0]
+        with self.assertRaises(shen.ShenFailure) as ctx:
+            shen.authority(replace(scoped, completeness_scopes=(replace(scope, mapping=scope.mapping[:-1]),)),
+                           validate=False, frozen=frozen)
+        self.assertEqual(ctx.exception.kind, 'frozen-pack-mismatch')
+        for mutation in mutations:
+            with self.subTest(bundle=mutation), self.assertRaises(shen.ShenFailure) as ctx:
+                shen.authority(mutation, validate=False, frozen=original.elaborated_checksum)
+            self.assertEqual(ctx.exception.kind, 'frozen-pack-mismatch')

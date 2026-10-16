@@ -178,7 +178,7 @@ def _assumptions(args: argparse.Namespace) -> int:
                 emit({"refusal": "reviewer admissions are not readable JSON"})
                 return 2
         try:
-            join = replay_join.build(receipt, reviewer_admissions=admissions)
+            join = replay_join.build(receipt, reviewer_admissions=admissions, version=args.pack_version)
             if join.bundle is None:
                 emit({"refusal": "the exporter refused the receipt",
                       "contract_findings": list(join.contract_findings)})
@@ -292,6 +292,7 @@ def main(argv: list[str]) -> int:
                             ("invalidate", "withdraw an assumption and report what every claim did")):
         command = asm_sub.add_parser(name, help=help_text)
         command.add_argument("--receipt", default=None, help="replay receipt directory (default: $CAPCOV_REPLAY_RECEIPT_DIR)")
+        command.add_argument("--pack-version", type=int, choices=(1, 2), default=1, help="replay specification profile (default: 1)")
         command.add_argument("--out", default=None, help="write the join artifacts to this directory")
         command.add_argument("--replay-root", default=None, help="differential replay directory for a kernel mismatch")
         command.add_argument(

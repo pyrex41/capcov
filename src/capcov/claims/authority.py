@@ -96,15 +96,16 @@ def contract_issues(bundle: Bundle):
         policy_rules.add(policy.rule)
         target = relations.get(policy.relation)
         if (rule is None or target is None or target.modality.value != 'completeness'
-            or target.primitive or rule.head.relation != policy.relation or digest(rule) != policy.rule_digest
-            or not any(isinstance(a, Atom) and not a.negated and a.relation in relations
-                       and relations[a.relation].modality.value == 'completeness' for a in rule.body)):
+            or target.primitive or rule.head.relation != policy.relation or digest(rule) != policy.rule_digest):
             fail('derived-completeness-policy', 'policy must bind an exact derived closure rule', policy.name)
     for rule in bundle.rules:
         target = relations.get(rule.head.relation)
         if target and target.modality.value == 'completeness' and rule.name not in policy_rules:
             fail('derived-completeness-policy', 'derived completeness requires an explicit named policy', rule.name)
     for r in relations.values():
+        if r.modality.value == 'compatibility' and r.context_indices:
+            fail('unsupported-compatibility-scope',
+                 'scoped compatibility witnesses are not yet supported', r.name)
         if r.compatibility_targets or r.compatibility_context_indices:
             fail('legacy-compatibility', 'v2 requires explicit capabilities, not legacy metadata', r.name)
         if r.modality.value == 'completeness' and not any(s.relation == r.name for s in bundle.completeness_scopes):
@@ -249,6 +250,33 @@ def judge_rule(bundle: Bundle, rule) -> AuthorityJudgment:
             witnesses.append(CompletenessWitness(rule.name, negated_occurrence, match.occurrence,
                 closure_atom.relation, atom.relation, match.mapping,
                 tuple((dest, match.endpoint(dest)[1]) for _, dest in match.mapping)))
+
+    # Projection is allowed only while retaining assumption authority. A later
+    # rule cannot turn an assumption into observed support by adding a wrapper.
+    assumption_relations = {d.name for d in relations.values() if d.modality.value == 'assumption'}
+    while True:
+        more = {r.head.relation for r in bundle.rules
+                if len(r.body) == 1 and isinstance(r.body[0], Atom) and not r.body[0].negated
+                and r.body[0].relation in assumption_relations
+                and r.head.relation in relations and relations[r.head.relation].modality.value == 'derived'}
+        if more <= assumption_relations:
+            break
+        assumption_relations.update(more)
+    conclusion = relations.get(rule.head.relation)
+    if conclusion and conclusion.binding.value == 'runtime' and conclusion.modality.value in ('derived', 'claim'):
+        positives = [(a, relations[a.relation]) for _, a in atoms
+                     if not a.negated and a.relation in relations]
+        observed = any(d.name not in assumption_relations and d.binding.value == 'runtime' and d.modality.value not in
+                       ('compatibility', 'completeness', 'assumption') for _, d in positives)
+        projection = (conclusion.modality.value == 'derived' and len(rule.body) == 1
+                      and len(positives) == 1 and positives[0][1].name in assumption_relations)
+        negations = [i for i,a in atoms if a.negated]
+        absence = (bool(negations) and bool(positives)
+                   and all(d.modality.value == 'completeness' and d.binding.value == 'runtime' for _,d in positives)
+                   and all(any(isinstance(w, CompletenessWitness) and w.negated_occurrence == i
+                               for w in witnesses) for i in negations))
+        if not (observed or projection or absence):
+            fail('declaration-promoted-to-effect', 'runtime conclusion lacks observed support, an assumption projection, or scoped absence evidence')
 
     head = carrier(rule.head, -1)
     if head:

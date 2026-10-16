@@ -145,13 +145,19 @@ def read_sources(source) -> SourceClosure:
         active.add(relative)
         raw = path.read_bytes()
         digests[relative] = hashlib.sha256(raw).hexdigest()
-        nodes = parse(raw.decode('utf-8'), relative)
-        if len(nodes) != 1:
-            raise SpecError('one claims-spec declaration is required')
-        _, body = form(nodes[0], 'claims-spec')
-        if not body or type(body[0].value) is not int or body[0].value != 1:
-            raise SpecError('unsupported declaration language version', nodes[0].location)
-        for decl in body[1:]:
+        text = raw.decode('utf-8')
+        if text.lstrip().startswith(('.claims', '//')):
+            from .logic import parse_logic
+            body = parse_logic(text, relative)
+        else:
+            nodes = parse(text, relative)
+            if len(nodes) != 1:
+                raise SpecError('one claims-spec declaration is required')
+            _, legacy = form(nodes[0], 'claims-spec')
+            if not legacy or type(legacy[0].value) is not int or legacy[0].value != 1:
+                raise SpecError('unsupported declaration language version', nodes[0].location)
+            body = legacy[1:]
+        for decl in body:
             tag, args = form(decl)
             if tag == 'import':
                 if len(args) != 1 or not isinstance(args[0].value, str):

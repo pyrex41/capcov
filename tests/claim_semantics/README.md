@@ -83,21 +83,20 @@ when the kernels disagree. Needs Soufflé, no replay environment.
 
 ### Specification migration work in progress
 
-`specs/claims/` contains restricted bracketed data declarations for all 154
-frozen v1 pack rules and the two shared static/runtime bridge rules.
-`baseline-v1.json` pins the existing canonical Bundle identities and the
-unchanged `model_min` fixture. This is a baseline transcription, **not a
-completed migration of the three packs to v2**. Installed profiles still use
-v1. The preserved-behavior and authority-tightening reports in that directory
-record the current boundaries and remaining work.
+`specs/claims/` contains readable typed declarations and named logic rules for
+all 154 pack rules and the two shared bridges. Replay uses Bundle v2 and native
+closure elaboration; static and observation retain v1. `baseline-v1.json` pins
+the compatibility identities and unchanged `model_min` fixture. All installed
+defaults remain v1; replay v2 is selectable. The preserved-behavior and
+authority-tightening reports record the remaining work.
 
 The compiler requires the pinned native Shen runtime:
 
 ```sh
 nix develop .#shen --command capcov experiment claims spec build \
-  --source specs/claims/static.claims --out /tmp/static-spec
+  --source specs/claims/replay.claims --out /tmp/replay-spec
 nix develop .#shen --command capcov experiment claims spec check \
-  --source specs/claims/static.claims --artifacts /tmp/static-spec
+  --source specs/claims/replay.claims --artifacts /tmp/replay-spec
 ```
 
 From an uninstalled checkout, use `env PYTHONPATH=src python -m capcov` instead
@@ -108,20 +107,42 @@ import closure, compiler sources, Python/native runtime identities, and output
 digests. It omits timestamps and absolute paths. Missing Shen is an operational
 failure. Installed pack evaluation reads JSON and does not require Shen.
 
-Sources have one `[claims-spec 1 ...]` form. Declarations include `pack`,
-`primitive`, `supplementary-primitive`, `derived`, `rule`, `capability`,
-`required-bridge`, `completeness-scope`, and `derived-completeness-policy`.
-Payloads are `[object [field value] ...]` records and `[array ...]` arrays;
-strings use JSON quoting. Imports are literal paths relative to the entry
-source's directory; escaping that root, cycles, executable forms, and unknown
-constructs are rejected. Templates and operation declarations are not yet
-implemented. V2 closure insertion runs in Shen and is reconstructed
-independently in Python; generated obligations never create closure facts.
+Authored sources use `.claims 2.` followed by typed relation declarations and named
+Datalog rules. For example, replay now contains:
+
+```text
+.completes model_writes_closed -> model_writes by model=model, op=op.
+
+undeclared_write_php: undeclared_write(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op),
+    php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run),
+    !model_writes(M, Op, Tb), model_scope_exclusions_closed(M),
+    !model_scope_excluded(M, Tb).
+```
+
+Native Shen inserts the two required closure premises. The independent Python
+checker reconstructs their exact terms, order, and source obligations. A
+compiler obligation never creates a closure fact. Replay declares 37 scopes
+and removes 24 redundant premises; its 71 elaborated rules equal the frozen v1
+rules exactly. Remaining closure premises express stronger gates, explicit
+closure policies, or bind an absence claim's domain.
+
+`.decl` marks context columns with `ctx`; `.capability` names directional
+endpoints; `.bridge` requires a dimension association; `.policy` binds a reviewed
+closure rule. Constants use JSON strings or integers with optional `::type`;
+variables begin with uppercase letters. `_` introduces a fresh variable.
+Negated variables must already be positively bound. Imports are literal paths
+relative to the entry source's directory. Escapes, cycles, executable forms,
+and unsupported syntax are rejected. The old bracketed data reader remains
+available for compatibility fixtures. Templates and operations are not yet
+implemented.
 
 Bundle v2 adds explicit directional capability endpoints, required bridges,
 complete closure-column maps, and named derived-completeness policies bound to
-exact rule identities. A derived closure policy must retain a positive
-completeness premise. V1 canonical serialization omits all v2 fields.
+exact rule identities. Complex policies retain their explicitly authored
+premises, including the learn reporting gate; absence of a reported downgrade
+is not comprehensive coverage. Scoped compatibility witnesses currently fail
+construction checking rather than silently ignoring their scope. V1 canonical serialization omits all v2 fields.
 `convert_v1` requires explicit contracts and returns the old and new identities;
 it never converts certificates. Combining versions or conflicting contracts
 fails. V2 mapping admission, aggregation closure, and universal-domain
@@ -137,10 +158,23 @@ prove external-world completeness or replace producer admission. Native v2
 certificate generation is deliberately refused until its versioned basis
 protocol is implemented.
 
-Current compilation exposes three pre-existing native/Python authority
-mismatches: replay's `learn_consistent` and `model_scope_excluded`, and
-observation's `masked_admitted`, fail native `declaration-promoted-to-effect`.
-The compiler reports these failures; it does not waive them. The static pack
-and shared bridges compile. Resolving these rule-purpose declarations is a
-release prerequisite, alongside the remaining operation framework, templates,
-profile migration, Prolog search, reporting metadata, and complete release CI.
+The three native/Python disagreements are resolved: `learn_consistent` is a
+scoped absence claim; `model_scope_excluded` and `masked_admitted` are single
+assumption projections. Direct assumption-to-claim promotion still fails, as
+does laundering the assumption through a derived projection before the claim.
+Native tests are registered in the Shen CI family, which requires the runtime.
+
+Select replay v2 with `replay.join.build(..., version=2)` or
+`capcov experiment claims assumptions registry --receipt DIR --pack-version 2`.
+The immutable profile travels through export, combination, and evaluation.
+Installed v2 pack/schema/stub bytes are checked against their generated
+manifest. V1 remains the default and retains its canonical identities.
+`test_replay_spec.py` compares all 28 frozen cases and individual closure and
+assumption withdrawals, checks the receipt-to-certificate path, and compares
+Python, interpreted Souffle, and compiled Souffle. The installed-wheel test
+loads both replay versions without repository files or Shen.
+
+The operation framework, Shen datatype judgments and Prolog search, templates,
+declarative reporting policy, remaining pack migrations, and full release gates
+are still outstanding. This milestone demonstrates real replay closure
+elaboration; it does not claim the complete original architecture is delivered.

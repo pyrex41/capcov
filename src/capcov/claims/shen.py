@@ -500,8 +500,11 @@ def _pack_bundle(rules: Any, *, validate: bool = True) -> Bundle:
     relations = [*rules.get("primitives", ()), *rules.get("supplementary_primitives", ()),
                  *rules.get("derived", ()), *rules.get("relations", ())]
     try:
-        return bundle_from_json({"schema_version": 1, "relations": relations, "rules": list(rules.get("rules", ()))},
-                                validate=validate)
+        from .contracts import CONTRACT_FIELDS
+        raw = {"schema_version": rules.get("schema_version", 1), "relations": relations,
+               "rules": list(rules.get("rules", ()))}
+        raw.update({key: rules[key] for key in CONTRACT_FIELDS if key in rules})
+        return bundle_from_json(raw, validate=validate)
     except (BundleIngestionError, ValidationError) as exc:
         raise ShenFailure("invalid-input", f"rule pack is not a valid bundle: {exc}") from exc
 
@@ -511,6 +514,11 @@ def _check_pack_against(bundle: Bundle, rules: Any) -> None:
     if rules is None:
         return
     pack = _pack_bundle(rules)
+    from .contracts import CONTRACT_FIELDS
+    if pack.schema_version != bundle.schema_version or any(
+        not set(getattr(pack, key)).issubset(getattr(bundle, key)) for key in CONTRACT_FIELDS
+    ):
+        raise ShenFailure("rule-pack-mismatch", "rule pack schema or authority contracts differ from the bundle")
     have_rules = {digest(rule) for rule in bundle.rules}
     have_relations = {decl.name: digest(decl) for decl in bundle.relations}
     missing = [rule.name or digest(rule) for rule in pack.rules if digest(rule) not in have_rules]

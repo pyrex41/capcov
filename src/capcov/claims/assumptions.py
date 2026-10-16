@@ -230,6 +230,10 @@ def certify_claims(bundle: Bundle, result: Any, *,
     closures = _closures(result)
     certificates: dict[str, dict[str, Any]] = {}
     row_certificates: dict[str, list[dict[str, Any]]] = {}
+    basis = None
+    if bundle.schema_version == 2:
+        from .evaluation_basis import evaluate_basis
+        basis = evaluate_basis(bundle)
     for claim in bundle.claims:
         first, first_backend = closures[0]
         rows = claim_conclusions(bundle, first, claim)
@@ -244,7 +248,7 @@ def certify_claims(bundle: Bundle, result: Any, *,
                            max_depth=max_depth, max_nodes=max_nodes) != certificate:
                     raise AssertionError(f"{claim.id}: certificates differ between closures ({backend})")
             for closure, backend in closures:
-                checked = recheck(bundle, certificate, closure)
+                checked = recheck(bundle, certificate, closure, evaluation_basis=basis)
                 if not checked.fully_checked:
                     raise AssertionError(f"{claim.id}: recheck failed against {backend}: {checked}")
             certificates.setdefault(claim.id, certificate)

@@ -4,8 +4,10 @@ This layer neither combines conflicting declarations nor chooses a version on
 behalf of an exporter. Callers select the version before loading resources.
 """
 from importlib import resources
+from dataclasses import dataclass
+import hashlib
 import json
-from .ir import bundle_from_json
+from .ir import Bundle, bundle_from_json
 
 DOMAINS = frozenset({'static', 'replay', 'observation'})
 RELATION_FIELDS = frozenset({'name','columns','modality','polarity','binding','primitive',
@@ -16,14 +18,25 @@ DIAGNOSTIC_POLICY = {'missing_premises':'unresolved','inconsistent_premises':'in
 
 
 def read_pack_text(domain, version=1):
-    if domain not in DOMAINS or type(version) is not int or version != 1:
+    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain == "replay" else (1,)):
         raise ValueError(f'unsupported installed pack profile: {domain}/v{version}')
-    return resources.files(f'capcov.claims.{domain}').joinpath(f'rules-{domain}-v{version}.json').read_text(encoding='utf-8')
+    directory = resources.files(f'capcov.claims.{domain}')
+    raw = directory.joinpath(f'rules-{domain}-v{version}.json').read_bytes()
+    if version == 2:
+        manifest = json.loads(directory.joinpath(f'rules-{domain}-v2.manifest.json').read_text(encoding='utf-8'))
+        files = {'pack.json': raw,
+                 'schema.json': directory.joinpath(f'schema_{domain}_v2.json').read_bytes(),
+                 'stubs.json': directory.joinpath(f'stubs-{domain}-v2.json').read_bytes()}
+        if (manifest.get('pack_id') != f'rules-{domain}-v2' or manifest.get('bundle_schema_version') != 2
+            or any(hashlib.sha256(content).hexdigest() != manifest.get('artifacts', {}).get(name)
+                   for name,content in files.items())):
+            raise ValueError('installed pack artifacts do not match their specification manifest')
+    return raw.decode('utf-8')
 
 
 def load_pack(domain, version=1, path=None):
     # Check the requested profile even when a custom path is supplied.
-    if domain not in DOMAINS or type(version) is not int or version != 1:
+    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain == "replay" else (1,)):
         raise ValueError(f'unsupported installed pack profile: {domain}/v{version}')
     text = path.read_text(encoding='utf-8') if path is not None else read_pack_text(domain,version)
     pack = json.loads(text)
@@ -47,5 +60,26 @@ def pack_relations(pack):
 
 
 def pack_bundle(pack):
+    from .contracts import CONTRACT_FIELDS
     return bundle_from_json(dict(schema_version=pack['schema_version'],relations=pack_relations(pack),
-                                  rules=pack['rules'],diagnostic_policy=DIAGNOSTIC_POLICY))
+                                  rules=pack['rules'],diagnostic_policy=DIAGNOSTIC_POLICY,
+                                  **{key:pack[key] for key in CONTRACT_FIELDS if key in pack}))
+
+
+@dataclass(frozen=True)
+class PackProfile:
+    domain: str
+    version: int
+    id: str
+    bundle: Bundle
+    manifest_digest: str = ""
+
+
+def resolve_profile(domain, version=1):
+    """Resolve once at an outer entry point, then pass the immutable selection."""
+    pack = load_pack(domain, version)
+    manifest_digest = ''
+    if version == 2:
+        raw = resources.files(f'capcov.claims.{domain}').joinpath(f'rules-{domain}-v2.manifest.json').read_bytes()
+        manifest_digest = hashlib.sha256(raw).hexdigest()
+    return PackProfile(domain, version, pack['id'], pack_bundle(pack), manifest_digest)

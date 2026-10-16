@@ -493,6 +493,63 @@
       "categories": [
         "compatibility"
       ]
+    },
+    {
+      "name": "scoped-permission-cannot-authorize-another-tenant",
+      "categories": [
+        "contracts"
+      ],
+      "changes": [
+        {
+          "path": "/relations/3/columns",
+          "value": [
+            {
+              "name": "from",
+              "type": "symbol",
+              "context": false
+            },
+            {
+              "name": "to",
+              "type": "symbol",
+              "context": false
+            },
+            {
+              "name": "extra",
+              "type": "symbol",
+              "context": false
+            },
+            {
+              "name": "tenant",
+              "type": "symbol",
+              "context": true
+            }
+          ]
+        },
+        {
+          "path": "/relations/3/context_indices",
+          "value": [
+            "tenant"
+          ]
+        },
+        {
+          "path": "/rules/0/body/2/terms",
+          "value": [
+            {
+              "variable": "A"
+            },
+            {
+              "variable": "B"
+            },
+            {
+              "variable": "Noise"
+            },
+            {
+              "value": "OTHER",
+              "type": "symbol"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

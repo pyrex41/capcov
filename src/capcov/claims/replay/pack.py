@@ -1,28 +1,9 @@
-"""Load the reviewed replay rule pack (``rules-replay-v1.json``) as a validated Bundle.
+"""Installed replay profiles.
 
-The pack **ships as package data** beside this module -- exactly as
-``schema_replay_v1.json`` does -- and is read through ``importlib.resources``,
-so ``capcov.claims.replay.join``, ``scripts/compiled_checker.py`` and
-``capcov experiment claims assumptions`` build the judge's combined bundle from
-an installed wheel with no source tree on disk.  Reading it off a path relative
-to this file was the older arrangement and it was a lie about the installed
-package: ``Path(__file__).parents[4]`` names the repository only in a source
-checkout, and in site-packages it names a directory that does not exist.
-
-The **reviewed source stays** ``experiments/claim-semantics/replay/rules-replay-v1.json``:
-that is the file a reviewer edits and the corpus adapter reads next to its
-cases.  That repository path is named by the tests, which live in the
-repository, and never by this module, which may be an installed wheel.  The
-shipped copy is a byte-identical mirror of it, and
-``tests/claim_semantics/test_replay_pack_package_data.py`` fails when the two drift -- so the experiment file remains canonical and the mirror
-can never quietly become a second opinion.
-
-The pack is kept in raw IR JSON wire form and merged verbatim: every relation
-declaration and rule comes from the file, nothing is evaluated here.  This is
-the same loader ``tests/claim_semantics/replay_rules/adapter.py`` implements;
-it is in ``src`` so the judge can build its bundle without the tests on
-``sys.path`` -- and build it identically, because the compiled checker's
-program identity depends on the declaration order the combiner yields.
+V1 remains the frozen compatibility pack. V2 is generated from
+``specs/claims/replay.claims`` by native Shen elaboration; installed evaluation
+loads JSON and needs neither the checkout nor Shen. Select a version once at
+``join.build`` and carry that profile through export and evaluation.
 """
 from __future__ import annotations
 
@@ -46,23 +27,23 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def read_pack_text() -> str:
+def read_pack_text(version: int = 1) -> str:
     """The shipped pack's bytes, as ``importlib.resources`` hands them over."""
-    return _resources.read_pack_text("replay")
+    return _resources.read_pack_text("replay", version)
 
 
-def load_pack(path: Path | None = None) -> dict[str, Any]:
+def load_pack(path: Path | None = None, *, version: int = 1) -> dict[str, Any]:
     """The rule pack document.  ``path=None`` reads the shipped package data."""
-    return _resources.load_pack("replay", path=path)
+    return _resources.load_pack("replay", version, path=path)
 
 
 def pack_relations(pack: dict[str, Any]) -> list[dict[str, Any]]:
     return _resources.pack_relations(pack)
 
 
-def pack_bundle(pack: dict[str, Any] | None = None) -> Bundle:
+def pack_bundle(pack: dict[str, Any] | None = None, *, version: int = 1) -> Bundle:
     """The rule pack alone (declarations and rules, no facts) as a validated Bundle."""
-    return _resources.pack_bundle(load_pack() if pack is None else pack)
+    return _resources.pack_bundle(load_pack(version=version) if pack is None else pack)
 
 
 #: The reviewed original this file mirrors is

@@ -3,13 +3,49 @@
   "scope": "experimental Bundle v2 only; no production default switch",
   "review_status": "implementation-tested; release review pending",
   "changes": [
-    {"id": "exact-endpoints", "meaning": "Compatibility requires positive, typed, directly matching endpoint terms; target membership alone is insufficient."},
-    {"id": "direction-and-dimensions", "meaning": "Every differing shared dimension and every applicable distinct-dimension bridge needs separate authorization; symmetry is explicit and transitivity is absent."},
-    {"id": "occurrence-identity", "meaning": "Self-joins are checked by premise occurrence, including negated ordinary premises and mapped completeness carriers."},
-    {"id": "head-carriers", "meaning": "Witness payload membership cannot supply a head context; an ordinary positive carrier or exact authorized endpoint must supply it."},
-    {"id": "total-closure-mapping", "meaning": "All closure columns map to distinct typed target columns; target contexts are covered and every mapped scope term must match."},
-    {"id": "named-derived-closure", "meaning": "Derived completeness requires an explicit named exact-rule policy retaining a positive completeness premise."},
-    {"id": "evaluation-basis", "meaning": "A v2 derivation without a matching, independently recomputed complete evaluation basis is partially checked and cannot be promoted."},
-    {"id": "no-legacy-mix", "meaning": "V2 contracts reject legacy compatibility fields, mixed Bundle versions, and conflicting declarations."}
+    {
+      "id": "exact-endpoints",
+      "meaning": "Compatibility requires positive, typed, directly matching endpoint terms; target membership alone is insufficient."
+    },
+    {
+      "id": "direction-and-dimensions",
+      "meaning": "Every differing shared dimension and every applicable distinct-dimension bridge needs separate authorization; symmetry is explicit and transitivity is absent."
+    },
+    {
+      "id": "occurrence-identity",
+      "meaning": "Self-joins are checked by premise occurrence, including negated ordinary premises and mapped completeness carriers."
+    },
+    {
+      "id": "head-carriers",
+      "meaning": "Witness payload membership cannot supply a head context; an ordinary positive carrier or exact authorized endpoint must supply it."
+    },
+    {
+      "id": "total-closure-mapping",
+      "meaning": "All closure columns map to distinct typed target columns; target contexts are covered and every mapped scope term must match."
+    },
+    {
+      "id": "named-derived-closure",
+      "meaning": "Derived completeness requires an explicit named exact-rule policy. Complex policies list their reviewed premises; the learn reporting gate retains its domain/freshness basis without asserting comprehensive model coverage."
+    },
+    {
+      "id": "evaluation-basis",
+      "meaning": "A v2 derivation without a matching, independently recomputed complete evaluation basis is partially checked and cannot be promoted."
+    },
+    {
+      "id": "no-legacy-mix",
+      "meaning": "V2 contracts reject legacy compatibility fields, mixed Bundle versions, and conflicting declarations."
+    },
+    {
+      "id": "scoped-compatibility-refusal",
+      "meaning": "Compatibility declarations with context dimensions are rejected until scoped authorization is implemented. Migrated replay witnesses put their model/run and index/run endpoints in explicit capabilities, not carrier context."
+    },
+    {
+      "id": "frozen-v2-contracts",
+      "meaning": "Native frozen identity includes the schema and every capability, bridge, scope mapping, and derived-completeness policy. Mapping ingestion preserves all contracts."
+    },
+    {
+      "id": "promotion-forms",
+      "meaning": "Native authority admits single-assumption projection to a derived relation and exact runtime scoped absence. Direct assumption-only runtime claims and unrelated closure evidence remain insufficient. Python v2 checks the same forms independently."
+    }
   ]
 }

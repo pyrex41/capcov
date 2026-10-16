@@ -46,6 +46,23 @@ class SpecParserTests(unittest.TestCase):
             main.write_text('[claims-spec 1 [import "escape/other"]]')
             with self.assertRaises(SpecError):read_sources(main)
 
+    def test_readable_logic_has_expected_ir_and_source_locations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source=Path(tmp)/'small.claims'
+            source.write_text(''' .claims 2.
+.pack "example" schema 1.
+.decl seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl result(run: symbol ctx, item: symbol) derived derived runtime.
+select: result(R, X) :- seen(R, X), X != "excluded".
+''')
+            _,_,bundle,locations=decode_source(source)
+            from capcov.claims.ir import Atom, Variable, Constant, Rule, Comparison
+            self.assertEqual(bundle.rules,(Rule(Atom('result',(Variable('R'),Variable('X'))),
+                (Atom('seen',(Variable('R'),Variable('X'))),Comparison(Variable('X'),'!=',Constant('excluded','symbol'))),'select'),))
+            self.assertEqual(next(x for x in locations if x['kind']=='rule')['line'],5)
+            source.write_text('.claims 2. .import "../escape.claims".')
+            with self.assertRaises(SpecError): read_sources(source)
+
     def test_all_154_rules_have_lossless_source_baselines(self):
         baseline=json.loads((ROOT/'specs/claims/baseline-v1.json').read_text())
         self.assertEqual(sum(p['rule_count'] for p in baseline['packs']),154)
@@ -54,7 +71,10 @@ class SpecParserTests(unittest.TestCase):
                 raw=(ROOT/pack['path']).read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest(),pack['file_sha256'])
                 _,_,bundle,_=decode_source(ROOT/f"specs/claims/{pack['domain']}.claims")
-                self.assertEqual(digest(bundle),pack['bundle_digest'])
+                if pack['domain'] != 'replay':
+                    self.assertEqual(digest(bundle),pack['bundle_digest'])
+                else:
+                    self.assertEqual(bundle.schema_version, 2)
                 self.assertEqual(len(bundle.rules),pack['rule_count'])
         fixture=ROOT/'tests/claim_semantics/fixtures/model_min'
         for name,expected in baseline['model_min'].items():
@@ -99,3 +119,23 @@ class NativeSpecTests(unittest.TestCase):
         rule=compiled.bundle.rules[0]
         mutation=replace(compiled.bundle,rules=(replace(rule,body=rule.body[1:]),))
         with self.assertRaises(SpecError):check_elaboration(before,mutation)
+
+    def test_replay_elaboration_reconstructs_frozen_rules_exactly(self):
+        from capcov.claims.ir import bundle_from_json, canonical_dict
+        from capcov.claims.authority import judge
+        baseline=json.loads((ROOT/'specs/claims/baseline-v1.json').read_text())['packs'][1]
+        legacy=json.loads((ROOT/baseline['path']).read_text())
+        old=bundle_from_json(dict(schema_version=1,relations=[*legacy['primitives'],*legacy['supplementary_primitives'],*legacy['derived']],rules=legacy['rules']))
+        compiled=compile_spec(ROOT/'specs/claims/replay.claims')
+        self.assertTrue(judge(compiled.bundle).ok)
+        self.assertEqual(dict(compiled.artifacts)['pack.json'],
+                         (ROOT/'src/capcov/claims/replay/rules-replay-v2.json').read_text())
+        self.assertEqual(old.rules,compiled.bundle.rules)
+        self.assertEqual(digest(replace(old,rules=compiled.bundle.rules)),baseline['bundle_digest'])
+        obligations=json.loads(dict(compiled.artifacts)['obligations.json'])['generated']
+        self.assertEqual(sum(item['generated'] for item in obligations),24)
+        self.assertEqual(len(compiled.bundle.completeness_scopes),37)
+        for domain in ('replay','observation'):
+            source=ROOT/f'specs/claims/{domain}.claims'
+            report=shen.authority(compile_spec(source).bundle,validate=False)
+            self.assertTrue(report.ok,report.failed_checks())

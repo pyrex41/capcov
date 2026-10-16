@@ -20,6 +20,7 @@
     "tests.claim_semantics.test_replay_adversarial_both_engines.AdversarialReplayCasesInBothEngines",
     "tests.claim_semantics.test_replay_corpus_evaluation.SouffleAgreesWithPythonOnEveryReplayCase",
     "tests.claim_semantics.test_replay_evidence_policy.ReplayEvidencePolicyTest",
+    "tests.claim_semantics.test_replay_spec.NativeReplaySpecTests",
     "tests.claim_semantics.test_shrinker_bundle.ShrinkerTests",
     "tests.claim_semantics.test_souffle_compiled_kernel.SouffleCompiledCorpusTests",
     "tests.claim_semantics.test_souffle_evaluator.SouffleCorpusSmokeTests",
@@ -33,6 +34,7 @@
   "shen": {
    "needs": "Starts the Shen runtime through bifrost.",
    "classes": [
+    "tests.claim_semantics.test_authority_v2.NativeAuthorityV2Tests",
     "tests.claim_semantics.test_modelcheck.CheckerTest",
     "tests.claim_semantics.test_modelcheck.LiveModelTest",
     "tests.claim_semantics.test_modelcheck.PreflightTest",
@@ -40,7 +42,8 @@
     "tests.claim_semantics.test_shen_transport.FakeLauncherFailureTest",
     "tests.claim_semantics.test_shen_workbench.ShenAuthorityTest",
     "tests.claim_semantics.test_shen_workbench.ShenDeriveTest",
-    "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest"
+    "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest",
+    "tests.claim_semantics.test_spec_compiler.NativeSpecTests"
    ]
   },
   "indexers": {

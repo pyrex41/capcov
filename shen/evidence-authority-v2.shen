@@ -62,7 +62,9 @@
 (define capcov.v2-contracts-base-ok?
   -> (and (capcov.all? (/. Name (let D (capcov.decl Name)
                                  (and (empty? (capcov.decl-compat-targets D))
-                                  (and (empty? (capcov.decl-compat-context D))
+                                  (and (and (empty? (capcov.decl-compat-context D))
+                                       (or (not (= (capcov.decl-modality D) "compatibility"))
+                                           (empty? (capcov.decl-context D))))
                                    (or (not (= (capcov.decl-modality D) "completeness"))
                                        (not (= (capcov.v2-find Name (value capcov.*scopes*)) capcov.none)))))))
                        (value capcov.*relation-names*))
@@ -204,9 +206,7 @@
        (and (not (= D capcov.none))
         (and (= (capcov.decl-modality D) "completeness")
          (and (not (capcov.decl-primitive? D))
-          (and (capcov.any? (/. A (= (capcov.atom-modality A) "completeness"))
-                             (capcov.declared-atoms (capcov.positive-atoms (nth 4 (hd Matches)))))
-           (and (= (nth 2 (hd Matches)) Digest) (= (nth 1 (nth 3 (hd Matches))) Relation)))))))))
+          (and (= (nth 2 (hd Matches)) Digest) (= (nth 1 (nth 3 (hd Matches))) Relation))))))))
 
 (define capcov.v2-policies-ok?
   -> (and (capcov.v2-unique? (value capcov.*derived-policies*))
