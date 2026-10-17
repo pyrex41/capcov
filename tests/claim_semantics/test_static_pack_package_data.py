@@ -66,14 +66,10 @@ for name,count in [('static',27),('replay',71),('observation',56)]:
     assert len(bundle.rules)==count
     result=evaluate(bundle)
     assert result.status.value=='complete', result.message
-from capcov.claims.replay.pack import pack_bundle
-bundle=pack_bundle(version=2)
-assert bundle.schema_version==2 and len(bundle.rules)==71
-assert evaluate(bundle).status.value=='complete'
-from capcov.claims.static.pack import pack_bundle as static_bundle
-bundle=static_bundle(version=2)
-assert bundle.schema_version==2 and len(bundle.rules)==27
-assert evaluate(bundle).status.value=='complete'
+for name,count in [('static',27),('replay',71),('observation',56)]:
+    bundle=importlib.import_module('capcov.claims.'+name+'.pack').pack_bundle(version=2)
+    assert bundle.schema_version==2 and len(bundle.rules)==count
+    assert evaluate(bundle).status.value=='complete'
 assert len(runtime_relations._bundle.rules)==2
 '''
             probe=subprocess.run([sys.executable,'-c',code,str(installed)],cwd=isolated,

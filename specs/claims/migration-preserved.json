@@ -2,7 +2,7 @@
   "format": "capcov-migration-report-v1",
   "release_ready": false,
   "preserved": [
-    "All 154 rules are authored in readable finite logic. Observation decodes to its frozen v1 Bundle identity; native replay v2 and static v2 elaboration reconstruct all 71 and all 27 frozen v1 rules exactly, in their original premise order, and the two shared bridges reconstruct the frozen runtime-shared-v1 rules.",
+    "All 154 rules are authored in readable finite logic. Native replay v2, static v2 and observation v2 elaboration reconstruct all 71, 27 and 56 frozen v1 rules exactly, in their original premise order, and the two shared bridges reconstruct the frozen runtime-shared-v1 rules.",
     "Bundle v1 canonical bytes omit v2 fields; old evidence and fact records retain their shapes.",
     "model_min remains unchanged and is hashed in baseline-v1.json.",
     "Static and replay exporter stubs now load exact declarations from installed packs.",
@@ -14,11 +14,14 @@
     "Static declares 7 completeness scopes and 1 named exact-rule closure policy. Shen regenerates 3 required premises; independent Python reconstruction verifies each insertion. index_describes_run is an unscoped v2 witness with one directional capability and the index-run bridge.",
     "All 14 frozen static cases and individual completeness/assumption withdrawals retain identical relation closures under v1 and v2.",
     "Static v2 runs through installed profile selection, SCIP export, exact declaration combination, evaluation, and evaluation-bound v2 certificates over the go_app golden; the exported index identity is unchanged.",
+    "Observation declares 28 completeness scopes and 14 named exact-rule closure policies, and no compatibility capabilities or bridges. Shen regenerates 21 required premises; independent Python reconstruction verifies each insertion. masked_admitted remains a single-premise assumption projection and passes native v2 authority.",
+    "The four committed observation receipts (agree, disagree, gap, masked), the admitted-mask control, and individual completeness/assumption withdrawals retain identical relation closures and claim verdicts under v1 and v2.",
+    "Observation v2 runs through installed profile selection, receipt export, exact declaration combination, Python and three-kernel evaluation, the judge CLI (--pack-version 2), and evaluation-bound v2 certificates. Exported rows, evidence ids and the observation identity are profile-independent; receipt format versions are unchanged.",
     "Experimental typed operation specifications derive transitions, ordered effect intents, outcome alternatives, traces and access summaries in Shen. Native Prolog checks observations and searches supplied finite state domains; the synthetic delete-issue corpus has hand-authored expectations. Existing model_min and evidence admission remain unchanged.",
     "Compositional finite systems now support schemas, scoped operation judgments, arithmetic, predicates, CRUD, branches, bounded iteration, before/after properties, invariants, workflows, adapter-driven observation checks, certificate reproduction, independent patch/trace/frame checking and case-scoped capcov claim export. Synthetic workspace, ledger and outbox regressions exercise distinct operation families."
   ],
   "pending": [
-    "Observation v2 migration, declarative reporting policies, and default selection after the full release gate.",
+    "Declarative reporting policies, and default selection of the v2 profiles after the full release gate.",
     "V2 mapping, aggregation, universal-domain, and native derivation admission.",
     "Declaration templates and declarative reporting policies for claim packs.",
     "Static invariant-preservation proofs beyond runtime checks, unbounded/non-serial concurrency reasoning, and reviewed application-specific model/receipt adapters.",

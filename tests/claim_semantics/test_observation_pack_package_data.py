@@ -95,7 +95,9 @@ class ObservationPackageDataTest(unittest.TestCase):
         """A third document added later must ship too; ``*.json`` is what makes that so."""
         module_dir = Path(observation_pack.__file__).resolve().parent
         shipped = sorted(path.name for path in module_dir.glob("*.json"))
-        self.assertEqual(shipped, sorted([SCHEMA_NAME, observation_pack.PACK_NAME]))
+        self.assertEqual(shipped, sorted([SCHEMA_NAME, observation_pack.PACK_NAME,
+                                          "rules-observation-v2.json", "rules-observation-v2.manifest.json",
+                                          "schema_observation_v2.json", "stubs-observation-v2.json"]))
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -71,7 +71,7 @@ select: result(R, X) :- seen(R, X), X != "excluded".
                 raw=(ROOT/pack['path']).read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest(),pack['file_sha256'])
                 _,_,bundle,_=decode_source(ROOT/f"specs/claims/{pack['domain']}.claims")
-                if pack['domain'] not in ('replay','static'):
+                if pack['domain'] not in ('replay','static','observation'):
                     self.assertEqual(digest(bundle),pack['bundle_digest'])
                 else:
                     self.assertEqual(bundle.schema_version, 2)
@@ -191,3 +191,49 @@ class NativeSpecTests(unittest.TestCase):
         for domain in ('static','shared'):
             report=shen.authority(compile_spec(ROOT/f'specs/claims/{domain}.claims').bundle,validate=False)
             self.assertTrue(report.ok,report.failed_checks())
+
+    def test_observation_elaboration_reconstructs_frozen_rules_exactly(self):
+        from capcov.claims.ir import bundle_from_json
+        from capcov.claims.authority import judge
+        baseline=json.loads((ROOT/'specs/claims/baseline-v1.json').read_text())['packs'][2]
+        self.assertEqual(baseline['domain'],'observation')
+        legacy=json.loads((ROOT/baseline['path']).read_text())
+        old=bundle_from_json(dict(schema_version=1,relations=[*legacy['primitives'],*legacy['supplementary_primitives'],*legacy['derived']],rules=legacy['rules']))
+        source=ROOT/'specs/claims/observation.claims'
+        _,_,before,_=decode_source(source)
+        compiled=compile_spec(source)
+        self.assertEqual(compiled.bundle.schema_version,2)
+        self.assertTrue(judge(compiled.bundle).ok)
+        report=shen.authority(compiled.bundle,validate=False)
+        self.assertTrue(report.ok,report.failed_checks())
+        installed=ROOT/'src/capcov/claims/observation'
+        for artifact,name in (('pack.json','rules-observation-v2.json'),('schema.json','schema_observation_v2.json'),
+                              ('stubs.json','stubs-observation-v2.json')):
+            self.assertEqual(dict(compiled.artifacts)[artifact],(installed/name).read_text())
+        # Same rules, same premise order, same declarations: the frozen identity.
+        self.assertEqual(old.rules,compiled.bundle.rules)
+        self.assertEqual(old.relations,compiled.bundle.relations)
+        self.assertEqual(digest(replace(old,rules=compiled.bundle.rules)),baseline['bundle_digest'])
+        self.assertEqual(len(compiled.bundle.rules),baseline['rule_count'])
+        # Python reconstructs every insertion independently of Shen's output,
+        # and the emitted obligations are exactly that reconstruction.
+        obligations=check_elaboration(before,compiled.bundle)
+        emitted=json.loads(dict(compiled.artifacts)['obligations.json'])['generated']
+        self.assertEqual([{k:v for k,v in item.items() if k!='source_location'} for item in emitted],obligations)
+        self.assertEqual(sum(item['generated'] for item in obligations),21)
+        self.assertEqual(len(obligations),21)
+        self.assertEqual(sum(len(r.body) for r in compiled.bundle.rules)-sum(len(r.body) for r in before.rules),21)
+        # Completeness scopes and exact closure policies only: no compatibility.
+        self.assertEqual(len(compiled.bundle.completeness_scopes),28)
+        self.assertEqual(len(compiled.bundle.derived_completeness_policies),14)
+        self.assertEqual(compiled.bundle.compatibility_capabilities,())
+        self.assertEqual(compiled.bundle.required_bridges,())
+        rule=next(r for r in compiled.bundle.rules if r.name=='observations_agree')
+        index=next(i for i,a in enumerate(rule.body) if getattr(a,'relation',None)=='observation_mask_disclosure_closed')
+        mutation=replace(compiled.bundle,rules=tuple(replace(r,body=r.body[:index]+r.body[index+1:]) if r is rule else r
+                                                       for r in compiled.bundle.rules))
+        with self.assertRaises(SpecError):check_elaboration(before,mutation)
+        # masked_admitted stays the single-premise assumption projection the
+        # v2 authority admits; it retains its assumption dependency.
+        masked=next(r for r in compiled.bundle.rules if r.name=='masked_admitted')
+        self.assertEqual([a.relation for a in masked.body],['masked_difference_admitted'])
