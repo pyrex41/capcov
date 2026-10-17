@@ -71,7 +71,7 @@ select: result(R, X) :- seen(R, X), X != "excluded".
                 raw=(ROOT/pack['path']).read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest(),pack['file_sha256'])
                 _,_,bundle,_=decode_source(ROOT/f"specs/claims/{pack['domain']}.claims")
-                if pack['domain'] != 'replay':
+                if pack['domain'] not in ('replay','static'):
                     self.assertEqual(digest(bundle),pack['bundle_digest'])
                 else:
                     self.assertEqual(bundle.schema_version, 2)
@@ -138,4 +138,56 @@ class NativeSpecTests(unittest.TestCase):
         for domain in ('replay','observation'):
             source=ROOT/f'specs/claims/{domain}.claims'
             report=shen.authority(compile_spec(source).bundle,validate=False)
+            self.assertTrue(report.ok,report.failed_checks())
+
+    def test_static_elaboration_reconstructs_frozen_rules_exactly(self):
+        from capcov.claims.ir import bundle_from_json
+        from capcov.claims.authority import judge
+        baseline=json.loads((ROOT/'specs/claims/baseline-v1.json').read_text())['packs'][0]
+        self.assertEqual(baseline['domain'],'static')
+        legacy=json.loads((ROOT/baseline['path']).read_text())
+        old=bundle_from_json(dict(schema_version=1,relations=[*legacy['primitives'],*legacy['supplementary_primitives'],*legacy['derived']],rules=legacy['rules']))
+        source=ROOT/'specs/claims/static.claims'
+        _,_,before,_=decode_source(source)
+        compiled=compile_spec(source)
+        self.assertTrue(judge(compiled.bundle).ok)
+        artifacts=dict(compiled.artifacts)
+        for name,installed in (('pack.json','rules-static-v2.json'),('schema.json','schema_static_v2.json'),
+                               ('stubs.json','stubs-static-v2.json')):
+            self.assertEqual(artifacts[name],(ROOT/'src/capcov/claims/static'/installed).read_text())
+        manifest=json.loads((ROOT/'src/capcov/claims/static/rules-static-v2.manifest.json').read_text())
+        self.assertEqual(manifest['bundle_digest'],digest(compiled.bundle))
+        self.assertEqual(old.rules,compiled.bundle.rules)
+        self.assertEqual(digest(replace(old,rules=compiled.bundle.rules)),baseline['bundle_digest'])
+        # Every insertion is independently re-derived, without Shen's witnesses.
+        obligations=check_elaboration(before,compiled.bundle)
+        self.assertEqual(obligations,[{k:v for k,v in item.items() if k!='source_location'}
+                                      for item in json.loads(artifacts['obligations.json'])['generated']])
+        self.assertEqual(sum(item['generated'] for item in obligations),3)
+        self.assertEqual(len(obligations),3)
+        self.assertEqual(len(compiled.bundle.completeness_scopes),7)
+        self.assertEqual(len(compiled.bundle.derived_completeness_policies),1)
+        self.assertEqual(len(before.rules),27)
+        self.assertEqual(sum(len(r.body) for r in compiled.bundle.rules)-sum(len(r.body) for r in before.rules),3)
+        # Dropping a regenerated closure premise is a refusal, not a variant.
+        mutation=replace(compiled.bundle,rules=tuple(replace(r,body=r.body[:-2]+r.body[-1:])
+                                                      if r.name=='static_file_unindexed' else r
+                                                      for r in compiled.bundle.rules))
+        with self.assertRaises(SpecError):check_elaboration(before,mutation)
+
+    def test_shared_bridges_reconstruct_frozen_installed_rules_exactly(self):
+        from capcov.claims.authority import judge
+        from capcov.claims.static import runtime_relations
+        frozen=runtime_relations._bundle
+        self.assertEqual(frozen.schema_version,1)
+        source=ROOT/'specs/claims/shared.claims'
+        _,_,before,_=decode_source(source)
+        compiled=compile_spec(source)
+        self.assertTrue(judge(compiled.bundle).ok)
+        self.assertEqual(frozen.rules,compiled.bundle.rules)
+        self.assertEqual(check_elaboration(before,compiled.bundle),[])
+        manifest=json.loads((ROOT/'src/capcov/claims/static/runtime-shared-v1.manifest.json').read_text())
+        self.assertEqual(digest(replace(frozen,rules=compiled.bundle.rules)),manifest['bundle_digest'])
+        for domain in ('static','shared'):
+            report=shen.authority(compile_spec(ROOT/f'specs/claims/{domain}.claims').bundle,validate=False)
             self.assertTrue(report.ok,report.failed_checks())

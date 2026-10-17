@@ -41,8 +41,8 @@
 .decl static_route_inventory_closed(index: digest ctx) primitive completeness static completes static_route_declared_surface.
 .decl static_scope_closed(index: digest ctx) primitive completeness static completes static_scope.
 .decl static_reachability_closed(index: digest ctx) primitive completeness static completes static_reaches.
-.decl scip_index_comparable(index_a: digest, index_b: digest, basis: symbol) primitive compatibility static legacy_targets(scip_index, scip_index_tree, scip_index_commit, static_scope, static_language_covered, scip_document, static_source_file, scip_symbol, scip_symbol_node, scip_symbol_unrooted, scip_relationship, scip_definition_site, scip_generated_site, scip_test_site, scip_import_site, scip_write_site, scip_read_site, scip_enclosing, static_site_owner, scip_may_reference, scip_module_scope_reference, scip_type_reference, route_site, route_handler_location, route_site_excluded, static_op_site, static_entity, static_blind_spot, scip_unresolved_site, static_unresolved, changed_symbol, static_scope_leak, authz_symbol__accepted, source_tree_observed, scip_documents_closed, scip_definitions_closed, scip_references_closed, static_route_inventory_closed, static_scope_closed, static_reachability_closed) legacy_context(index_a, index_b).
-.decl index_describes_run(index: digest ctx, run: symbol ctx) primitive compatibility runtime legacy_targets(authz_symbol__accepted, changed_symbol, route_handler_location, route_site, route_site_excluded, run_built_from_commit, runtime_function_entered, runtime_route_completed, runtime_route_observed, runtime_route_reaches_sql_on_index, runtime_sql_executed, runtime_tx_committed, scip_definition_site, scip_definitions_closed, scip_document, scip_documents_closed, scip_enclosing, scip_generated_site, scip_import_site, scip_index, scip_index_commit, scip_index_tree, scip_may_reference, scip_module_scope_reference, scip_read_site, scip_references_closed, scip_relationship, scip_symbol, scip_symbol_node, scip_symbol_unrooted, scip_test_site, scip_type_reference, scip_unresolved_site, scip_write_site, source_tree_observed, static_blind_spot, static_entity, static_language_covered, static_op_site, static_reachability_closed, static_route_declared_surface, static_route_inventory_closed, static_scope, static_scope_closed, static_scope_leak, static_site_owner, static_source_file, static_unresolved) legacy_context(index, run).
+.decl scip_index_comparable(index_a: digest, index_b: digest, basis: symbol) primitive compatibility static.
+.decl index_describes_run(index: digest, run: symbol) primitive compatibility runtime.
 .decl runtime_route_observed(tenant: symbol ctx, surface: symbol ctx, event: symbol ctx, run: symbol ctx) supplementary-primitive observation runtime.
 .decl generated_code_in_scope__accepted(index: digest ctx, path: symbol) supplementary-primitive assumption static.
 .decl generated_code_in_scope__rejected(index: digest ctx, path: symbol) supplementary-primitive assumption static negative.
@@ -73,3 +73,19 @@
 .decl static_route_authorization_gap(index: digest ctx, surface: symbol) derived derived static.
 .decl static_route_authorized_closed(index: digest ctx) derived completeness static completes static_route_authorized.
 .decl runtime_route_reaches_sql_on_index(index: digest ctx, run: symbol ctx, request: symbol ctx, surface: symbol ctx, symbol: symbol, tx: symbol ctx, operation: symbol) derived derived runtime.
+
+// Explicit scope mappings. Elaboration inserts missing obligations, never facts.
+
+.completes scip_documents_closed -> scip_document_path by index=index.
+.completes scip_definitions_closed -> scip_definition_site_at by index=index, path=path.
+.completes scip_references_closed -> scip_may_reference by index=index, path=path.
+.completes static_route_inventory_closed -> static_route_declared_surface by index=index.
+.completes static_scope_closed -> static_scope by index=index.
+.completes static_reachability_closed -> static_reaches by index=index.
+.completes static_route_authorized_closed -> static_route_authorized by index=index.
+
+// index_describes_run is the only static/runtime join. Every index/run premise
+// pair in static.claims and shared.claims needs this exact endpoint witness.
+
+.capability index_describes_run-endpoints witness index_describes_run index:index -> run:run left(scip_index, static_route_declared_surface) right(runtime_route_observed, runtime_function_entered, runtime_sql_executed, runtime_tx_committed, runtime_route_completed).
+.bridge index-run index -> run.

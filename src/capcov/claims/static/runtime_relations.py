@@ -19,8 +19,10 @@ import hashlib
 import json
 from ..ir import bundle_from_json
 
-# Authored in specs/claims/shared.claims. These installed data are generated
-# by the native specification compiler; no source checkout or Shen is needed.
+# Generated from the schema-1 specs/claims/shared.claims by the native
+# specification compiler and now frozen as the v1 bridge identity; no source
+# checkout or Shen is needed. The source is schema 2, and its elaboration
+# reconstructs these two rules exactly (tests/claim_semantics/test_spec_compiler).
 _data = resources.files(__package__).joinpath("runtime-shared-v1.json").read_bytes()
 _manifest = json.loads(resources.files(__package__).joinpath("runtime-shared-v1.manifest.json").read_text(encoding="utf-8"))
 if hashlib.sha256(_data).hexdigest() != _manifest["artifacts"]["bundle.json"]:

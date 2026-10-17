@@ -84,10 +84,11 @@ when the kernels disagree. Needs Soufflé, no replay environment.
 ### Specification migration work in progress
 
 `specs/claims/` contains readable typed declarations and named logic rules for
-all 154 pack rules and the two shared bridges. Replay uses Bundle v2 and native
-closure elaboration; static and observation retain v1. `baseline-v1.json` pins
-the compatibility identities and unchanged `model_min` fixture. All installed
-defaults remain v1; replay v2 is selectable. The preserved-behavior and
+all 154 pack rules and the two shared bridges. Replay, static, and the shared
+bridges use Bundle v2 and native closure elaboration; observation retains v1.
+`baseline-v1.json` pins the compatibility identities and unchanged `model_min`
+fixture. All installed defaults remain v1; replay v2 and static v2 are
+selectable. The preserved-behavior and
 authority-tightening reports record the remaining work.
 
 The compiler requires the pinned native Shen runtime:
@@ -126,6 +127,18 @@ compiler obligation never creates a closure fact. Replay declares 37 scopes
 and removes 24 redundant premises; its 71 elaborated rules equal the frozen v1
 rules exactly. Remaining closure premises express stronger gates, explicit
 closure policies, or bind an absence claim's domain.
+
+Static declares 7 scopes (in `static-relations.claims`, shared with the
+bridges) and 1 named closure policy (`static_route_authorized_closed`); native
+Shen regenerates 3 premises (`static_file_unindexed`,
+`runtime_route_without_static`, `static_route_authorization_gap`) and the 27
+elaborated rules equal the frozen v1 rules exactly, with digest `c11d6289…`
+reconstructed. `index_describes_run` is now an unscoped v2 witness with one
+directional capability (`scip_index` and `static_route_declared_surface` to the
+runtime route and trace primitives) and the `index-run` bridge. The two shared
+bridges regenerate no premises and equal the frozen
+`runtime-shared-v1.json` rules; that v1 bundle is now frozen generated data
+rather than recompiled from `shared.claims`.
 
 `.decl` marks context columns with `ctx`; `.capability` names directional
 endpoints; `.bridge` requires a dimension association; `.policy` binds a reviewed
@@ -173,6 +186,15 @@ manifest. V1 remains the default and retains its canonical identities.
 assumption withdrawals, checks the receipt-to-certificate path, and compares
 Python, interpreted Souffle, and compiled Souffle. The installed-wheel test
 loads both replay versions without repository files or Shen.
+
+Select static v2 with `static.pack.pack_bundle(version=2)` and
+`scip_facts.export_bundle(..., pack_profile=resolve_profile('static', 2))`
+(also `export_from_tree`). A v2 export carries the pack's exact declarations
+and contracts; its index identity is unchanged from v1. `test_static_spec.py`
+compares all 14 frozen static cases and individual closure and assumption
+withdrawals, checks the go_app export-to-certificate path, and compares
+Python, interpreted Souffle, and compiled Souffle. Claims are excluded there
+because v2 universal-domain admission is pending.
 
 The operation framework, Shen datatype judgments and Prolog search, templates,
 declarative reporting policy, remaining pack migrations, and full release gates

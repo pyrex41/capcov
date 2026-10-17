@@ -23,8 +23,12 @@ class StaticPackPackageTests(unittest.TestCase):
     def test_static_pack_is_identical_to_frozen_baseline_and_source(self):
         frozen=ROOT/'experiments/claim-semantics/static/rules-static-v1.json'
         self.assertEqual(frozen.read_text(),pack.read_pack_text())
+        # The source is now schema 2; its native elaboration reconstructs these
+        # frozen rules exactly (test_spec_compiler, static elaboration test).
         _,_,source,_=decode_source(ROOT/'specs/claims/static.claims')
-        self.assertEqual(digest(source),digest(pack.pack_bundle()))
+        self.assertEqual(source.schema_version,2)
+        self.assertEqual(len(source.rules),len(pack.pack_bundle().rules))
+        self.assertEqual(pack.pack_bundle(version=2).rules,pack.pack_bundle().rules)
 
     def test_shared_bridge_resource_matches_generated_identity(self):
         directory=ROOT/'src/capcov/claims/static'
@@ -32,8 +36,12 @@ class StaticPackPackageTests(unittest.TestCase):
         data=(directory/'runtime-shared-v1.json').read_bytes()
         self.assertEqual(hashlib.sha256(data).hexdigest(),manifest['artifacts']['bundle.json'])
         from capcov.claims.static import runtime_relations as runtime
+        # The v1 bridge bundle is frozen generated data; shared.claims is now
+        # schema 2 and reconstructs its rules exactly (test_spec_compiler).
+        self.assertEqual(digest(runtime._bundle),manifest['bundle_digest'])
         _,_,source,_=decode_source(ROOT/'specs/claims/shared.claims')
-        self.assertEqual(digest(source),digest(runtime._bundle))
+        self.assertEqual(source.schema_version,2)
+        self.assertEqual(source.rules,runtime._bundle.rules)
 
     @unittest.skipUnless(BUILD_TOOLS,'pip and setuptools required for installed-wheel check')
     def test_all_installed_packs_evaluate_without_checkout_or_shen(self):
@@ -61,6 +69,10 @@ for name,count in [('static',27),('replay',71),('observation',56)]:
 from capcov.claims.replay.pack import pack_bundle
 bundle=pack_bundle(version=2)
 assert bundle.schema_version==2 and len(bundle.rules)==71
+assert evaluate(bundle).status.value=='complete'
+from capcov.claims.static.pack import pack_bundle as static_bundle
+bundle=static_bundle(version=2)
+assert bundle.schema_version==2 and len(bundle.rules)==27
 assert evaluate(bundle).status.value=='complete'
 assert len(runtime_relations._bundle.rules)==2
 '''
