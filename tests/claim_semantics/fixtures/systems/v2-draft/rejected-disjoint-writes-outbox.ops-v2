@@ -1,0 +1,27 @@
+; rejected-by: R-DISJOINT
+; docs/ir-specification.md section 6. The claim says transfer and
+; relay-transfer have disjoint frames, but transfer's [outbox ...] writes
+; transfer-outbox, which relay-transfer reads and writes. v1 summarizes
+; publish with an empty write set (system.shen:199); a v2 summary that did the
+; same for outbox would accept this claim, so this fixture is that mutant's test.
+[system-v2 "disjoint-writes-outbox"
+ []
+ [[table "transfer" ["amount"] [] []]
+  [outbox-table "transfer-outbox" "transfer-completed"]]
+ [[channel "transfer-completed" [at-least-once]]]
+ [[operation "transfer" ["amount" "request"] [intent [argument "request"]]
+   [negate [exists "transfer" [argument "request"]]]
+   [[transaction "apply"
+     [[named "record" [insert "transfer" [argument "request"] [["amount" [argument "amount"]]]]]
+      [named "notify" [outbox "transfer-outbox" [intent [argument "request"]] [argument "request"]]]]]]
+   [exists "transfer" [argument "request"]]]
+  [operation "relay-transfer" ["request"] [intent [argument "request"]]
+   [exists "transfer-outbox" [argument "request"]]
+   [[deliver "notify-deliver" "transfer-outbox" [intent [argument "request"]]
+     [ok [[transaction "notified" [[named "mark-notified" [update "transfer-outbox" [argument "request"] "state" [literal "delivered"]]]]]]]
+     [fail []]
+     [info []]]]
+   [yes]]]
+ []
+ [[disjoint "transfer" "relay-transfer"]]
+ []]

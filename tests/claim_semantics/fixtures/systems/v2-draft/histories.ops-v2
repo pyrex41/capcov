@@ -1,0 +1,112 @@
+; DRAFT v2 histories for transfer-outbox.ops-v2: docs/ir-specification.md,
+; section 5, gives each one's admissible sets and verdicts. Not accepted by the
+; engine. Effect records are [effect Intent Attempt Logical-effect]; the
+; attempt id is the invocation id joined with the step name (section 4.2).
+; Initial state for H1-H4: job "j" pending with payload "hello", no outbox row.
+
+; H1: send->info; send->ok; ack->ok. Truth: two delivered records for intent j.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "sent"]]]
+     [row "outbox" "j" [["payload" "hello"] ["state" "delivered"]]]]
+    [journal "1" "7"
+     [[entry "1" [effect "j" "i1/record" [recorded "outbox" "j" "hello"]]]
+      [entry "2" [effect "j" "i1/record" [put "job" "j" "status" "queued"]]]
+      [entry "3" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "4" [effect "j" "i1/publish" [delivered "delivery-attempt" "hello"]]]
+      [entry "5" [effect "j" "i2/publish" [delivered "delivery-attempt" "hello"]]]
+      [entry "6" [effect "j" "i2/settle" [put "outbox" "j" "state" "delivered"]]]
+      [entry "7" [effect "i3" "i3/body" [put "job" "j" "status" "sent"]]]]]]]
+  [close]]]
+
+; H2: same calls. Truth: one delivered record, from attempt i1/publish.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "sent"]]]
+     [row "outbox" "j" [["payload" "hello"] ["state" "delivered"]]]]
+    [journal "1" "6"
+     [[entry "1" [effect "j" "i1/record" [recorded "outbox" "j" "hello"]]]
+      [entry "2" [effect "j" "i1/record" [put "job" "j" "status" "queued"]]]
+      [entry "3" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "4" [effect "j" "i1/publish" [delivered "delivery-attempt" "hello"]]]
+      [entry "5" [effect "j" "i1/settle" [put "outbox" "j" "state" "delivered"]]]
+      [entry "6" [effect "i3" "i3/body" [put "job" "j" "status" "sent"]]]]]]]
+  [close]]]
+
+; H3: send->info; ack->ok; final read without drain. Attempt i1/publish was
+; sent (row in-flight) and is not in the journal: it may land after the read.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "ack" [["id" "j"]]] [complete "i2" [ok]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [not-drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "sent"]]]
+     [row "outbox" "j" [["payload" "hello"] ["state" "in-flight"]]]]
+    [journal "1" "4"
+     [[entry "1" [effect "j" "i1/record" [recorded "outbox" "j" "hello"]]]
+      [entry "2" [effect "j" "i1/record" [put "job" "j" "status" "queued"]]]
+      [entry "3" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "4" [effect "i2" "i2/body" [put "job" "j" "status" "sent"]]]]]]]
+  [close]]]
+
+; H3-drained: H3 with a drained cut. The attempt is established not landed.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "ack" [["id" "j"]]] [complete "i2" [ok]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "sent"]]]
+     [row "outbox" "j" [["payload" "hello"] ["state" "in-flight"]]]]
+    [journal "1" "4"
+     [[entry "1" [effect "j" "i1/record" [recorded "outbox" "j" "hello"]]]
+      [entry "2" [effect "j" "i1/record" [put "job" "j" "status" "queued"]]]
+      [entry "3" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "4" [effect "i2" "i2/body" [put "job" "j" "status" "sent"]]]]]]]
+  [close]]]
+
+; H4: H2 with journal positions 3-4 not observed.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "sent"]]]
+     [row "outbox" "j" [["payload" "hello"] ["state" "delivered"]]]]
+    [journal "1" "6"
+     [[entry "1" [effect "j" "i1/record" [recorded "outbox" "j" "hello"]]]
+      [entry "2" [effect "j" "i1/record" [put "job" "j" "status" "queued"]]]
+      [gap "3" "4"]
+      [entry "5" [effect "j" "i1/settle" [put "outbox" "j" "state" "delivered"]]]
+      [entry "6" [effect "i3" "i3/body" [put "job" "j" "status" "sent"]]]]]]]
+  [close]]]
+
+; H5: transfer a->b 5 under request r1, then the same key with amount 7.
+; Initial state: wallet a balance 10, wallet b balance 0.
+[history
+ [[open]
+  [invoke "i1" "transfer" [["amount" "5"] ["from" "a"] ["request" "r1"] ["to" "b"]]] [complete "i1" [ok]]
+  [invoke "i2" "transfer" [["amount" "7"] ["from" "a"] ["request" "r1"] ["to" "b"]]]
+  [complete "i2" [fail [rejected "idempotency-conflict"]]]
+  [read [observation [cut ["wallet" "transfer" "transfer-outbox" "transfer-completed"] [barrier "b1"] [drained]]
+    [[row "wallet" "a" [["balance" "5"]]]
+     [row "wallet" "b" [["balance" "5"]]]
+     [row "transfer" "r1" [["amount" "5"] ["from" "a"] ["to" "b"]]]
+     [row "transfer-outbox" "r1" [["payload" "r1"] ["state" "delivered"]]]]
+    [journal "1" "7"
+     [[entry "1" [effect "r1" "i1/apply" [put "wallet" "a" "balance" "5"]]]
+      [entry "2" [effect "r1" "i1/apply" [put "wallet" "b" "balance" "5"]]]
+      [entry "3" [effect "r1" "i1/apply" [create "transfer" "r1" [["amount" "5"] ["from" "a"] ["to" "b"]]]]]
+      [entry "4" [effect "r1" "i1/apply" [recorded "transfer-outbox" "r1" "r1"]]]
+      [entry "5" [effect "r1" "i1/notify-deliver" [put "transfer-outbox" "r1" "state" "in-flight"]]]
+      [entry "6" [effect "r1" "i1/notify-deliver" [delivered "transfer-completed" "r1"]]]
+      [entry "7" [effect "r1" "i1/notified" [put "transfer-outbox" "r1" "state" "delivered"]]]]]]]
+  [close]]]

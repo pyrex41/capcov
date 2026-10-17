@@ -1,0 +1,21 @@
+; rejected-by: T-operation
+; docs/ir-specification.md section 6. A per-attempt operation (no intent id)
+; publishes as a step after its transaction. publish is typed only as an
+; action inside the single transaction of a per-attempt operation
+; (caps-v1-steps), where atomic-publish-v1 makes it commit with the
+; transaction. Outside it, publish would be an external effect with neither
+; transactional atomicity nor an intent id. caps-v1-steps does not type a
+; second step, and caps-step has no rule for publish.
+[system-v2 "publish-outside-transaction"
+ [[assume "atomic-publish-v1"]]
+ [[table "job" [[column "status" [enum ["pending" "sent"]]] "payload"] [] []]]
+ []
+ [[operation "send" ["id"] [per-attempt]
+   [exists "job" [argument "id"]]
+   [[transaction "body"
+     [[named "mark" [update "job" [argument "id"] "status" [literal "sent"]]]]]
+    [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]
+   [yes]]]
+ []
+ []
+ []]

@@ -1,0 +1,19 @@
+; rejected-by: R-CHANNEL
+; docs/ir-specification.md section 4.3. The outbox table's kind
+; "delivery-attempt" has no [channel ...] declaration, so its delivery
+; contract (at-most-once or at-least-once) is unstated and neither the
+; eligibility of a row for delivery nor a duplicate is defined.
+[system-v2 "outbox-without-channel"
+ []
+ [[table "job" ["payload"] [] []]
+  [outbox-table "outbox" "delivery-attempt"]]
+ []
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [exists "job" [argument "id"]]
+   [[transaction "record"
+     [[named "enqueue" [outbox "outbox" [intent [argument "id"]] [lookup "job" [argument "id"] "payload"]]]]]
+    [deliver "publish" "outbox" [intent [argument "id"]] [ok []] [fail []] [info []]]]
+   [yes]]]
+ []
+ []
+ []]

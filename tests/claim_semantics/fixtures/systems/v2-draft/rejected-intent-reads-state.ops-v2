@@ -1,0 +1,18 @@
+; rejected-by: R-INTENT-SCOPE
+; docs/ir-specification.md section 4.2. The intent id is read from the state
+; (the job's payload). Two jobs with one payload would share an intent, and a
+; retry after the state changed would get a different one. An intent
+; expression may use literal and argument (and row-key inside for-each) only.
+[system-v2 "intent-reads-state"
+ []
+ [[table "job" ["payload"] [] []]
+  [outbox-table "outbox" "delivery-attempt"]]
+ [[channel "delivery-attempt" [at-most-once]]]
+ [[operation "send" ["id"] [intent [lookup "job" [argument "id"] "payload"]]
+   [exists "job" [argument "id"]]
+   [[transaction "record"
+     [[named "enqueue" [outbox "outbox" [intent [lookup "job" [argument "id"] "payload"]] [lookup "job" [argument "id"] "payload"]]]]]]
+   [yes]]]
+ []
+ []
+ []]

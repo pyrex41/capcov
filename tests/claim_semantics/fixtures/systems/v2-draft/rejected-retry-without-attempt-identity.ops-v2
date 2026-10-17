@@ -1,0 +1,18 @@
+; rejected-by: R-RETRY
+; docs/ir-specification.md section 6. send is per-attempt: its intent id is
+; its invocation id, so attempt k+1 of one logical request is a new intent.
+; A retry of it cannot be told from a fresh request, and a duplicate across
+; retries is undefinable. R-RETRY admits [retry C Max] only for an operation
+; declared with [intent X].
+[system-v2 "retry-without-attempt-identity"
+ [[assume "atomic-publish-v1"]]
+ [[table "job" ["payload"] [] []]]
+ []
+ [[operation "send" ["id"] [per-attempt]
+   [exists "job" [argument "id"]]
+   [[transaction "body"
+     [[named "send" [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]]]]
+   [yes]]]
+ [[retry "send" "3"]]
+ []
+ []]

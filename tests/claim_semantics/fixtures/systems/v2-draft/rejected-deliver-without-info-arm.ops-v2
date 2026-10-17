@@ -1,0 +1,18 @@
+; rejected-by: T-deliver
+; docs/ir-specification.md section 6. The delivery attempt handles ok and fail
+; and omits info. T-deliver has exactly one rule, with all three arms, so an
+; omitted info case is a construction error, never implicit success.
+[system-v2 "deliver-without-info-arm"
+ []
+ [[table "job" ["payload"] [] []]
+  [outbox-table "outbox" "delivery-attempt"]]
+ [[channel "delivery-attempt" [at-most-once]]]
+ [[operation "relay" ["id"] [intent [argument "id"]]
+   [exists "outbox" [argument "id"]]
+   [[deliver "publish" "outbox" [intent [argument "id"]]
+     [ok [[transaction "settle" [[named "mark-delivered" [update "outbox" [argument "id"] "state" [literal "delivered"]]]]]]]
+     [fail [[transaction "release" [[named "mark-pending" [update "outbox" [argument "id"] "state" [literal "pending"]]]]]]]]]
+   [yes]]]
+ []
+ []
+ []]

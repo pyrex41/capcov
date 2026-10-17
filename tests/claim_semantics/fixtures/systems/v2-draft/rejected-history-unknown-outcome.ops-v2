@@ -1,0 +1,9 @@
+; rejected-by: T-outcome
+; docs/ir-specification.md section 4.1. "unknown" is the v1 request alphabet
+; (system.py:126-128); a v2 history uses the capcov.faults alphabet ok / fail
+; / info. The bridge (section 7) maps unknown to info under atomic-publish-v1;
+; it never appears in a v2 history.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [unknown]]
+  [close]]]

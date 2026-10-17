@@ -1,0 +1,83 @@
+; DRAFT v2 model: docs/ir-specification.md, section 5. Not accepted by the
+; engine: capcov.operations.system rejects system-v2 and every other v2 tag.
+; Syntax: src/capcov/operations/shen/system-types-v2-draft.shen.
+;
+; Two flows share one model.
+; - Job delivery on an at-most-once channel (H1-H4): the v2 form of
+;   outbox-intended.ops. send records the job in the outbox and delivers it in
+;   the same invocation; relay re-delivers a row a definite failure released.
+; - Ledger transfer (H5, section 6 derivation): the v2 form of ledger.ops. The
+;   notification is a transactional outbox record on an at-least-once channel.
+; ack is a per-attempt (v1-bridge) operation, so the system declares
+; atomic-publish-v1 (section 7).
+[system-v2 "transfer-outbox"
+ [[assume "atomic-publish-v1"]]
+ [[table "job" [[column "status" [enum ["pending" "queued" "sent"]]] "payload"] [] []]
+  [outbox-table "outbox" "delivery-attempt"]
+  [table "wallet" [[column "balance" [int32]]] [] []]
+  [table "transfer" ["from" "to" "amount"] [] [[foreign "from" "wallet"] [foreign "to" "wallet"]]]
+  [outbox-table "transfer-outbox" "transfer-completed"]]
+ [[channel "delivery-attempt" [at-most-once]]
+  [channel "transfer-completed" [at-least-once]]]
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [both [exists "job" [argument "id"]]
+         [negate [equal [lookup "job" [argument "id"] "status"] [literal "sent"]]]]
+   [[transaction "record"
+     [[named "dedupe" [choose [equal [lookup "job" [argument "id"] "status"] [literal "pending"]]
+       [[named "enqueue" [outbox "outbox" [intent [argument "id"]] [lookup "job" [argument "id"] "payload"]]]
+        [named "mark-queued" [update "job" [argument "id"] "status" [literal "queued"]]]]
+       []]]]]
+    [deliver "publish" "outbox" [intent [argument "id"]]
+     [ok [[transaction "settle" [[named "mark-delivered" [update "outbox" [argument "id"] "state" [literal "delivered"]]]]]]]
+     [fail [[transaction "release" [[named "mark-pending" [update "outbox" [argument "id"] "state" [literal "pending"]]]]]]]
+     [info []]]]
+   [equal [lookup "job" [argument "id"] "status"] [literal "queued"]]]
+  [operation "relay" ["id"] [intent [argument "id"]]
+   [exists "outbox" [argument "id"]]
+   [[deliver "publish" "outbox" [intent [argument "id"]]
+     [ok [[transaction "settle" [[named "mark-delivered" [update "outbox" [argument "id"] "state" [literal "delivered"]]]]]]]
+     [fail [[transaction "release" [[named "mark-pending" [update "outbox" [argument "id"] "state" [literal "pending"]]]]]]]
+     [info []]]]
+   [yes]]
+  [operation "ack" ["id"] [per-attempt]
+   [exists "job" [argument "id"]]
+   [[transaction "body" [[named "ack" [update "job" [argument "id"] "status" [literal "sent"]]]]]]
+   [equal [lookup "job" [argument "id"] "status"] [literal "sent"]]]
+  [operation "transfer" ["from" "to" "amount" "request"] [intent [argument "request"]]
+   [both [exists "wallet" [argument "from"]]
+    [both [exists "wallet" [argument "to"]]
+     [both [negate [equal [argument "from"] [argument "to"]]]
+           [less-than [literal "0"] [argument "amount"]]]]]
+   [[transaction "apply"
+     [[named "deduplicate" [choose [exists "transfer" [argument "request"]]
+       [[named "same-request" [require "idempotency-conflict"
+         [both [equal [lookup "transfer" [argument "request"] "from"] [argument "from"]]
+          [both [equal [lookup "transfer" [argument "request"] "to"] [argument "to"]]
+                [equal [lookup "transfer" [argument "request"] "amount"] [argument "amount"]]]]]]]
+       [[named "funds" [require "insufficient-funds"
+         [negate [less-than [lookup "wallet" [argument "from"] "balance"] [argument "amount"]]]]]
+        [named "debit" [update "wallet" [argument "from"] "balance"
+         [int-sub [lookup "wallet" [argument "from"] "balance"] [argument "amount"]]]]
+        [named "credit" [update "wallet" [argument "to"] "balance"
+         [int-add [lookup "wallet" [argument "to"] "balance"] [argument "amount"]]]]
+        [named "record" [insert "transfer" [argument "request"]
+         [["from" [argument "from"]] ["to" [argument "to"]] ["amount" [argument "amount"]]]]]
+        [named "notify" [outbox "transfer-outbox" [intent [argument "request"]] [argument "request"]]]]]]]]
+    [deliver "notify-deliver" "transfer-outbox" [intent [argument "request"]]
+     [ok [[transaction "notified" [[named "mark-notified" [update "transfer-outbox" [argument "request"] "state" [literal "delivered"]]]]]]]
+     [fail []]
+     [info []]]]
+   [both [exists "transfer" [argument "request"]]
+         [equal [sum-field "wallet" "balance"] [before [sum-field "wallet" "balance"]]]]]
+  [operation "relay-transfer" ["request"] [intent [argument "request"]]
+   [exists "transfer-outbox" [argument "request"]]
+   [[deliver "notify-deliver" "transfer-outbox" [intent [argument "request"]]
+     [ok [[transaction "notified" [[named "mark-notified" [update "transfer-outbox" [argument "request"] "state" [literal "delivered"]]]]]]]
+     [fail []]
+     [info []]]]
+   [yes]]]
+ [[retry "send" "3"] [retry "relay" "3"] [retry "transfer" "3"] [retry "relay-transfer" "3"]]
+ [[disjoint "ack" "relay-transfer"]]
+ [["nonnegative" [every-row "wallet" [negate [less-than [row-field "balance"] [literal "0"]]]]]
+  ["outbox-follows-job" [every-row "outbox" [exists "job" [row-key]]]]
+  ["outbox-follows-transfer" [every-row "transfer-outbox" [exists "transfer" [row-key]]]]]]

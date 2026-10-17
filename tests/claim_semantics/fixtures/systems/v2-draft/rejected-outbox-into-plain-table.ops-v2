@@ -1,0 +1,17 @@
+; rejected-by: R-OUTBOX-TABLE
+; docs/ir-specification.md section 4.3. [outbox T I V] must name an
+; outbox-table; job is an ordinary table, so the record would have no state
+; field, no channel and no delivery contract.
+[system-v2 "outbox-into-plain-table"
+ []
+ [[table "job" ["payload"] [] []]
+  [table "log" ["payload"] [] []]]
+ []
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [exists "job" [argument "id"]]
+   [[transaction "record"
+     [[named "enqueue" [outbox "log" [intent [argument "id"]] [lookup "job" [argument "id"] "payload"]]]]]]
+   [yes]]]
+ []
+ []
+ []]

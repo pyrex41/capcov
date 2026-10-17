@@ -1,0 +1,11 @@
+; rejected-by: R-HISTORY
+; docs/ir-specification.md section 4.4. The history has no [close]. Without
+; it, the open info invocation i1 never stops being able to take effect, and
+; no verdict that depends on it can be reached; the history is malformed, not
+; a pass.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
+    [[row "job" "j" [["payload" "hello"] ["status" "pending"]]]]
+    [journal "1" "0" []]]]]]
