@@ -1339,6 +1339,7 @@
 (define capcov.run
   [capcov.compile-spec] -> (capcov.spec-elaborate)
   [capcov.authority] -> (do (capcov.load-bundle) (capcov.authority-json))
+  [capcov.typed-authority] -> (do (capcov.load-bundle) (capcov.typed-authority-json))
   [capcov.derive Rel Row] -> (do (capcov.load-bundle)
                                  (capcov.check-request-row Rel Row)
                                  (capcov.load-facts (value capcov.*in-facts*))

@@ -195,6 +195,21 @@ assumption projections. Direct assumption-to-claim promotion still fails, as
 does laundering the assumption through a derived projection before the claim.
 Native tests are registered in the Shen CI family, which requires the runtime.
 
+`test_typed_authority.py` judges every installed pack, every `authority_v2/`
+and `typed_authority/` fixture and every planted bad-rule pack three ways:
+with Python validation, with the untyped Shen authority, and with
+`shen.typed_authority`, whose verdicts are Shen type-checker derivations
+(`shen/claim-types/`). It asserts that the failing (rule, check id) sets
+differ only in the cases recorded in `specs/claims/migration-preserved.json`
+`typed_authority_disagreements`. `typed_authority/` adds the W2 gate
+fixtures: producer escalation, missing or substituted completeness,
+duplicated and substituted premise occurrences, and non-transitive
+compatibility. A forged-IR test checks that a lying sort proposal or a moved
+witness endpoint is refused. The two Shen batches take about 13 minutes on
+a loaded two-core host, and the typed batch dominates.
+docs/typed-claim-authority.md lists what typing checks and what stays
+trusted.
+
 Select replay v2 with `replay.join.build(..., version=2)` or
 `capcov experiment claims assumptions registry --receipt DIR --pack-version 2`.
 The immutable profile travels through export, combination, and evaluation.
