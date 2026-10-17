@@ -194,28 +194,40 @@ requested_closed: requested_closed(Run) :-
     replay_requests_closed(Run).
 replayed: replayed(Run, Op) :-
     replay_request(Run, Req, Tenant, Route, Op).
-php_model_agree: php_model_agree(Run, Req) :-
-    php_post_state(Run, Req, S), model_describes_run(M, Run), model_admissible(Run, M, Req, S).
-php_model_disagree: php_model_disagree(Run, Req, S) :-
-    php_post_state(Run, Req, S), model_describes_run(M, Run), !model_admissible(Run, M, Req, S).
-go_model_agree: go_model_agree(Run, Req) :-
-    go_post_state(Run, Req, S), model_describes_run(M, Run), model_admissible(Run, M, Req, S).
-go_model_disagree: go_model_disagree(Run, Req, S) :-
-    go_post_state(Run, Req, S), model_describes_run(M, Run), !model_admissible(Run, M, Req, S).
+// One family per implementation side. Expansion is syntactic and happens
+// once at decode; every kernel sees only the expanded rules.
+.template side(Side) {
+    $Side_model_agree: $Side_model_agree(Run, Req) :-
+        $Side_post_state(Run, Req, S), model_describes_run(M, Run), model_admissible(Run, M, Req, S).
+    $Side_model_disagree: $Side_model_disagree(Run, Req, S) :-
+        $Side_post_state(Run, Req, S), model_describes_run(M, Run), !model_admissible(Run, M, Req, S).
+    $Side_observed: $Side_observed(Run, Req) :-
+        $Side_post_state(Run, Req, S).
+    $Side_observed_closed: $Side_observed_closed(Run) :-
+        $Side_post_states_closed(Run).
+    post_state_gap_$Side: post_state_gap(Run, Req, $Side::symbol) :-
+        requested(Run, Req), replay_requests_closed(Run), !$Side_observed(Run, Req).
+    exclusion_applied_$Side: exclusion_applied(Run, Op, Tb) :-
+        replay_request(Run, Req, Tenant, Route, Op), $Side_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), model_scope_excluded(M, Tb).
+    undeclared_write_$Side: undeclared_write(Run, Op, Tb) :-
+        replay_request(Run, Req, Tenant, Route, Op), $Side_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_writes(M, Op, Tb), model_scope_exclusions_closed(M), !model_scope_excluded(M, Tb).
+    $Side_disagree_any: $Side_disagree_any(Run, Op) :-
+        replay_request(Run, Req, Tenant, Route, Op), $Side_model_disagree(Run, Req, S).
+    $Side_disagreement_closed: $Side_disagreement_closed(Run, Op) :-
+        replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), $Side_post_states_closed(Run), model_admissible_closed(Run, M).
+    effect_order_violation_$Side: effect_order_violation(Run, $Side::symbol, Req, Ta, Tb) :-
+        model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, $Side_effect_seq(Run, Req, O1, Ta, Ka, Qa), $Side_effect_seq(Run, Req, O2, Tb, Kb, Qb), O2 < O1.
+    effect_order_respected_$Side: effect_order_respected(Run, $Side::symbol, Req) :-
+        model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, $Side_effect_seq(Run, Req, O1, Ta, Ka, Qa), $Side_effect_seq(Run, Req, O2, Tb, Kb, Qb), O1 < O2.
+    repeat_delete_has_effect_$Side: repeat_delete_has_effect(Run, Req) :-
+        repeat_delete(Run, Req, T), $Side_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_scope_excluded(M, Tb).
+    repeat_delete_violation_$Side: repeat_delete_violation(Run, Req, $Side::symbol) :-
+        repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), $Side_response(Run, Req, St), St != 404::unsigned.
+}
+.instantiate side(php).
+.instantiate side(go).
 op_exercised: op_exercised(Run, Op) :-
     replay_request(Run, Req, Tenant, Route, Op), php_model_agree(Run, Req), go_model_agree(Run, Req).
-php_observed: php_observed(Run, Req) :-
-    php_post_state(Run, Req, S).
-go_observed: go_observed(Run, Req) :-
-    go_post_state(Run, Req, S).
-php_observed_closed: php_observed_closed(Run) :-
-    php_post_states_closed(Run).
-go_observed_closed: go_observed_closed(Run) :-
-    go_post_states_closed(Run).
-post_state_gap_php: post_state_gap(Run, Req, "php"::symbol) :-
-    requested(Run, Req), replay_requests_closed(Run), !php_observed(Run, Req).
-post_state_gap_go: post_state_gap(Run, Req, "go"::symbol) :-
-    requested(Run, Req), replay_requests_closed(Run), !go_observed(Run, Req).
 post_state_any: post_state_any(Run, Op) :-
     replay_request(Run, Req, Tenant, Route, Op), post_state_gap(Run, Req, Side).
 post_state_gap_closed: post_state_gap_closed(Run, Op) :-
@@ -224,14 +236,6 @@ model_scope_excluded: model_scope_excluded(M, Tb) :-
     model_scope_exclusion(M, Tb, Reason).
 model_scope_excluded_closed: model_scope_excluded_closed(M) :-
     model_scope_exclusions_closed(M).
-exclusion_applied_php: exclusion_applied(Run, Op, Tb) :-
-    replay_request(Run, Req, Tenant, Route, Op), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), model_scope_excluded(M, Tb).
-exclusion_applied_go: exclusion_applied(Run, Op, Tb) :-
-    replay_request(Run, Req, Tenant, Route, Op), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), model_scope_excluded(M, Tb).
-undeclared_write_php: undeclared_write(Run, Op, Tb) :-
-    replay_request(Run, Req, Tenant, Route, Op), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_writes(M, Op, Tb), model_scope_exclusions_closed(M), !model_scope_excluded(M, Tb).
-undeclared_write_go: undeclared_write(Run, Op, Tb) :-
-    replay_request(Run, Req, Tenant, Route, Op), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_writes(M, Op, Tb), model_scope_exclusions_closed(M), !model_scope_excluded(M, Tb).
 surviving_mutant: surviving_mutant(Run, Op, Mu) :-
     model_describes_run(M, Run), mutant(M, Mu, Op), mutants_closed(M, Op), !mutant_killed_in(Run, Mu).
 op_has_surviving_mutant: op_has_surviving_mutant(Run, Op) :-
@@ -246,26 +250,10 @@ kill_closure_gap_any: kill_closure_gap_any(Run, Op) :-
     replayed(Run, Op), kill_closure_gap(Run, Mu, Req).
 kill_gap_closed: kill_gap_closed(Run) :-
     mutant_kills_closed(Run), replay_requests_closed(Run).
-php_disagree_any: php_disagree_any(Run, Op) :-
-    replay_request(Run, Req, Tenant, Route, Op), php_model_disagree(Run, Req, S).
-go_disagree_any: go_disagree_any(Run, Op) :-
-    replay_request(Run, Req, Tenant, Route, Op), go_model_disagree(Run, Req, S).
 undeclared_any: undeclared_any(Run, Op) :-
     undeclared_write(Run, Op, Tb).
-php_disagreement_closed: php_disagreement_closed(Run, Op) :-
-    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), php_post_states_closed(Run), model_admissible_closed(Run, M).
-go_disagreement_closed: go_disagreement_closed(Run, Op) :-
-    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), go_post_states_closed(Run), model_admissible_closed(Run, M).
 undeclared_writes_closed: undeclared_writes_closed(Run, Op) :-
     replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), php_effects_closed(Run), go_effects_closed(Run), model_writes_closed(M, Op), model_scope_exclusions_closed(M).
-effect_order_violation_php: effect_order_violation(Run, "php"::symbol, Req, Ta, Tb) :-
-    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, php_effect_seq(Run, Req, O1, Ta, Ka, Qa), php_effect_seq(Run, Req, O2, Tb, Kb, Qb), O2 < O1.
-effect_order_respected_php: effect_order_respected(Run, "php"::symbol, Req) :-
-    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, php_effect_seq(Run, Req, O1, Ta, Ka, Qa), php_effect_seq(Run, Req, O2, Tb, Kb, Qb), O1 < O2.
-effect_order_violation_go: effect_order_violation(Run, "go"::symbol, Req, Ta, Tb) :-
-    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, go_effect_seq(Run, Req, O1, Ta, Ka, Qa), go_effect_seq(Run, Req, O2, Tb, Kb, Qb), O2 < O1.
-effect_order_respected_go: effect_order_respected(Run, "go"::symbol, Req) :-
-    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, go_effect_seq(Run, Req, O1, Ta, Ka, Qa), go_effect_seq(Run, Req, O2, Tb, Kb, Qb), O1 < O2.
 effect_order_any: effect_order_any(Run, Op) :-
     replay_request(Run, Req, Tenant, Route, Op), effect_order_violation(Run, Side, Req, Ta, Tb).
 effect_order_exercised: effect_order_exercised(Run, Op) :-
@@ -282,18 +270,10 @@ first_delete_committed: first_delete_committed(Run, Req, T) :-
     delete_target(Run, Req, Seq, Tenant, T), !earlier_delete(Run, Tenant, T, Seq), php_response(Run, Req, 200::unsigned), go_response(Run, Req, 200::unsigned), php_effect(Run, Req, "issue"::symbol, "update"::symbol, Pk1, Cols1), go_effect(Run, Req, "issue"::symbol, "update"::symbol, Pk2, Cols2).
 repeat_delete: repeat_delete(Run, Req, T) :-
     delete_target(Run, Req1, S1, Tenant, T), delete_target(Run, Req, S2, Tenant, T), S1 < S2.
-repeat_delete_has_effect_php: repeat_delete_has_effect(Run, Req) :-
-    repeat_delete(Run, Req, T), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_scope_excluded(M, Tb).
-repeat_delete_has_effect_go: repeat_delete_has_effect(Run, Req) :-
-    repeat_delete(Run, Req, T), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_scope_excluded(M, Tb).
 repeat_delete_effects_closed: repeat_delete_effects_closed(Run) :-
     model_describes_run(M, Run), php_effects_closed(Run), go_effects_closed(Run), model_scope_exclusions_closed(M).
 repeat_delete_not_found: repeat_delete_not_found(Run, T) :-
     repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), php_response(Run, Req, 404::unsigned), go_response(Run, Req, 404::unsigned), !repeat_delete_has_effect(Run, Req).
-repeat_delete_violation_php: repeat_delete_violation(Run, Req, "php"::symbol) :-
-    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), php_response(Run, Req, St), St != 404::unsigned.
-repeat_delete_violation_go: repeat_delete_violation(Run, Req, "go"::symbol) :-
-    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), go_response(Run, Req, St), St != 404::unsigned.
 repeat_delete_violation_effects: repeat_delete_violation(Run, Req, "effects"::symbol) :-
     repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), repeat_delete_has_effect(Run, Req).
 repeat_delete_any: repeat_delete_any(Run, Op) :-

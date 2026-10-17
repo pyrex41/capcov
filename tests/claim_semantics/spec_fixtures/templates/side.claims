@@ -1,0 +1,11 @@
+.claims 2.
+// Shared declarations and the side template; entry files add the pack.
+.decl a_seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl b_seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl a_ok(run: symbol ctx, item: symbol) derived derived runtime.
+.decl b_ok(run: symbol ctx, item: symbol) derived derived runtime.
+.decl seen_by(run: symbol ctx, item: symbol, side: symbol) derived derived runtime.
+.template side(Side) {
+    $Side_ok: $Side_ok(R, X) :- $Side_seen(R, X), X != "excluded".
+    seen_by_$Side: seen_by(R, X, $Side::symbol) :- $Side_seen(R, X).
+}

@@ -42,4 +42,5 @@
              (error "capcov-invalid-input: malformed evidence contracts")
              (capcov.json-chunks
                (capcov.obj [(@p "kind" "spec-elaboration")
-                            (@p "rules" (capcov.arr (map (function capcov.spec-rule) (value capcov.*in-rules*))))])))))
+                            (@p "rules" (capcov.arr (map (function capcov.spec-rule) (value capcov.*in-rules*))))
+                            (@p "template_rules" (capcov.arr (capcov.spec-template-rules)))])))))

@@ -1,0 +1,12 @@
+.claims 2.
+// Hand-written oracle for valid.claims: the same rules, no templates.
+.pack "template-test-v2" schema 2.
+.decl a_seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl b_seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl a_ok(run: symbol ctx, item: symbol) derived derived runtime.
+.decl b_ok(run: symbol ctx, item: symbol) derived derived runtime.
+.decl seen_by(run: symbol ctx, item: symbol, side: symbol) derived derived runtime.
+a_ok: a_ok(R, X) :- a_seen(R, X), X != "excluded".
+seen_by_a: seen_by(R, X, "a"::symbol) :- a_seen(R, X).
+b_ok: b_ok(R, X) :- b_seen(R, X), X != "excluded".
+seen_by_b: seen_by(R, X, "b"::symbol) :- b_seen(R, X).

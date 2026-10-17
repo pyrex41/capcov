@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from .parser import SpecError, read_sources, form, data
+from .templates import expand_templates, check_native_expansion
 from ..ir import bundle_from_json, canonical_dict, canonical_json, digest
 from ..validation import assert_valid
 from ..authority import judge
@@ -53,6 +54,8 @@ class SpecCheckReport:
 
 def decode_source(source):
     closure = read_sources(source)
+    templates = expand_templates(closure.declarations)
+    ancestry = templates.ancestry()
     pack = dict(primitives=[], supplementary_primitives=[], derived=[], rules=[])
     contracts = dict(compatibility_capabilities=[], completeness_scopes=[], required_bridges=[], derived_completeness_policies=[])
     source_map = []
@@ -61,7 +64,7 @@ def decode_source(source):
                 'derived': 'derived', 'rule': 'rules', 'capability': 'compatibility_capabilities',
                 'completeness-scope': 'completeness_scopes', 'required-bridge': 'required_bridges',
                 'derived-completeness-policy': 'derived_completeness_policies'}
-    for declaration in closure.declarations:
+    for declaration in templates.declarations:
         tag, args = form(declaration)
         if len(args) != 1:
             raise SpecError(f'{tag} requires one data object', declaration.location)
@@ -85,13 +88,17 @@ def decode_source(source):
             (contracts if section in contracts else pack)[section].append(value)
             source_map.append(dict(kind=tag, name=identity,
                 source=declaration.location.source, line=declaration.location.line,
-                column=declaration.location.column, ancestry=[]))
+                column=declaration.location.column,
+                ancestry=ancestry.get(identity, []) if tag == 'rule' else []))
         else:
             raise SpecError(f'unsupported declaration {tag}', declaration.location, 'unsupported-construct')
     if 'pack' not in seen or 'id' not in pack or pack.get('schema_version') not in (1,2):
         raise SpecError('pack must declare its id and Bundle schema version')
     if pack['schema_version'] == 1 and any(contracts.values()):
         raise SpecError('v1 cannot declare explicit evidence contracts')
+    if pack['schema_version'] == 1 and templates.used:
+        # Native re-expansion runs in the v2 compile path only.
+        raise SpecError('v1 cannot declare templates', code='template-unsupported-version')
     raw = dict(schema_version=pack['schema_version'], relations=[*pack['primitives'],*pack['supplementary_primitives'],*pack['derived']], rules=pack['rules'])
     if pack['schema_version'] == 2:
         raw.update(contracts)
@@ -105,11 +112,14 @@ def compile_spec(source, timeout=60) -> CompiledSpec:
     if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or not math.isfinite(timeout) or timeout <= 0:
         raise ValueError('timeout must be finite and positive')
     closure, pack, bundle, source_map = decode_source(source)
+    # Deterministic recomputation of decode's expansion, for its raw data.
+    templates = expand_templates(closure.declarations)
     generated = []
     if bundle.schema_version == 2:
-        native = shen.run(bundle, {"kind": "compile-spec"}, timeout=timeout)
+        native = shen.run(bundle, {"kind": "compile-spec", **templates.native_request()}, timeout=timeout)
         if native.payload.get("kind") != "spec-elaboration":
             raise SpecError("native elaborator returned an invalid envelope")
+        check_native_expansion(templates, native.payload.get("template_rules"))
         raw = canonical_dict(bundle)
         raw["rules"] = native.payload.get("rules")
         elaborated = bundle_from_json(raw, validate=False)
@@ -138,7 +148,8 @@ def compile_spec(source, timeout=60) -> CompiledSpec:
         'rules.dl': program.program,
         'source-map.json': _json(source_map),
         'obligations.json': _json({'schema_version':bundle.schema_version, 'generated':generated,
-                                  'authority':[canonical_dict(w) for w in judge(bundle).witnesses] if bundle.schema_version == 2 else []}),
+                                  'authority':[canonical_dict(w) for w in judge(bundle).witnesses] if bundle.schema_version == 2 else [],
+                                  **({'templates': templates.obligations()} if templates.used else {})}),
         'authority.json': _json(dict(ok=report.ok, rules=report.rules, pack=report.pack,
                                     elaborated_checksum=report.elaborated_checksum)),
     }

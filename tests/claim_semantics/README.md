@@ -152,8 +152,21 @@ variables begin with uppercase letters. `_` introduces a fresh variable.
 Negated variables must already be positively bound. Imports are literal paths
 relative to the entry source's directory. Escapes, cycles, executable forms,
 and unsupported syntax are rejected. The old bracketed data reader remains
-available for compatibility fixtures. Templates and operations are not yet
-implemented.
+available for compatibility fixtures. Operations are not yet implemented.
+
+`.template side(Side) { rule ... }` and `.instantiate side(php).` expand rules
+once at decode, before elaboration; no kernel sees a template. `$Side` inside
+a rule or relation name substitutes the argument text, and a whole term
+`$Side::symbol` becomes `"php"::symbol`; variables and strings never change.
+Expanded rules are emitted at the instantiation, which is order-safe because
+Bundle rules are a canonically sorted set. Templates hold rules only, cannot
+instantiate one another and must be defined before use. Unbound parameters,
+arity mismatches, unknown templates and name collisions are named refusals.
+Native Shen (`shen/spec-templates.shen`) re-expands the raw template data and
+compilation refuses on any difference; `obligations.json` and the source map
+trace each expanded rule to its template rule and instantiation. Replay's
+13 php/go families are one template; `spec_fixtures/replay-pretemplate.claims`
+is the untemplated oracle it must decode identically to.
 
 Bundle v2 adds explicit directional capability endpoints, required bridges,
 complete closure-column maps, and named derived-completeness policies bound to

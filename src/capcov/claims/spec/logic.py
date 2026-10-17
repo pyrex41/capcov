@@ -8,7 +8,10 @@ import json
 import re
 from .parser import Location, Node, Symbol, SpecError
 
-_TOKEN = re.compile(r'\s+|//[^\n]*|"(?:[^"\\]|\\.)*"|:-|::|->|!=|<=|>=|[A-Za-z_][A-Za-z_0-9-]*|-?[0-9]+|[.,:()!<>=]')
+_TOKEN = re.compile(r'\s+|//[^\n]*|"(?:[^"\\]|\\.)*"|:-|::|->|!=|<=|>=|[A-Za-z_$][A-Za-z_0-9$-]*|-?[0-9]+|[.,:()!<>={}]')
+# ``$`` and braces are lexed everywhere but accepted only inside a
+# ``.template`` body (see templates.py); elsewhere they are syntax errors.
+_TEMPLATE_IDENTIFIER = re.compile(r'[A-Za-z_$][A-Za-z_0-9$-]*')
 
 
 def _node(value, loc):
@@ -38,6 +41,7 @@ def parse_logic(text, source):
         raise SpecError('unterminated token', Location(source,text.count('\n',0,offset)+1,1,offset))
     pos, anonymous = 0, 0
     out = []
+    in_template = False
 
     def peek():
         return tokens[pos][0] if pos < len(tokens) else ''
@@ -54,6 +58,12 @@ def parse_logic(text, source):
 
     def name():
         value = take()
+        if '$' in value:
+            if not in_template:
+                raise SpecError('template parameter outside a .template body',tokens[pos-1][1],'template-syntax')
+            if not _TEMPLATE_IDENTIFIER.fullmatch(value):
+                raise SpecError('expected identifier',tokens[pos-1][1])
+            return value
         if not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9-]*', value):
             raise SpecError('expected identifier',tokens[pos-1][1])
         return value
@@ -84,6 +94,15 @@ def parse_logic(text, source):
             if peek() == '::':
                 take('::'); typ=name()
             return dict(value=literal,type=typ)
+        if value.startswith('$'):
+            if not in_template:
+                raise SpecError('template parameter outside a .template body',tokens[pos-1][1],'template-syntax')
+            if not re.fullmatch('[$][A-Z][A-Za-z0-9]*', value):
+                raise SpecError('a parameter term is exactly $Name',tokens[pos-1][1],'template-syntax')
+            typ='symbol'
+            if peek() == '::':
+                take('::'); typ=name()
+            return dict(parameter=value[1:],type=typ)
         if not re.fullmatch('[A-Z_][A-Za-z_0-9]*', value):
             raise SpecError('variables start with an uppercase letter; constants are quoted',tokens[pos-1][1])
         if value.startswith('__spec_anon_'):
@@ -102,25 +121,55 @@ def parse_logic(text, source):
         take(')')
         return dict(relation=rel,terms=terms,negated=neg)
 
+    def rule_value():
+        rule=name(); take(':'); head=atom(); take(':-'); body=[]
+        while True:
+            if peek() == '!' or (pos+1<len(tokens) and tokens[pos+1][0]=='('):
+                body.append(atom())
+            else:
+                left=term(); op=take()
+                if op not in ('=','!=','<','<=','>','>='):
+                    raise SpecError('unsupported comparison', tokens[pos-1][1])
+                body.append(dict(left=left,operator=op,right=term()))
+            if peek()!=',': break
+            take(',')
+        take('.')
+        return dict(name=rule,head=head,body=body)
+
+    def template_node(loc):
+        """``.template name(P, ...) { rule ... }``: rules only, never nested.
+
+        The node carries the header and the unexpanded rule nodes, each with
+        its own location; expansion is ``templates.expand_templates``."""
+        nonlocal in_template
+        identity=name(); parameters=names(); take('{')
+        in_template=True
+        rules=[]
+        while peek() != '}':
+            if not peek():
+                raise SpecError('unterminated .template body',loc,'template-syntax')
+            if peek() == '.':
+                raise SpecError('a .template body contains rules only',tokens[pos][1],'template-syntax')
+            rule_loc=tokens[pos][1]
+            rules.append(Node((Node(Symbol('rule'),rule_loc),_node(rule_value(),rule_loc)),rule_loc))
+        take('}')
+        in_template=False
+        header=_node(dict(name=identity,parameters=parameters),loc)
+        return Node((Node(Symbol('template'),loc),header,*rules),loc)
+
     take('.'); take('claims'); take('2'); take('.')
     while peek():
         loc=tokens[pos][1]
         if peek() != '.':
-            rule=name(); take(':'); head=atom(); take(':-'); body=[]
-            while True:
-                if peek() == '!' or (pos+1<len(tokens) and tokens[pos+1][0]=='('):
-                    body.append(atom())
-                else:
-                    left=term(); op=take()
-                    if op not in ('=','!=','<','<=','>','>='):
-                        raise SpecError('unsupported comparison', tokens[pos-1][1])
-                    body.append(dict(left=left,operator=op,right=term()))
-                if peek()!=',': break
-                take(',')
-            take('.'); emit('rule',dict(name=rule,head=head,body=body),loc)
+            emit('rule',rule_value(),loc)
             continue
         take('.'); tag=name()
-        if tag=='import':
+        if tag=='template':
+            out.append(template_node(loc))
+        elif tag=='instantiate':
+            template=name(); arguments=names(); take('.')
+            emit('instantiate',dict(template=template,arguments=arguments),loc)
+        elif tag=='import':
             path=string(); take('.')
             out.append(Node((Node(Symbol('import'),loc),Node(path,loc)),loc))
         elif tag=='pack':

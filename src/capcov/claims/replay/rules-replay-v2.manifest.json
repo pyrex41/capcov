@@ -2,11 +2,11 @@
   "artifacts": {
     "authority.json": "a6e9aeb5d590ad5c1756465d81b706417f3cbcf1ab1f94bdbc60a32b5a9b2e7c",
     "bundle.json": "3d97c41115a168d4022bd29f033a89a7bd2d97b3e5f474d8ba83cd020d00f0ae",
-    "obligations.json": "fc0370469003951006c464a320b56a06296c3af7f973bf43fccbfe695d2498ba",
+    "obligations.json": "19d319f70c346cc2865d538f6129e7f229f2a4c4287cadd362f8169e17497c5c",
     "pack.json": "64e6a8eaa2adea7ad17a0077d5fc2f5c391a8332cbac0893e19728f1c6b00202",
     "rules.dl": "e6db142d80817ff404ca41f5558b550b0d7ab5cacf0325d2a22e04f7b8964c04",
     "schema.json": "872f963a48609a7c78e12127437072baa3282f82c52f8a13bddcff3e32a968d6",
-    "source-map.json": "185f3edc078e8aa278b9621c4bb4d3a71d3585c248dc93841509d95e370a0689",
+    "source-map.json": "1d7a614054d9165ea75ecfe3035431e810de700a5147e7d3865c2c3cf1aba7cd",
     "stubs.json": "2c03ab47ee0eb36caef3349a5c198c8325debaf0130d969343eaa3a514b5f117"
   },
   "bundle_digest": "9f030fda51d02f6297ecf16b08e3cd2ed0a4305c297b8d776d66b07e70f1af47",
@@ -35,13 +35,14 @@
     "replay/judge.py": "d48370b70c845ee9095f6a13edc160e9bff01d368b2e2e8e04293141e38d8a7c",
     "replay/pack.py": "0b4338aaceab5930f7efb2c21de3f74d281c8d0240634ca5823e8e4c66f5ddc6",
     "replay/replay_facts.py": "d5db44999b71f9c9ac69da3fb38840e75d0bcc3f9cd9ae610801d812b7ff5cf2",
-    "shen.py": "fd555da1d1f0c581f7d6dda3d280ab8fe85fb938b3eccbd9819b68ca8d683bcc",
+    "shen.py": "0746efc017f6fc5f5cdb0345d48c5e8ca2e0e19c14b6ee41e51885da57f4f7e0",
     "shrinker.py": "f38d4e2526790fdc33cf20e718b4e1b0ae08c7296dc223c0cfbd0dc155fd7ecf",
     "souffle/__init__.py": "0112ebd8a3a102a09489e5d8d45c59cc994849561863e96a47b19b5dcf120be4",
     "souffle/compile.py": "ecad961f19c8a696dff26c0c02968a01a501874b21fe94c66fc3b87e162c859b",
-    "spec/__init__.py": "96c20360f859fce21ce2db3be2dd720c459c44afc25716c57c6837e4e6757dbc",
-    "spec/logic.py": "a3a7a0db704c0d111bc71e9bf6c752ce00411febddb79cbe677b7b547385102d",
+    "spec/__init__.py": "dd09d88fcfa82ee0932de5cc7989789142161d7d44157c9cc0071bc6d9a09ef0",
+    "spec/logic.py": "a91c1db57230e6622fbec1b3b9027e799ad730b28ee0f2f17cd4f136061c49f3",
     "spec/parser.py": "0163d26fe47015acec8a939aad38464f6b8da6116897cd9ab86d3a39fa5793c9",
+    "spec/templates.py": "9b55031bfa539035c2cd58a1b0f92a3ddda979f991de276c4f0320cb7f6fc0cc",
     "static/__init__.py": "71066ed580489cb8f6714ef9938244f41277a5708eb05622a21016a20d92850f",
     "static/certificate.py": "81aedd9bf7dfa01b2fb3167e269a3a2dfaf8332eb7b55875ce31b446a49bd2aa",
     "static/combine.py": "7709dd55f6ef234ee184c8cc54db6882d26e0957f19acebb29a8a041c36b4e93",
@@ -63,7 +64,8 @@
       "claim-workbench.shen": "637196d89143a0d49c4034c20acf8b0d1f685b97c6498119492390a738918fb2",
       "evidence-authority-v2.shen": "cefee4629c8abb02ce7062b24f4b690ba1aa0f5b0494ed69db98ebfc580a0a2b",
       "rule-authority.shen": "5ffc19202fa97ca8c93e9d9be059a812110164fd6875e7ae1474b46b666f27b6",
-      "spec-elaborator.shen": "0d5219fb449a317122c6578d3ce2f460bdde3bdbd6dab3cc2266ec300016b9f5"
+      "spec-elaborator.shen": "1f03f0c6c5f507790c6d9be5b24a9f6fc46efef8b2c893a566ad8642875d96d3",
+      "spec-templates.shen": "db3a65e88dcf644ceb1cc4dd466468569281822589683fda8f52588deaf6ebb8"
     },
     "python": {
       "implementation": "cpython",
@@ -76,6 +78,6 @@
     "sha256": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba"
   },
   "sources": {
-    "replay.claims": "d662df17fbd6b73badbd91d1317aa327847a4de13374cd0362211dfe8956185c"
+    "replay.claims": "b181fd179bf3520ad6e77b1336a5b988753d65a203267e7892ec56c5ee631061"
   }
 }
