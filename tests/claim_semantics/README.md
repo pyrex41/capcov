@@ -256,10 +256,34 @@ placeholder with no reviewer authority.
 
 Every result names its executor class: `model` (the Shen system evaluator) or
 `fake` (`scenario-adapter.py`, a synthetic stand-in, never a legacy
-implementation). Outcomes use the `capcov.faults` vocabulary (`ok`/`fail`/
-`info`); `info` is the IR's `unknown`. Ledger conservation is a
-per-transition bounded check of the transfer postcondition over an explicit
-domain (`basis: explicit-bounded-domain`), not a proof; the proof is R12.
+implementation). Model results also record `depth` and
+`basis: explicit-bounded-domain`; fake results record
+`basis: fake-observation`. Outcomes use the `capcov.faults` vocabulary
+(`ok`/`fail`/`info`); `info` is the IR's `unknown`. Verdicts are `satisfied`,
+`violated` (with the faults invariant `effect_applied_twice` or
+`unsettled_effect`) or `unresolved`: a clause over zero complete histories is
+`unresolved`, never `satisfied`, and paths that end early (an inadmissible
+transition, or explore stopping when its frontier empties) are counted as
+`truncated`, not dropped.
+
+A difference is `accepted` only when the decision is approved and bound to
+both clause ids and both models, and the legacy, target and guard-dropped
+mutant evidence each come from a `model` executor, evaluate the intended
+clause on the model the decision names, carry a scope digest of the explored
+initial state and schedule equal to the decision's, and have at least one
+complete and no truncated history. The obligation checks are computed from
+that evidence. A target that violates the intended clause is `rejected`, and
+agreement with legacy on that violation is reported.
+
+Delivery attempts are counted by intent id when an effect carries one, and
+otherwise by payload, labelled `payload-fallback`; the current IR always
+takes the fallback.
+
+The ledger case is the transfer postcondition (sum of balances unchanged,
+`ledger.ops:23`) checked per transition over an explicit finite domain; a
+failure is reported by `caps.finish` as `["rejected", "invariant"]`
+(`system.shen:141-145`). It is a bounded invariant check, not a conservation
+proof; the proof is R12.
 
 Families: `MigrationDecisionRecordTests`, `FakeExecutorTests` and
 `InexpressibleFrontEndTests` run in `base`; `MigrationProbeModelTests` and
@@ -270,37 +294,47 @@ Families: `MigrationDecisionRecordTests`, `FakeExecutorTests` and
 | Case | Test | Executor | Result |
 |---|---|---|---|
 | Legacy explores to duplicate delivery-attempt (`send ok; send ok; ack ok`) | `test_legacy_explores_to_duplicate_delivery_attempt` | model | `effect_applied_twice` |
-| Intended does not deliver twice | `test_intended_does_not_deliver_twice` | model | satisfied |
-| Difference accepted only with an approved decision bound to both clause ids, the observation scope and checked obligations | `test_difference_accepted_only_with_an_approved_decision` | model | accepted / open |
-| M5 decision without approval provenance | same, and `test_m5_missing_approval_provenance_keeps_the_decision_open` | model / none | open |
+| Intended does not deliver twice, in explore and in the observation checker | `test_intended_does_not_deliver_twice`, `test_intended_checker_refuses_observed_double_delivery` | model | satisfied; observed double delivery refused |
+| Difference accepted only with an approved, bound decision and covering evidence | `test_difference_accepted_only_with_an_approved_decision` | model | accepted / open |
+| M5: decision with missing approval provenance | same, and `test_m5_missing_approval_provenance_keeps_the_decision_open` | model / none | open |
+| Evidence not bound to the decision: wrong clause, fake as legacy, other schedule, mutant not killed | `test_wrong_clause_is_not_accepted`, `test_fake_as_legacy_is_not_accepted`, `test_scope_mismatch_from_a_different_schedule_stays_open`, `test_obligation_is_computed_from_evidence` | model, fake | open |
+| No vacuous pass: a target that rejects the retry | `test_target_that_rejects_the_retry_is_not_accepted`, `test_no_complete_history_is_unresolved_not_satisfied` | model | open; `unresolved` |
 | Guard-dropping target mutant; legacy and target agreeing on a violation is still reported | `test_guard_dropping_target_mutant_is_rejected` | model | rejected |
 | M1 double delivery on `ok` | `test_m1_fake_double_delivery_on_ok_violates_the_intended_clause`, `test_m1_fake_double_delivery_is_rejected_by_the_legacy_model` | fake, model | rejected |
 | H1 `send info; send ok; ack ok`, truth 2 deliveries | `test_h1_info_then_ok_retry_two_deliveries`, `test_h1_truth_two_deliveries_from_the_fake` | model, fake | legacy finding; intended violation |
 | H2 same calls, truth 1 delivery; both info resolutions retained | `test_h2_info_then_ok_retry_one_delivery_keeps_alternatives` | model | pass |
 | H5 same idempotency key, different amount | `test_h5_same_idempotency_key_different_amount_conflicts_without_debit` | model | `idempotency-conflict`, no debit |
-| M2 payload dedupe drops a delivery (count falls) | `test_m2_payload_dedupe_loses_an_effect` | model | rejected |
+| M2 payload dedupe drops a delivery (count falls) | `test_m2_payload_dedupe_leaves_an_unsettled_effect` | model | `unsettled_effect` |
 | M3 `ok` reported for an `info` send that did not land | `test_m3_reporting_ok_for_an_info_send_is_rejected` | model | rejected |
 | Harness negative: different `info` resolution is a different history, never a replay | `test_harness_negative_*` (both classes) | fake, model | distinct history ids |
-| Ledger conservation, bounded per transition | `test_ledger_conservation_is_a_per_transition_bounded_check_not_a_proof` | model | no violation within bound; mutant caught |
+| Ledger transfer postcondition, bounded per transition | `test_ledger_transfer_postcondition_is_a_bounded_per_transition_invariant_check` | model | no invariant violation within bound; mutant caught |
 
 All of these rest on the atomic-publish assumption of the current IR: a
 `publish` commits with its transaction (`system.shen:67`), so an `info` send
 has exactly two alternatives (`system.shen:165-166`).
 
-### Not expressible today (checked in as `unittest.expectedFailure`)
+### Not expressible today (IR-gap tests)
 
-This table is the input to the IR specification. Each row flips to an
-unexpected success, which fails the run, when the missing feature lands.
+This table is the input to the IR specification. Each IR-gap test is a
+`unittest.expectedFailure` method whose expressible precondition runs in
+`setUp` (a `given_*` method), so a broken precondition, such as a typecheck
+failure, is a normal failure and cannot pass for the documented gap; only the
+gap assertion is expected to fail, and an `OperationError` there becomes a
+failure naming the gap. Each row flips to an unexpected success, which fails
+the run, when its "flips when" condition holds. The front-end rows prescribe
+one possible wire shape (a `journal` field, a fourth effect element,
+`outbox`/`deliver` tags); the IR specification may choose another, and those
+tests change with it.
 
-| Case | Test | Missing IR feature | Where the IR stops |
-|---|---|---|---|
-| `info` send admits nothing / outbox-only / outbox+delivered | `test_info_send_has_at_least_three_alternatives` | an `info` outcome with more than two alternatives; an outbox-recorded-not-delivered state | `system.shen:165-166`; binary tape `scenarios.py:56-57`, `adapters.py:63-64` |
-| H3 delivery lands after the final read ⇒ `unresolved` | `test_h3_delivery_after_final_read_is_unresolved` | `info` invocations open until history close; a final-read / close marker | unknown resolved in its own transition `system.shen:165-166`, `scenarios.py:125-126`; no open set in `explore` `system.py:451-466`; request fields `system.py:113-127` |
-| H4 missing journal range ⇒ `unresolved` | `test_h4_missing_journal_range_is_unresolved` | partial observation (journal gaps, unestablished observation cut) | observation is exactly `{state, effects}` `system.py:132`, `scenarios.py:100`; whole-list match `system.shen:168-169` |
-| Intent / attempt identity on effects | `test_effects_carry_intent_and_attempt_identity` | `(intent-id, attempt-id, logical-effect)` effects | fixed-arity effects `system.py:100-104`; `[emit Kind Value]` `system.shen:67` |
-| Outbox record vs delivery attempt | `test_outbox_record_and_delivery_attempt_are_separate_constructors` | separate transactional outbox-record and external delivery-attempt constructors | single `publish` `system-types.shen:59-61`, `system.shen:67`; tag whitelist `system.py:24-26` |
-| M2 dedupe by intent, not payload | `test_m2_dedupe_by_intent_not_payload` | intent identity, so at-most-once can be stated per intent | equal payloads give equal journals (`system.py:100-104`); the correct model and a "j twice, k never" mutant are indistinguishable |
-| M4 adapter normalizes effects to a set | `test_m4_adapter_that_normalizes_effects_to_a_set_is_rejected` | attempt identity, so attempts stay distinct under normalization | equal tuples collapse (`system.py:100-104`); `caps.accepts?` `system.shen:168-169` |
+| Case | Test | Missing IR feature | Where the IR stops | Flips when |
+|---|---|---|---|---|
+| `info` send admits nothing / outbox-only / outbox+delivered | `test_info_send_has_at_least_three_alternatives` | an `info` outcome with more than two alternatives; an outbox-recorded-not-delivered state | `system.shen:165-166`; binary tape `scenarios.py:56-57`, `adapters.py:63-64` | the intended model's info send explores to ≥3 alternatives |
+| H3 delivery lands after the final read ⇒ `unresolved` | `test_h3_delivery_after_final_read_is_unresolved` | `info` invocations open until history close; a final-read / close marker | unknown resolved in its own transition `system.shen:165-166`, `scenarios.py:125-126`; no open set in `explore` `system.py:451-466`; request fields `system.py:110-118`, outcomes `system.py:126-128` | the info step's `observed_matches` is not `True` before close |
+| H4 missing journal range ⇒ `unresolved` | `test_h4_missing_journal_range_is_unresolved` | partial observation (journal gaps, unestablished observation cut) | observation is exactly `{state, effects}` `system.py:132`, `scenarios.py:100`; whole-list match `system.shen:168-169` | `_request` accepts an observation with a journal gap |
+| Intent / attempt identity on effects | `test_effects_carry_intent_and_attempt_identity` | `(intent-id, attempt-id, logical-effect)` effects | fixed-arity effects `system.py:100-104`; `[emit Kind Value]` `system.shen:67` | `_effect_terms` accepts an emit with intent and attempt ids |
+| Outbox record vs delivery attempt | `test_outbox_record_and_delivery_attempt_are_separate_constructors` | separate transactional outbox-record and external delivery-attempt constructors | single `publish` `system-types.shen:59-61`, `system.shen:67`; tag whitelist `system.py:24-26` | the front end accepts the two constructors |
+| M2 dedupe by intent, not payload | `test_m2_delivery_effects_carry_intent_identity` | intent identity on emitted effects | two jobs with one payload emit identical effects (`system.py:100-104`, `system.shen:67`); `at_most_once` takes the payload fallback | the intended model's two delivery effects differ by intent id (then `at_most_once` counts per intent) |
+| M4 adapter normalizes effects to a set | `test_m4_adapter_that_normalizes_effects_to_a_set_is_rejected` | attempt identity, so attempts stay distinct under normalization | equal tuples collapse (`system.py:100-104`); `caps.accepts?` `system.shen:168-169` | the set-normalized report of the double delivery mismatches |
 
 Deferred to qualification, explicitly: conservation proof (R12), controlled
 replay (R15), causal minimization (R16).
