@@ -1616,7 +1616,8 @@ def export_bundle(receipt_dir: str | Path, *, run: str | None = None,
                   forbidden_strings: tuple[str, ...] | None = None,
                   admissions_path: str | Path | None = None,
                   admissions_bytes: bytes | None = None,
-                  allow_receipt_admissions: bool = False) -> ExportResult:
+                  allow_receipt_admissions: bool = False,
+                  profile=None) -> ExportResult:
     """Export one observation receipt directory as a validated ``Bundle``.
 
     ``run`` is the run the caller expects; ``None`` takes the receipt's own
@@ -1630,7 +1631,27 @@ def export_bundle(receipt_dir: str | Path, *, run: str | None = None,
     ``allow_receipt_admissions=True``; live callers should instead supply an
     external ``admissions_path`` or a previously captured ``admissions_bytes``
     snapshot whose exact bytes they bind independently.
+
+    ``profile`` is the installed pack profile the caller selected once
+    (``pack_resources.resolve_profile``; ``None`` is v1). Under v2 the bundle
+    declares the profile's relations and evidence contracts and names the
+    profile and its manifest digest in metadata. The rows, their evidence ids
+    and the observation identity are computed over the frozen primitive
+    schema under either profile, so they do not depend on which judge reads
+    them; a v2 profile whose primitives differ from that schema, or a
+    profile for another domain or with a mismatched schema version, is a
+    ``ValueError`` -- a caller error, not a receipt refusal.
     """
+    from ..pack_resources import resolve_profile, PackProfile
+    profile = resolve_profile("observation") if profile is None else profile
+    if (not isinstance(profile, PackProfile) or profile.domain != "observation"
+            or profile.version != profile.bundle.schema_version):
+        raise ValueError("export requires a matching observation pack profile")
+    primitives = {decl.name: decl for decl in observation_relations()}
+    if profile.version == 2:
+        declared = {decl.name: decl for decl in profile.bundle.relations}
+        if any(declared.get(name) != decl for name, decl in primitives.items()):
+            raise ValueError("the v2 observation profile does not declare the frozen primitive schema")
     receipt_dir = Path(receipt_dir)
     if ((admissions_path is not None or admissions_bytes is not None)
             and allow_receipt_admissions):
@@ -1643,7 +1664,7 @@ def export_bundle(receipt_dir: str | Path, *, run: str | None = None,
     forbidden = (FORBIDDEN_FORK_STRINGS if forbidden_strings is None
                  else tuple(s.lower() for s in forbidden_strings))
     messages: list[str] = []
-    relations = {decl.name: decl for decl in observation_relations()}
+    relations = primitives
     facts = _Facts(_PLACEHOLDER_IDENTITY, relations)
     header: dict[str, Any] = {}
     try:
@@ -1912,8 +1933,15 @@ def export_bundle(receipt_dir: str | Path, *, run: str | None = None,
         "reproduce": dict(_obj(receipt["reproduce"], "reproduce")),
         "receipt_dir": str(receipt_dir),
     }
-    bundle = Bundle(tuple(relations.values()), fact_atoms, (), (), tuple(metadata.items()),
-                    evidence=evidence)
+    from ..contracts import CONTRACT_FIELDS
+    contracts = {key: getattr(profile.bundle, key) for key in CONTRACT_FIELDS
+                 if key != "derived_completeness_policies"} if profile.version == 2 else {}
+    declarations = tuple(relations.values()) if profile.version == 1 else profile.bundle.relations
+    if profile.version == 2:
+        metadata["pack_profile"] = profile.id
+        metadata["specification_manifest"] = profile.manifest_digest
+    bundle = Bundle(declarations, fact_atoms, (), (), tuple(metadata.items()),
+                    evidence=evidence, schema_version=profile.version, **contracts)
     try:
         assert_valid(bundle)
     except ValidationError as exc:

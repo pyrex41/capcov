@@ -1,6 +1,6 @@
 .claims 2.
 // Authored finite logic. Closure contracts are elaborated by Shen.
-.pack "rules-observation-v1" schema 1 description "The reviewed rule pack for observations_agree(run, check, scenario_set, policy) and incumbent_stable(run) (Lane A). observations_agree says only that, on the scenarios the admitted set declares, the incumbent and the candidate were observed to answer alike under the admitted comparison policy -- it is NOT a correctness claim and not a capability-parity claim. NO MODEL RELATION IS DECLARED: neither this pack nor schema_observation_v1.json declares a model relation or a model producer class, so the claim is model-free BY CONSTRUCTION; and model_conformance_unassessed is a POSITIVE, CLOSED premise, so the claim does not derive unless the receipt states in exported rows that it assessed no model. A receipt that carries a model belongs to op_qualified in the replay pack, not here. There is NO experiments/claim-semantics mirror of this pack in v1 -- there is no corpus adapter for observation receipts yet, so this shipped file is the only copy and nobody should look for a second one. Every relation is runtime-bound, so no static/runtime compatibility witness is needed or declared (a compatibility relation here would be ceremony a later reader would mistake for a gate). The receipt's source binding is a context-free reviewer observation joined on a column of the run row, exactly as replay_run_current binds a snapshot. C4 (one-sided masks): observation_body_raw is read by body_masked, which holds where a scenario's two raw body digests differ while its two normalized body digests match -- a real wire difference that a normalization erased, on one side or on both. observation_mask_undisclosed holds where such a scenario has no observation_masked_difference row for the body facet, and observations_agree negates it under observation_mask_disclosure_closed. This is the judge's own copy of the exporter's R-9: an erased difference that reached the bundle undisclosed blocks the claim here even if it was not refused at ingest." primitives_source "packages/capabilities/src/capcov/claims/observation/schema_observation_v1.json".
+.pack "rules-observation-v2" schema 2 description "The reviewed rule pack for observations_agree(run, check, scenario_set, policy) and incumbent_stable(run) (Lane A). observations_agree says only that, on the scenarios the admitted set declares, the incumbent and the candidate were observed to answer alike under the admitted comparison policy -- it is NOT a correctness claim and not a capability-parity claim. NO MODEL RELATION IS DECLARED: neither this pack nor schema_observation_v1.json declares a model relation or a model producer class, so the claim is model-free BY CONSTRUCTION; and model_conformance_unassessed is a POSITIVE, CLOSED premise, so the claim does not derive unless the receipt states in exported rows that it assessed no model. A receipt that carries a model belongs to op_qualified in the replay pack, not here. There is NO experiments/claim-semantics mirror of this pack in v1 -- there is no corpus adapter for observation receipts yet, so this shipped file is the only copy and nobody should look for a second one. Every relation is runtime-bound, so no static/runtime compatibility witness is needed or declared (a compatibility relation here would be ceremony a later reader would mistake for a gate). The receipt's source binding is a context-free reviewer observation joined on a column of the run row, exactly as replay_run_current binds a snapshot. C4 (one-sided masks): observation_body_raw is read by body_masked, which holds where a scenario's two raw body digests differ while its two normalized body digests match -- a real wire difference that a normalization erased, on one side or on both. observation_mask_undisclosed holds where such a scenario has no observation_masked_difference row for the body facet, and observations_agree negates it under observation_mask_disclosure_closed. This is the judge's own copy of the exporter's R-9: an erased difference that reached the bundle undisclosed blocks the claim here even if it was not refused at ingest." primitives_source "packages/capabilities/src/capcov/claims/observation/schema_observation_v1.json".
 
 .decl observation_run(run: symbol ctx, nonce: digest, check: symbol, candidate_commit: symbol, incumbent_commit: symbol, source_digest: digest, fixture: digest, scenario_set: digest, policy: digest) primitive observation runtime finite nonempty producers(observe).
 .decl observation_scenario(run: symbol ctx, scenario: symbol, kind: symbol, required: symbol, expected_class: symbol) primitive observation runtime producers(observe).
@@ -86,6 +86,53 @@
 .decl observation_unstable_closed(run: symbol ctx) derived completeness runtime completes observation_unstable.
 .decl incumbent_stable(run: symbol ctx) derived derived runtime.
 .decl observations_agree(run: symbol ctx, check: symbol, scenario_set: digest, policy: digest) derived derived runtime.
+
+// Explicit scope mappings. Elaboration inserts missing obligations, never facts.
+.completes observation_bodies_closed -> observation_body by run=run, side=side.
+.completes observation_classes_closed -> observation_class by run=run, side=side.
+.completes observation_effects_closed -> observation_effects by run=run, side=side.
+.completes observation_observed_closed -> observation_observed by run=run, side=side.
+.completes observation_statuses_closed -> observation_status by run=run, side=side.
+.completes masked_admissions_closed -> masked_difference_admitted by policy=policy.
+.completes masked_admitted_closed -> masked_admitted by policy=policy.
+.completes observation_policy_closed -> observation_policy_entry by policy=policy.
+.completes policy_normalization_closed -> policy_normalization by policy=policy.
+.completes body_mask_disclosed_closed -> body_mask_disclosed by run=run.
+.completes observation_degenerate_closed -> observation_degenerate_any by run=run.
+.completes observation_disagreement_closed -> observation_disagree_any by run=run.
+.completes observation_failure_gate_closed -> observation_failure_any by run=run.
+.completes observation_failures_closed -> observation_failure by run=run.
+.completes observation_gap_closed -> observation_gap_any by run=run.
+.completes observation_mask_disclosure_closed -> observation_mask_undisclosed by run=run.
+.completes observation_masked_closed -> observation_masked_difference by run=run.
+.completes observation_masked_gate_closed -> observation_masked_unadmitted by run=run.
+.completes observation_normalizations_closed -> observation_normalization by run=run.
+.completes observation_scenarios_closed -> observation_scenario by run=run.
+.completes observation_stability_closed -> observation_stability by run=run.
+.completes observation_unassessed_closed -> observation_unassessed by run=run.
+.completes observation_undeclared_closed -> observation_undeclared_any by run=run.
+.completes observation_unobserved_closed -> observation_unobserved by run=run.
+.completes observation_unstable_closed -> observation_unstable by run=run.
+.completes scenario_declared_closed -> scenario_declared by run=run.
+.completes scenario_observed_closed -> scenario_observed by run=run.
+.completes scenario_undeclared_closed -> scenario_undeclared_any by run=run.
+
+// Reviewed closure derivations retain their full premise lists.
+.policy masked_admitted_closed-policy rule masked_admitted_closed completes masked_admitted_closed digest "3e489ec6fb2f3ffdecad3708325b04c2a550d8da50e047ae411dbb5f32efb96e".
+.policy body_mask_disclosed_closed-policy rule body_mask_disclosed_closed completes body_mask_disclosed_closed digest "b081bf018d78dff897375e0d47d021b9af377fd5a90f3372f36e50ef9dfb5b76".
+.policy scenario_observed_closed-policy rule scenario_observed_closed completes scenario_observed_closed digest "62aa83641859fe272a40fa04b5cbec1c29c846a0b0dc4f73200e4ee73ac67cc9".
+.policy policy_normalization_closed-policy rule policy_normalization_closed completes policy_normalization_closed digest "f0c07e6ec9a954fb661337ac8fbd8816317c82343a0091971e52a9c940205bb3".
+.policy observation_failure_gate_closed-policy rule observation_failure_gate_closed completes observation_failure_gate_closed digest "33842a976f67396571eb11ba8e2363bda008e42ba810f0d9328420385d6bc49a".
+.policy observation_mask_disclosure_closed-policy rule observation_mask_disclosure_closed completes observation_mask_disclosure_closed digest "4eec500ec348d65991f09c4d743c0d48b92c012a072c26ababc9eeb6517e80d6".
+.policy observation_masked_gate_closed-policy rule observation_masked_gate_closed completes observation_masked_gate_closed digest "69eec67d0ae149774a236c5189d1c26dd23c0886e504eaade735bcb0eaa4ad9c".
+.policy observation_undeclared_closed-policy rule observation_undeclared_closed completes observation_undeclared_closed digest "cd2879e60025c95f879c5129f0f90d897a2cc9287170008fe8ed7e043a1814ff".
+.policy observation_degenerate_closed-policy rule observation_degenerate_closed completes observation_degenerate_closed digest "5befb74c5bf353cbc2a2c0ad7d3e44e874e73075ee6d0f0cde6de58a47bc6216".
+.policy observation_disagreement_closed-policy rule observation_disagreement_closed completes observation_disagreement_closed digest "6453118b68594a0a02e57e3f53beb008cf9ae7573fc4d6b19d61749e756b54c8".
+.policy observation_gap_closed-policy rule observation_gap_closed completes observation_gap_closed digest "29a9258889c461795cacb5bf287d2da7c5c8976129a22eae4164577f000ac06e".
+.policy scenario_undeclared_closed-policy rule scenario_undeclared_closed completes scenario_undeclared_closed digest "9fe4c037cbdda9b1adbe1f03050a2008c28194d75090eacb3d5e6c79f515895e".
+.policy scenario_declared_closed-policy rule scenario_declared_closed completes scenario_declared_closed digest "a7c8137f2bd60642aca91fb203b4a75cc1c3b97562aaac8efd3980e68d00484e".
+.policy observation_unstable_closed-policy rule observation_unstable_closed completes observation_unstable_closed digest "f7074e919e2c48753f663f431afb6bb509b72676397602037b24f40c9070e078".
+
 scenario_observed: scenario_observed(Run, S) :-
     observation_observed(Run, S, "incumbent"::symbol), observation_observed(Run, S, "candidate"::symbol).
 scenario_observed_closed: scenario_observed_closed(Run) :-
@@ -107,17 +154,17 @@ model_conformance_unassessed: model_conformance_unassessed(Run) :-
 set_exercised: set_exercised(Run) :-
     observation_scenario(Run, S, Kind10, Req10, Class10), scenario_observed(Run, S).
 status_disagree_a: status_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_status(Run, S, "incumbent"::symbol, St), observation_statuses_closed(Run, "candidate"::symbol), !observation_status(Run, S, "candidate"::symbol, St).
+    scenario_observed(Run, S), observation_status(Run, S, "incumbent"::symbol, St), !observation_status(Run, S, "candidate"::symbol, St).
 status_disagree_b: status_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_status(Run, S, "candidate"::symbol, St), observation_statuses_closed(Run, "incumbent"::symbol), !observation_status(Run, S, "incumbent"::symbol, St).
+    scenario_observed(Run, S), observation_status(Run, S, "candidate"::symbol, St), !observation_status(Run, S, "incumbent"::symbol, St).
 body_disagree_a: body_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_body(Run, S, "incumbent"::symbol, Bd), observation_bodies_closed(Run, "candidate"::symbol), !observation_body(Run, S, "candidate"::symbol, Bd).
+    scenario_observed(Run, S), observation_body(Run, S, "incumbent"::symbol, Bd), !observation_body(Run, S, "candidate"::symbol, Bd).
 body_disagree_b: body_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_body(Run, S, "candidate"::symbol, Bd), observation_bodies_closed(Run, "incumbent"::symbol), !observation_body(Run, S, "incumbent"::symbol, Bd).
+    scenario_observed(Run, S), observation_body(Run, S, "candidate"::symbol, Bd), !observation_body(Run, S, "incumbent"::symbol, Bd).
 effects_disagree_a: effects_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_effects(Run, S, "incumbent"::symbol, Ed), observation_effects_closed(Run, "candidate"::symbol), !observation_effects(Run, S, "candidate"::symbol, Ed).
+    scenario_observed(Run, S), observation_effects(Run, S, "incumbent"::symbol, Ed), !observation_effects(Run, S, "candidate"::symbol, Ed).
 effects_disagree_b: effects_disagree(Run, S) :-
-    scenario_observed(Run, S), observation_effects(Run, S, "candidate"::symbol, Ed), observation_effects_closed(Run, "incumbent"::symbol), !observation_effects(Run, S, "incumbent"::symbol, Ed).
+    scenario_observed(Run, S), observation_effects(Run, S, "candidate"::symbol, Ed), !observation_effects(Run, S, "incumbent"::symbol, Ed).
 scenario_disagree_status: scenario_disagree(Run, S) :-
     status_disagree(Run, S).
 scenario_disagree_body: scenario_disagree(Run, S) :-
@@ -129,7 +176,7 @@ observation_disagree_any: observation_disagree_any(Run) :-
 observation_disagreement_closed: observation_disagreement_closed(Run) :-
     observation_run_current(Run), observation_scenarios_closed(Run), observation_observed_closed(Run, "incumbent"::symbol), observation_observed_closed(Run, "candidate"::symbol), observation_statuses_closed(Run, "incumbent"::symbol), observation_statuses_closed(Run, "candidate"::symbol), observation_bodies_closed(Run, "incumbent"::symbol), observation_bodies_closed(Run, "candidate"::symbol), observation_normalizations_closed(Run).
 scenario_uncompared: scenario_uncompared(Run, S) :-
-    observation_scenario(Run, S, Kind22, Req22, Class22), scenario_observed_closed(Run), !scenario_observed(Run, S).
+    observation_scenario(Run, S, Kind22, Req22, Class22), !scenario_observed(Run, S).
 scenario_setup_failed: scenario_setup_failed(Run, S) :-
     observation_unobserved(Run, S, Side23, "setup_failed"::symbol).
 scenario_timed_out: scenario_timed_out(Run, S) :-
@@ -143,7 +190,7 @@ observation_gap_any_unobserved: observation_gap_any(Run) :-
 observation_gap_closed: observation_gap_closed(Run) :-
     observation_run_current(Run), observation_scenarios_closed(Run), observation_observed_closed(Run, "incumbent"::symbol), observation_observed_closed(Run, "candidate"::symbol), observation_unobserved_closed(Run).
 scenario_degenerate: scenario_degenerate(Run, S) :-
-    observation_scenario(Run, S, Kind29, Req29, EC), scenario_observed(Run, S), observation_classes_closed(Run, "incumbent"::symbol), !observation_class(Run, S, "incumbent"::symbol, EC).
+    observation_scenario(Run, S, Kind29, Req29, EC), scenario_observed(Run, S), !observation_class(Run, S, "incumbent"::symbol, EC).
 observation_degenerate_any: observation_degenerate_any(Run) :-
     scenario_degenerate(Run, S).
 observation_degenerate_closed: observation_degenerate_closed(Run) :-
@@ -153,13 +200,13 @@ policy_normalization: policy_normalization(Pol, Id) :-
 policy_normalization_closed: policy_normalization_closed(Pol) :-
     observation_policy_closed(Pol).
 normalization_undeclared: normalization_undeclared(Run, N) :-
-    observation_normalization(Run, S, Side34, Facet34, N, Before34, After34), observation_run(Run, Nonce34, Check34, Cand34, Inc34, Src34, Fix34, Set34, Pol), policy_normalization_closed(Pol), !policy_normalization(Pol, N).
+    observation_normalization(Run, S, Side34, Facet34, N, Before34, After34), observation_run(Run, Nonce34, Check34, Cand34, Inc34, Src34, Fix34, Set34, Pol), !policy_normalization(Pol, N).
 observation_undeclared_any: observation_undeclared_any(Run) :-
     normalization_undeclared(Run, N).
 observation_undeclared_closed: observation_undeclared_closed(Run) :-
     observation_run_current(Run), observation_normalizations_closed(Run), observation_run(Run, Nonce36, Check36, Cand36, Inc36, Src36, Fix36, Set36, Pol), observation_policy_closed(Pol).
 scenario_undeclared: scenario_undeclared(Run, S) :-
-    observation_observed(Run, S, Side37), scenario_declared_closed(Run), !scenario_declared(Run, S).
+    observation_observed(Run, S, Side37), !scenario_declared(Run, S).
 scenario_undeclared_any: scenario_undeclared_any(Run) :-
     scenario_undeclared(Run, S).
 scenario_undeclared_closed: scenario_undeclared_closed(Run) :-
@@ -169,7 +216,7 @@ masked_admitted: masked_admitted(Pol, N, FieldPath) :-
 masked_admitted_closed: masked_admitted_closed(Pol) :-
     masked_admissions_closed(Pol).
 observation_masked_unadmitted: observation_masked_unadmitted(Run) :-
-    observation_masked_difference(Run, S, Facet40, N, FieldPath), observation_run(Run, Nonce40, Check40, Cand40, Inc40, Src40, Fix40, Set40, Pol), masked_admitted_closed(Pol), !masked_admitted(Pol, N, FieldPath).
+    observation_masked_difference(Run, S, Facet40, N, FieldPath), observation_run(Run, Nonce40, Check40, Cand40, Inc40, Src40, Fix40, Set40, Pol), !masked_admitted(Pol, N, FieldPath).
 observation_masked_gate_closed: observation_masked_gate_closed(Run) :-
     observation_run_current(Run), observation_masked_closed(Run), observation_run(Run, Nonce41, Check41, Cand41, Inc41, Src41, Fix41, Set41, Pol), masked_admissions_closed(Pol).
 body_masked: body_masked(Run, S) :-
@@ -179,7 +226,7 @@ body_mask_disclosed: body_mask_disclosed(Run, S) :-
 body_mask_disclosed_closed: body_mask_disclosed_closed(Run) :-
     observation_masked_closed(Run).
 observation_mask_undisclosed: observation_mask_undisclosed(Run) :-
-    body_masked(Run, S), body_mask_disclosed_closed(Run), !body_mask_disclosed(Run, S).
+    body_masked(Run, S), !body_mask_disclosed(Run, S).
 observation_mask_disclosure_closed: observation_mask_disclosure_closed(Run) :-
     observation_run_current(Run), observation_masked_closed(Run), observation_bodies_closed(Run, "incumbent"::symbol), observation_bodies_closed(Run, "candidate"::symbol).
 observation_failure_any_setup: observation_failure_any(Run) :-
@@ -195,6 +242,6 @@ observation_unstable: observation_unstable(Run) :-
 observation_unstable_closed: observation_unstable_closed(Run) :-
     observation_stability_closed(Run).
 incumbent_stable: incumbent_stable(Run) :-
-    observation_stability(Run, RunA48, RunB48, "incumbent"::symbol, "true"::symbol), observation_stability_closed(Run), observation_unstable_closed(Run), !observation_unstable(Run).
+    observation_stability(Run, RunA48, RunB48, "incumbent"::symbol, "true"::symbol), observation_stability_closed(Run), !observation_unstable(Run).
 observations_agree: observations_agree(Run, Check, Set, Pol) :-
-    observation_run(Run, Nonce49, Check, Cand49, Inc49, Src49, Fix49, Set, Pol), observation_run_current(Run), policy_bound(Run, Pol), set_bound(Run, Set), check_completed(Run), model_conformance_unassessed(Run), observation_failure_gate_closed(Run), !observation_failure_any(Run), observation_gap_closed(Run), !observation_gap_any(Run), set_exercised(Run), observation_degenerate_closed(Run), !observation_degenerate_any(Run), observation_undeclared_closed(Run), !observation_undeclared_any(Run), scenario_undeclared_closed(Run), !scenario_undeclared_any(Run), observation_masked_gate_closed(Run), !observation_masked_unadmitted(Run), observation_disagreement_closed(Run), !observation_disagree_any(Run), observation_mask_disclosure_closed(Run), !observation_mask_undisclosed(Run).
+    observation_run(Run, Nonce49, Check, Cand49, Inc49, Src49, Fix49, Set, Pol), observation_run_current(Run), policy_bound(Run, Pol), set_bound(Run, Set), check_completed(Run), model_conformance_unassessed(Run), !observation_failure_any(Run), !observation_gap_any(Run), set_exercised(Run), !observation_degenerate_any(Run), !observation_undeclared_any(Run), !scenario_undeclared_any(Run), !observation_masked_unadmitted(Run), !observation_disagree_any(Run), !observation_mask_undisclosed(Run).

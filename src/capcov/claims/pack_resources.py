@@ -10,6 +10,8 @@ import json
 from .ir import Bundle, bundle_from_json
 
 DOMAINS = frozenset({'static', 'replay', 'observation'})
+#: Domains with a generated, manifest-checked v2 profile installed beside v1.
+V2_DOMAINS = frozenset({'replay', 'observation'})
 RELATION_FIELDS = frozenset({'name','columns','modality','polarity','binding','primitive',
     'producer_classes','context_indices','completes','finite','nonempty',
     'compatibility_targets','compatibility_context_indices'})
@@ -18,7 +20,7 @@ DIAGNOSTIC_POLICY = {'missing_premises':'unresolved','inconsistent_premises':'in
 
 
 def read_pack_text(domain, version=1):
-    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain == "replay" else (1,)):
+    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain in V2_DOMAINS else (1,)):
         raise ValueError(f'unsupported installed pack profile: {domain}/v{version}')
     directory = resources.files(f'capcov.claims.{domain}')
     raw = directory.joinpath(f'rules-{domain}-v{version}.json').read_bytes()
@@ -36,7 +38,7 @@ def read_pack_text(domain, version=1):
 
 def load_pack(domain, version=1, path=None):
     # Check the requested profile even when a custom path is supplied.
-    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain == "replay" else (1,)):
+    if domain not in DOMAINS or type(version) is not int or version not in ((1, 2) if domain in V2_DOMAINS else (1,)):
         raise ValueError(f'unsupported installed pack profile: {domain}/v{version}')
     text = path.read_text(encoding='utf-8') if path is not None else read_pack_text(domain,version)
     pack = json.loads(text)

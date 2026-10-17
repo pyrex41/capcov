@@ -1,0 +1,1558 @@
+{
+  "compatibility_capabilities": [],
+  "completeness_scopes": [
+    {
+      "mapping": [
+        [
+          "policy",
+          "policy"
+        ]
+      ],
+      "relation": "masked_admissions_closed",
+      "target": "masked_difference_admitted"
+    },
+    {
+      "mapping": [
+        [
+          "policy",
+          "policy"
+        ]
+      ],
+      "relation": "masked_admitted_closed",
+      "target": "masked_admitted"
+    },
+    {
+      "mapping": [
+        [
+          "policy",
+          "policy"
+        ]
+      ],
+      "relation": "observation_policy_closed",
+      "target": "observation_policy_entry"
+    },
+    {
+      "mapping": [
+        [
+          "policy",
+          "policy"
+        ]
+      ],
+      "relation": "policy_normalization_closed",
+      "target": "policy_normalization"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ],
+        [
+          "side",
+          "side"
+        ]
+      ],
+      "relation": "observation_bodies_closed",
+      "target": "observation_body"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ],
+        [
+          "side",
+          "side"
+        ]
+      ],
+      "relation": "observation_classes_closed",
+      "target": "observation_class"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ],
+        [
+          "side",
+          "side"
+        ]
+      ],
+      "relation": "observation_effects_closed",
+      "target": "observation_effects"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ],
+        [
+          "side",
+          "side"
+        ]
+      ],
+      "relation": "observation_observed_closed",
+      "target": "observation_observed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ],
+        [
+          "side",
+          "side"
+        ]
+      ],
+      "relation": "observation_statuses_closed",
+      "target": "observation_status"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "body_mask_disclosed_closed",
+      "target": "body_mask_disclosed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_degenerate_closed",
+      "target": "observation_degenerate_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_disagreement_closed",
+      "target": "observation_disagree_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_failure_gate_closed",
+      "target": "observation_failure_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_failures_closed",
+      "target": "observation_failure"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_gap_closed",
+      "target": "observation_gap_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_mask_disclosure_closed",
+      "target": "observation_mask_undisclosed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_masked_closed",
+      "target": "observation_masked_difference"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_masked_gate_closed",
+      "target": "observation_masked_unadmitted"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_normalizations_closed",
+      "target": "observation_normalization"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_scenarios_closed",
+      "target": "observation_scenario"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_stability_closed",
+      "target": "observation_stability"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_unassessed_closed",
+      "target": "observation_unassessed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_undeclared_closed",
+      "target": "observation_undeclared_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_unobserved_closed",
+      "target": "observation_unobserved"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "observation_unstable_closed",
+      "target": "observation_unstable"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "scenario_declared_closed",
+      "target": "scenario_declared"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "scenario_observed_closed",
+      "target": "scenario_observed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "scenario_undeclared_closed",
+      "target": "scenario_undeclared_any"
+    }
+  ],
+  "relations": [
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "nonce",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "check",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "candidate_commit",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "incumbent_commit",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "source_digest",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "fixture",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "scenario_set",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "policy",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": true,
+      "modality": "observation",
+      "name": "observation_run",
+      "nonempty": true,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "required",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "expected_class",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_scenario",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "reason",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_unobserved",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "status",
+          "type": "unsigned"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_status",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "class",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_class",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "body_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_body",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "raw_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_body_raw",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "effects_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_effects",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "facet",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "normalization",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "before_digest",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "after_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_normalization",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "scenario",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "facet",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "normalization",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "field_path",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_masked_difference",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "policy",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "entry_kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "id",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "facet",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "target",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "preserves",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "source_sha256",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "policy"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_policy_entry",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "outcome",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_terminal",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "phase",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "failure_class",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_failure",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "dimension",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "reason",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_unassessed",
+      "nonempty": true,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "run_a",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "run_b",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "stable",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_stability",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "nonce",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_nonce_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "source_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_source_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "fixture",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "observation_fixture_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "policy",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "reviewer",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "version",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "policy"
+      ],
+      "finite": false,
+      "modality": "assumption",
+      "name": "policy_admitted",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "scenario_set",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "check",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "reviewer",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "version",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "scenario_set"
+      ],
+      "finite": false,
+      "modality": "assumption",
+      "name": "scenario_set_admitted",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "policy",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "normalization",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "field_path",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "reviewer",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "policy"
+      ],
+      "finite": false,
+      "modality": "assumption",
+      "name": "masked_difference_admitted",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_scenario",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_scenarios_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_observed",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_observed_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_unobserved",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_unobserved_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_status",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_statuses_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_class",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_classes_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_body",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_bodies_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_effects",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_effects_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_normalization",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_normalizations_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_masked_difference",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_masked_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_failure",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_failures_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_unassessed",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_unassessed_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_stability",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_stability_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "policy",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "observation_policy_entry",
+      "context_indices": [
+        "policy"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "observation_policy_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "observe"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "policy",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "masked_difference_admitted",
+      "context_indices": [
+        "policy"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "masked_admissions_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    }
+  ],
+  "required_bridges": [],
+  "schema_version": 2
+}
