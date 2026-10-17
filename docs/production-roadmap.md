@@ -1,9 +1,11 @@
-# Production reasoning and verification roadmap
+# Typed behavior and production verification roadmap
 
-Baseline: `dc3d57bf7a337c29d4ff013c18d4f7318e87fb26`, on
+Planning revision: October 17, 2026. Baseline: `58ddd39b9edc5972855a3e3626fa818510e20bd5`, on
 `shen-specification-foundation`. This is the execution plan for the reasoning,
 induction, evidence and adapter extensions. It complements the existing capcov
 plans; it does not declare the branch production-ready.
+
+The governing design is [Executable typed behavior and migration contracts](typed-behavior-architecture.md). This revision moves typed executable behavior ahead of evidence admission: legacy behavior, intended behavior and the migration contract are distinct, connected artifacts. B1-B4 below add the missing critical path; W0-W11 retain the detailed production work. The R-series replaces the previous N-series execution order.
 
 Status meanings: **implemented** means code exists; **validated** requires the
 specified tests against a named revision; **production-ready** requires the
@@ -15,9 +17,8 @@ current full pinned run. Milestones below are planned unless stated otherwise.
 One specification/evidence workflow should support the complete application
 migration, not a single delete operation or a collection of disconnected demos:
 
-1. Inventory every route, background job, event consumer and external effect.
-2. Preserve both observed legacy behavior and independently specified target
-   behavior, including intentional differences and unanswered questions.
+1. Define reusable typed domain states, commands, effects and behavioral rules in Shen; inventory every route, background job, event consumer and external effect.
+2. Maintain a reconstructed legacy model, an approved intended model and a versioned migration contract, sharing domain primitives while preserving intentional differences and unanswered questions.
 3. Execute the model to generate simulations, histories and counterexamples.
 4. Prove supported model obligations using independently checked derivations.
 5. Exercise real implementations through isolated, observable adapters.
@@ -62,6 +63,19 @@ unbounded unreachability proof.
 
 ## 3. Architectural decisions
 
+* The primary artifact is a typed executable behavioral model. Rule contracts,
+  effects, error paths and behavioral composition are checked object-language
+  judgments; ordinary function types or structurally typed proof records are
+  insufficient. Current implementation supports only part of this design.
+* Model correctness, implementation conformance and migration preservation are
+  separate obligations. Proofs about a model do not prove the PHP or Go program.
+  Preserve raw observations and check concrete-to-domain mappings. Safety trace
+  inclusion needs additional enabledness/progress obligations to exclude vacuity.
+* Legacy, intended and migration artifacts have independent identities. Approved
+  behavior changes require explicit decisions; agreement between implementations
+  does not override a violated intended property.
+
+
 * Shen owns logical judgments, proof checking, typed elaboration as it is added,
   and the reference model semantics. Prolog may propose derivations and search
   schedules; admission never trusts a search result without checking it.
@@ -91,22 +105,108 @@ unbounded unreachability proof.
 
 | Work package | Prerequisites | Can proceed alongside |
 | --- | --- | --- |
-| W0: baseline and validation | Current branch | Inventory preparation |
-| W1: evidence/checker contracts | W0 | Enforced adapter lifecycle |
-| W2: typed claims and authority | W1 | W6, application extraction |
-| W3: checked compiler transformations | W1 | W2, W6 |
-| W4: quantified/structural induction | W2 judgment conventions, W3 witness boundary | W6–W8 |
-| W5: general frames and completion | W3, relevant W4 theories | Runtime optimization |
-| W6: production adapter enforcement | W0; align artifacts with W1 | W2–W5 |
-| W7: deterministic controls and replay | W6 | W4–W5, W9 |
-| W8: concurrency and temporal properties | W7, appropriate model theories | Application rollout |
-| W9: complete application migration | W1 and W6 for execution; W2–W5 for corresponding proof claims | W7–W8 |
-| W10: performance and incrementality | W0 metrics, W1 identities | After each semantic increment |
-| W11: release qualification | All capabilities claimed by the release; W9 consuming evidence | None for final admission |
+| W0: baseline and validation | Current branch | Consumer inventory and ambiguity collection |
+| B1: domain language and model variants | W0 inventory; align W1 identities | W6 adapter lifecycle |
+| W1: evidence/checker contracts | W0; B1 artifact vocabulary | B1, W6 |
+| B2: checked rules and behavior composition | B1, W1 | W2, W3, W6 |
+| B3: model execution, generation and correspondence | B2, supported W3 witnesses | W6-W7, consumer models |
+| B4: migration contracts and three-way qualification | B1, B3, W1; real execution needs W6 | W9 rollout |
+| W2: typed claims and authority | W1, B1 sorts; integrate B2 derivations | W3, W6 |
+| W3: checked compiler transformations | W1, B1 semantics | B2, W2, W6 |
+| W4: quantified/structural induction | B2, W2 conventions, W3 boundary | W6-W8 |
+| W5: general frames and completion | W3, relevant W4 theories | W10 |
+| W6: production adapter enforcement | W0; W1 envelope and B1 domain mapping alignment | B1-B4, W2-W5 |
+| W7: deterministic controls and replay | W6, B3 choice semantics | W4-W5, W9 |
+| W8: concurrency and temporal properties | B2 composition, W7, relevant W4 theories | W9 |
+| W9: complete application migration | Start inventory now; B4 and W6 for qualification | W7-W8 |
+| W10: performance and incrementality | W0 metrics, W1 and B1 identities | After each semantic increment |
+| W11: release qualification | All advertised capabilities; W9 consuming evidence | Final admission gate |
 
-Work packages can be developed independently where shown, but new evidence is
-only admitted after its dependencies' gates pass. There is no requirement to
-finish a general theorem prover before beginning real adapter validation.
+Development can overlap where shown. Admission requires the relevant gates, not
+completion of every future proof theory. B1-B4 describe planned work, not new
+runtime functionality delivered by this documentation revision.
+
+### B1 — Typed domain language and distinct behavioral models
+
+Define sorted domain values, state schemas, commands, errors, effects, capabilities,
+footprints and predicates, with explicit numeric/partial-expression semantics.
+Add source-mapped canonical behavior IR and an explicit versioned `.ops` bridge.
+Represent legacy and intended variants as shared primitives plus named differences;
+bind each claim to its precise variant. Keep unresolved specification clauses
+first-class and do not infer completeness from having mapped every URL.
+
+**Deliverables:** language/IR version, Shen construction judgments, primitive
+semantics, model-variant manifests and old/new compatibility fixtures. Start with
+existing state/action constructors; expand them without silently changing v1.
+
+**Gate:** valid/invalid declarations, scope/sort/effect errors, raw-to-domain value
+round trips, variant identity isolation and semantic agreement for translated old
+models. An omitted error branch is an obligation, not implicit success.
+
+**Touchpoints:** `operations/system.py`, `shen/system-types.shen`,
+`shen/system.shen`, existing operation datatypes; proposed behavior elaborator and
+versioned IR modules. New paths are design proposals until implemented.
+
+### B2 — Typed rule contracts and checked behavior composition
+
+Implement the object-language judgment described in the architecture document.
+Separate structural well-formedness, contract derivability and execution outcome.
+Define trusted primitive rules and checked derived rules, then sequencing,
+branching, frames, transactional commit/abort, effects and resource accounting.
+Integrate existing loop proofs; add retry/idempotency, recursive and concurrent
+rules only with the relevant W4/W5/W8 obligations. Unsupported contracts stay open.
+
+**Deliverables:** frozen primitive/axiom ledger, rule declaration syntax, explicit
+proof terms, independent checker, elaboration diagnostics and reusable behavior
+library. Libraries cover ownership, CRUD, transactions, idempotency, outbox/worker
+flows, snapshot iteration, retries and compensation as their gates become available.
+
+**Gate:** check compositions with proof search disabled; reject arbitrary user
+axioms, missing branch/error cases, false frame conditions, capability duplication,
+circular lemmas and incompatible pre/post composition. Publish which checks are
+mechanized and which semantic correspondence arguments remain trusted.
+
+### B3 — Shared execution, generation and conformance semantics
+
+Execute canonical behavior IR in the reference Shen interpreter. Generate legal
+inputs/histories through typed modes and finite constraints; label invalid-input
+campaigns separately. Emit transition witnesses and typed effect requests. Derive
+obligations and finite graph/relation projections from that same model, retaining
+translation witnesses or explicit trust boundaries under W3.
+
+Define adapter observation maps for arguments, returns, errors, state and effects,
+including hidden transitions and pending outcomes. A conformance monitor tracks
+allowed model states and reports budget exhaustion as open. Preserve raw events.
+Do not normalize away effect multiplicity, ordering or externally visible errors.
+
+**Gate:** simulator/generator/checker agreement on supported fragments; mutant
+models and adapters rejected; ambiguous commit retains alternatives; unreachable
+preconditions are reported separately from vacuous partial correctness. Conformance
+results name concrete histories; universal refinement requires a separate argument.
+
+**Optional planner gate:** pin and validate GraphWalker schema/generators, export a
+finite abstraction, map path proposals back to model transitions and concrete
+inputs, then validate execution. Failed feasibility search remains open. Souffle
+projections preserve unknowns/completeness and existing differential checks. Neither
+engine becomes the authority for behavioral judgments. ELF is a separate producer.
+
+### B4 — Explicit migration contract and three-way qualification
+
+Create versioned preserve/change/remove/defer decisions binding legacy and intended
+clauses, observation mappings, rationale, approval provenance and obligations.
+Run model, legacy and target on comparable scenarios and classify disagreements.
+Check target safety refinement plus declared supported-operation and progress
+requirements; use equivalence only where specifically required. Legacy defects
+must not force rejection of an approved correction or disappear from reporting.
+
+**Deliverables:** decision schema, three-way report, per-capability obligation
+matrix, source/specification ambiguity queue and dependency invalidation rules.
+
+**Gate:** synthetic transfer/outbox/retry workflow with a legacy duplicate-effect
+bug, intended correction and explicit decision. Detect a target mutant, a shared
+legacy/target bug, missing approval, incomplete mapping and replay identity drift.
+Then apply the same contract to real consumer capabilities under W9. One passing
+fixture validates integration only; it does not qualify the full migration.
 
 ## 5. W0 — Establish the actual baseline
 
@@ -133,7 +233,11 @@ basis for later performance budgets, not an estimate from a few examples.
 
 ## 6. W1 — Version evidence and checker contracts
 
-Define a common envelope without erasing the distinctions between artifact kinds:
+Define a common envelope without erasing the distinctions between artifact kinds.
+Use Model, Claim, Obligation, Proposal, Evidence and Judgment records. Bind legacy/
+intended variant, migration decision, behavior/rule identity and observation mapping
+where applicable. W1 standardizes transport; B1/B2 define behavioral meaning:
+
 
 * Statement/model identity; context and assumptions; proof or observation scope.
 * Source revision and extraction identity; producer class and producer version.
@@ -163,6 +267,8 @@ Failure cannot become a successful claim through folding or CLI exit handling.
 
 ## 7. W2 — Extend genuine Shen typing into claim elaboration
 
+Integrate B1 domain sorts and B2 behavioral derivations into evidence admission.
+Behavior validity and producer authority remain separate checked judgments.
 Build typed judgments around existing semantics rather than copying the untyped
 authority code and relabeling its column checks as a type system.
 
@@ -417,6 +523,10 @@ invariants, effects, adapter mapping, proof obligations, campaigns, evidence
 producers and unresolved questions. Unsupported or intentionally removed behavior
 must be visible with a disposition; it cannot vanish from the denominator.
 
+Use the B4 migration contract and classify three-way outcomes, including shared
+legacy/target defects and approved differences. Every entry names its legacy and
+intended variant, decision identity, observation map and remaining obligations.
+
 Separate three relations:
 
 1. Source/specification to model: assumptions and refinement obligations.
@@ -474,6 +584,8 @@ A release claiming the full workflow requires:
   paths for prior artifacts. Changed checker semantics cannot silently reuse proofs.
 * Real-service qualification of the adapter/control scope actually advertised.
 * Cold restoration of replay bundles, crash recovery, cleanup and identity checks.
+* Checked B1/B2 behavior/rule judgments and B3 correspondence boundaries, with
+  versioned B4 migration decisions; distinguish model proofs from implementation evidence.
 * A consuming application report that covers its entire reconciled inventory and
   keeps unresolved/unsupported cases visible.
 * A trusted-code/assumption ledger with no undocumented semantic authority.
@@ -486,35 +598,42 @@ cloud applications” is not justified by the current implementation or this pla
 
 ## 17. Concrete change sequence
 
-Each row is a reviewable change or small change series, with executable gates.
-“Depends on” describes admission dependencies, not permission to prototype.
+This R-series supersedes N01-N19 from the previous roadmap. All original work
+packages remain above; the revised order adds typed behavior as the common basis.
+Each row is a reviewable change or small series. Dependencies gate admission.
 
 | ID | Change | Depends on | Exit evidence |
 | --- | --- | --- | --- |
-| N01 | Pin and run full baseline; add benchmark corpus | Current branch | W0 report and green family gate |
-| N02 | Version envelopes, semantic/operational result contract and trust ledger | N01 | Cross-version/adversarial artifact tests |
-| N03 | Typed claim terms, contexts and elaboration skeleton | N02 | Valid/invalid pack judgments |
-| N04 | Typed authority/completeness/compatibility witnesses; migrate packs | N03 | Independent/differential admission agreement |
-| N05 | Transformation-witness protocol and WP/frame checkers | N02 | Checked rewrites plus seeded-mutant detection |
-| N06 | Enforced lease/control-plane lifecycle | N01, N02 envelope alignment | Crash, fencing, isolation and expiry suite |
-| N07 | SQL transaction/journal adapters and private mappings | N06 | Real MySQL/PostgreSQL outcome tests |
-| N08 | Sorted terms, equality, binders and quantifier kernel | N03, N05 | Capture/eigenvariable/scope adversarial suite |
-| N09 | Structural induction and reusable checked lemmas | N08 | Constructor-complete induction proofs |
-| N10 | Checked arithmetic, resource/mode integration | N05, N08 | Range/conservation/consumption proofs |
-| N11 | Cross-key/domain/nested completion rules | N09, relevant N10 theories | Positive and invalid-frame pairs |
-| N12 | Redis/DocDB/queue observation contracts | N06, N07 | Cross-store barriers and journal completeness |
-| N13 | Versioned control tape, uncertainty and causal replay bundles | N07, N12 | Fresh-environment fault replay |
-| N14 | Causal minimization and Antithesis campaign round trip | N13 | Stable reduced failures and imported evidence |
-| N15 | Concurrent-history models and temporal judgments | N09, N13 | Independent small-history comparisons |
-| N16 | Full consumer inventory and legacy/target evidence rollout | Start after N02; execution after N07 | All entries mapped; critical gaps resolved |
-| N17 | Batched checking, caches and isolated workers | N01, N02; preserve later kernels | Cross-mode equality and measured budgets |
-| N18 | Incremental proof/fact invalidation | N04, N05, N17 | Full-recomputation equivalence under removals |
-| N19 | Complete release qualification | All advertised capabilities | W11 evidence bundle |
+| R01 | Full pinned baseline, trust inventory and benchmarks (W0) | Current branch | Accounted test families and named validation report |
+| R02 | Typed domain/behavior IR, variants and `.ops` compatibility (B1) | R01 | Construction and compatibility fixtures |
+| R03 | Common artifacts, outcomes, mappings and decision identities (W1) | R02 vocabulary | Cross-version/adversarial envelope checks |
+| R04 | Primitive contract rules and composition checker (B2) | R02, R03 | Independent valid/forged derivation checks |
+| R05 | Checked WP/frame/substitution transformation protocol (W3) | R02, R03 | Checked rewrites and mutant detection |
+| R06 | Typed claims, authority and pack migration (W2) | R03, R04 | Differential admission and occurrence checks |
+| R07 | Shared simulator, typed generation and conformance monitor (B3) | R04, R05 supported fragment | Cross-interpretation and ambiguity checks |
+| R08 | Enforced leases, fencing and server lifecycle (W6a) | R01; align R03 | Crash, expiry, cleanup and isolation suite |
+| R09 | Real SQL transaction/journal adapters and domain maps (W6b) | R08, R02 | Real MySQL/PostgreSQL outcome tests |
+| R10 | Migration decisions and three-way integration (B4) | R07, R09 | Transfer/outbox/retry fixture and target mutants |
+| R11 | Sorted quantifier/equality kernel (W4a) | R04, R05 | Binder/eigenvariable/definedness adversarial checks |
+| R12 | Structural induction, arithmetic and resource lemmas (W4b/c) | R11 | Constructor coverage, range/conservation proofs |
+| R13 | Cross-key, domain-changing and nested completion (W5) | R12, R05 | Valid proofs and invalid-frame countercases |
+| R14 | Redis/DocDB/queues and consistent observation cuts (W6c) | R09 | Real-service barriers and journal completeness |
+| R15 | Controlled choices, uncertainty and durable replay (W7) | R07, R09, relevant R14 controls | Fresh-environment fault replay |
+| R16 | Causal minimization and Antithesis round trip (W7) | R15 | Reduced reproducible failures and imported evidence |
+| R17 | Concurrent behaviors, histories and temporal contracts (W8) | R04, relevant R12 theories, R15 | Independent small-history oracles and progress assumptions |
+| R18 | Souffle-guided targeting and optional GraphWalker projection (B3) | R07, R06; R15 for replay claims | Projection mapping, feasibility and seed/control distinction |
+| R19 | Full consumer inventory, decisions and evidence rollout (W9) | Inventory now; R10 for qualification | Every entry disposed; critical gaps resolved |
+| R20 | Batch, cache and isolated workers (W10) | R01, R03, stable relevant semantics | Measured cross-mode agreement |
+| R21 | Incremental fact/proof/decision invalidation (W10) | R06, R05, R20 | Full recomputation agreement including removals |
+| R22 | Complete release qualification (W11) | All advertised capabilities and R19 | Scope-specific release bundle |
 
-**Immediate next work:** N01, followed by N02. Then start N03/N05 on the proof
-side and N06 on the execution side. Prepare N16's private inventory at the same
-time. Do not spend the next milestone only enlarging the Boolean search limits
-or adding another synthetic operation.
+**Immediate next work:** R01, then R02/R03 as a coordinated schema increment,
+followed by R04/R05/R07. Start R08 and consumer inventory alongside that work.
+R10 is the first complete behavioral migration loop, not the release endpoint.
+R11-R17 extend its proof and execution coverage; R19 covers the whole application.
+R18 is optional and must not block required consumer qualification. R22 requires
+it only if that integration is advertised. Do not substitute another isolated
+example or a larger Boolean search bound for the behavioral-language milestone.
 
 ## 18. Migration, rollback and stop conditions
 
@@ -553,7 +672,7 @@ behavior changes are approved; the required concurrency/fault model; which
 critical claims require proof versus bounded evidence; and where long-lived
 artifacts are retained. Record decisions with identities and affected claims.
 
-Optional branches stay separately budgeted: LuaJIT plugins, ELF/x86-64 extraction,
+Optional branches stay separately budgeted: GraphWalker path planning, LuaJIT plugins, ELF/x86-64 extraction,
 alternate Shen runtimes, external solvers and VM-level deterministic execution.
 Adopt one only when a measured gap or an explicitly chosen product requirement
 justifies it, with its own evidence and compatibility gate.

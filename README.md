@@ -281,8 +281,10 @@ the claims engine, static evidence, replay verification and incremental caching.
 
 ### Executable Shen system specifications
 
-The [production roadmap](docs/production-roadmap.md) tracks the remaining proof,
-adapter, replay and application-migration work, with acceptance gates.
+The planned [typed behavior architecture](docs/typed-behavior-architecture.md)
+centers executable Shen rules and behaviors, with separate legacy, intended and
+migration contracts. The [production roadmap](docs/production-roadmap.md) orders
+the remaining language, proof, adapter, replay and full migration work with gates.
 
 `capcov system` runs typed, compositional state models for simulation, bounded
 workflow exploration, adapter-driven conformance checks and reproducible

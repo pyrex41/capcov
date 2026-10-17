@@ -301,3 +301,9 @@ which typing, runtime and trust-boundary changes are implemented and still open.
 
 See the [Production roadmap](production-roadmap.md) for the complete remaining
 work, dependencies, validation gates and proposed change sequence.
+
+The revised [typed behavior architecture](typed-behavior-architecture.md) makes
+executable domain behavior and checked rule composition the next foundation.
+Legacy behavior, intended behavior and migration preservation are distinct
+contracts; model proofs and implementation conformance remain separate claims.
+This is planned work, not an expansion of the commands documented above.

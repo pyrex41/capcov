@@ -37,3 +37,13 @@ Further work prompted by the critique:
 The reviewer's reported native test run and inability to run Soufflé describe
 their environment. They are not substituted for the validation performed for
 this milestone.
+
+## Subsequent planning revision
+
+The [typed behavior architecture](typed-behavior-architecture.md) and revised
+[roadmap](production-roadmap.md) extend the critique into the executable model
+itself: typed states, commands, effects, rule contracts and behavioral composition
+precede full evidence admission. They distinguish reconstructed legacy behavior,
+approved intended behavior and explicit migration contracts. B1-B4 and R01-R22
+are planned work; none of these documentation changes makes the existing untyped
+authorities or trusted transformations typechecked or proved.
