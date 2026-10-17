@@ -121,6 +121,29 @@
         "tests.claim_semantics.test_systems.NativeSystemTests.test_split_workflow_exposes_duplicate_send_after_missing_ack",
         "tests.claim_semantics.test_systems.NativeSystemTests.test_unknown_workflow_exhausts_declared_choices"
       ]
+    },
+    {
+      "reason": "Needs native Shen or Souffle; these tests run without accepted skips in the corresponding CI family.",
+      "tests": [
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_safety_reachability_and_antithesis_catalog_emission",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_cli_exit_codes_preserve_open_and_operational_results",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_typed_relation_generates_campaign_calls",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_replay_detects_uncontrolled_state_and_adapter_receives_no_oracle",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_sequent_proofs_and_mutation_rejection",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_search_agrees_with_independent_boolean_truth_tables",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_compiler_proves_updates_but_preserves_open_obligations",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_modes_cardinality_generation_and_capability_consumption",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_mode_branch_outputs_resources_and_numeric_sorts",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_relational_search_reachability_history_and_budget",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_stateful_execution_replay_minimization_and_unknown_choice",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_full_evidence_to_counterexample_pipeline"
+      ]
+    },
+    {
+      "reason": "Needs native Shen or Souffle; these tests run without accepted skips in the corresponding CI family.",
+      "tests": [
+        "tests.claim_semantics.test_reasoning.SouffleSourceTests.test_transitive_invalidation_agrees_with_python"
+      ]
     }
   ]
 }

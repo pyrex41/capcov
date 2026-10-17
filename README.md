@@ -284,3 +284,9 @@ the claims engine, static evidence, replay verification and incremental caching.
 `capcov system` runs typed, compositional state models for simulation, bounded
 workflow exploration, adapter-driven conformance checks and reproducible
 case-scoped claim evidence. See [System specifications](docs/system-specifications.md).
+
+`capcov reason` adds source-linked evidence, compositional proof obligations,
+independently checked Shen sequent derivations, typed relational modes,
+Prolog-generated scenarios, stateful replay and counterexample minimization.
+See [Reasoning workbench](docs/reasoning-workbench.md) for runnable interfaces,
+the integrated verification loop, and precise proof and execution boundaries.

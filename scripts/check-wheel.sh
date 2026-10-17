@@ -22,11 +22,16 @@ cd "$scratch"
 RELEASE_REF=${RELEASE_REF:-} "$scratch/venv/bin/python" - <<'PY'
 import importlib.metadata as metadata
 import os
+from importlib import resources
 
 import capcov
 from capcov.faults import checker
 
 assert checker.load_pack()["id"] == checker.PACK_ID
+operations = resources.files("capcov.operations")
+for name in ("proof-check.shen", "proof-search.shen", "relations.shen", "search.shen"):
+    assert operations.joinpath("shen", name).read_bytes(), name
+assert operations.joinpath("evidence.dl").read_bytes()
 version = metadata.version("capcov")
 assert capcov.__version__ == version, (capcov.__version__, version)
 ref = os.environ.get("RELEASE_REF", "")

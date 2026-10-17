@@ -1,5 +1,9 @@
 # Compositional Shen systems
 
+For source evidence, static obligations, independently checked sequent proofs,
+typed relational generators and stateful replay, see the
+[reasoning workbench](reasoning-workbench.md). The commands below remain supported.
+
 `capcov system` executes a complete **finite abstraction** of an application's
 state and operations. The same specification supplies simulation, access
 analysis, bounded workflow exploration, model comparison, observation checking,

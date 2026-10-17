@@ -28,7 +28,8 @@
     "tests.claim_semantics.test_static_corpus_evaluation.SouffleAgreesWithPythonOnEveryStaticCase",
     "tests.claim_semantics.test_static_evidence_policy.StaticEvidencePolicyTest",
     "tests.test_claim_souffle.SouffleBackendTests",
-    "tests.test_faults_checker.EngineTest"
+    "tests.test_faults_checker.EngineTest",
+    "tests.claim_semantics.test_reasoning.SouffleSourceTests"
    ]
   },
   "shen": {
@@ -45,7 +46,8 @@
     "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest",
     "tests.claim_semantics.test_spec_compiler.NativeSpecTests",
     "tests.claim_semantics.test_operations.NativeOperationTests",
-    "tests.claim_semantics.test_systems.NativeSystemTests"
+    "tests.claim_semantics.test_systems.NativeSystemTests",
+    "tests.claim_semantics.test_reasoning.NativeReasoningTests"
    ]
   },
   "indexers": {
