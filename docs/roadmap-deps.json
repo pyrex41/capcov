@@ -1,0 +1,378 @@
+{
+ "version": 1,
+ "about": "Authoritative dependency data for docs/production-roadmap.md. scripts/roadmap-deps.py validates this file and regenerates the dependency table in section 4, the R-table in section 17 and the 'Changes' line under each work-package heading. Edit this file, not the generated regions.",
+ "executor_classes": {
+  "model": "Shen reference model execution",
+  "fake": "Synthetic in-process adapter or service substitute; never called a legacy or target implementation",
+  "real-service": "Pinned real service or deployed implementation behind an enforced adapter",
+  "none": "No implementation is executed; checker, schema or proof work"
+ },
+ "work_packages": {
+  "W0": "Baseline and validation",
+  "B1": "Domain language and model variants",
+  "W1": "Evidence/checker contracts",
+  "B2": "Checked rules and behavior composition",
+  "W3": "Checked compiler transformations",
+  "W2": "Typed claims and authority",
+  "B3": "Model execution, generation and correspondence",
+  "W6": "Production adapter enforcement",
+  "B4": "Migration contracts and three-way qualification",
+  "W4": "Quantified/structural induction",
+  "W5": "General frames and completion",
+  "W7": "Deterministic controls and replay",
+  "W8": "Concurrency and temporal properties",
+  "W9": "Complete application migration",
+  "W10": "Performance and incrementality",
+  "W11": "Release qualification"
+ },
+ "conditions": {
+  "multi-store-observation": {
+   "applies_to": "inventory-entry",
+   "description": "The observation map reads more than one store, or any store with asynchronous workers or TTL.",
+   "any_of": [
+    {"field": "observation_stores", "test": "count_gt", "value": 1},
+    {"field": "observation_stores", "test": "any_flag", "flag": "async_or_ttl"}
+   ]
+  },
+  "concurrent-or-retry": {
+   "applies_to": "inventory-entry",
+   "description": "Two or more commands can be in flight concurrently, or an info-able step is followed by a retry.",
+   "any_of": [
+    {"field": "max_concurrent_commands", "test": "gt", "value": 1},
+    {"field": "info_step_then_retry", "test": "true"}
+   ]
+  },
+  "unbounded-progress": {
+   "applies_to": "claim",
+   "description": "A progress or liveness claim beyond a bounded campaign, needing ranking or well-founded arguments.",
+   "any_of": [
+    {"field": "claims_unbounded_progress", "test": "true"}
+   ]
+  },
+  "replay-claims": {
+   "applies_to": "claim",
+   "description": "A projection or targeting result is reported as a replayable execution claim.",
+   "any_of": [
+    {"field": "reported_as_replay", "test": "true"}
+   ]
+  },
+  "advertised": {
+   "applies_to": "release",
+   "description": "The capability is part of the release's advertised scope.",
+   "any_of": [
+    {"field": "advertised", "test": "true"}
+   ]
+  }
+ },
+ "changes": [
+  {
+   "id": "R01",
+   "title": "Full pinned baseline, trust inventory and benchmarks",
+   "work_package": "W0",
+   "depends": [],
+   "delivers": ["cap.validation-baseline", "cap.trust-inventory", "cap.benchmarks"],
+   "requires_capabilities": [],
+   "gate": "Accounted test families and named validation report",
+   "executor_classes": ["model", "fake"]
+  },
+  {
+   "id": "R02",
+   "title": "Typed domain/behavior IR, variants and `.ops` compatibility",
+   "work_package": "B1",
+   "depends": ["R01"],
+   "delivers": ["cap.behavior-ir", "cap.model-variants", "cap.ops-bridge"],
+   "requires_capabilities": [
+    {"capability": "cap.validation-baseline"}
+   ],
+   "aligns_with": ["R03"],
+   "gate": "Reviewed IR specification; construction and compatibility fixtures",
+   "executor_classes": ["model"]
+  },
+  {
+   "id": "R03",
+   "title": "Common artifacts, outcomes, mappings and decision identities",
+   "work_package": "W1",
+   "depends": ["R02"],
+   "delivers": ["cap.artifact-envelope", "cap.outcome-vocabulary", "cap.decision-identity"],
+   "requires_capabilities": [
+    {"capability": "cap.behavior-ir"}
+   ],
+   "gate": "Cross-version/adversarial envelope checks",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R04",
+   "title": "Primitive contract rules and composition checker",
+   "work_package": "B2",
+   "depends": ["R02", "R03"],
+   "delivers": ["cap.contract-checker"],
+   "requires_capabilities": [
+    {"capability": "cap.behavior-ir"},
+    {"capability": "cap.artifact-envelope"}
+   ],
+   "gate": "Independent valid/forged derivation checks",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R05",
+   "title": "Checked WP/frame/substitution transformation protocol",
+   "work_package": "W3",
+   "depends": ["R02", "R03"],
+   "delivers": ["cap.checked-transformations"],
+   "requires_capabilities": [
+    {"capability": "cap.behavior-ir"},
+    {"capability": "cap.artifact-envelope"}
+   ],
+   "gate": "Checked rewrites and mutant detection",
+   "executor_classes": ["model"]
+  },
+  {
+   "id": "R06",
+   "title": "Typed claims, authority and pack migration",
+   "work_package": "W2",
+   "depends": ["R03", "R04"],
+   "delivers": ["cap.typed-claims"],
+   "requires_capabilities": [
+    {"capability": "cap.artifact-envelope"},
+    {"capability": "cap.contract-checker"}
+   ],
+   "gate": "Differential admission and occurrence checks",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R07",
+   "title": "Shared simulator, typed generation and conformance monitor",
+   "work_package": "B3",
+   "depends": ["R04", "R05"],
+   "delivers": ["cap.simulator", "cap.typed-generation", "cap.conformance-monitor"],
+   "requires_capabilities": [
+    {"capability": "cap.contract-checker"},
+    {"capability": "cap.checked-transformations"}
+   ],
+   "gate": "Cross-interpretation and ambiguity checks on the supported fragment",
+   "executor_classes": ["model", "fake"]
+  },
+  {
+   "id": "R08",
+   "title": "Enforced leases, fencing and server lifecycle",
+   "work_package": "W6",
+   "depends": ["R01"],
+   "delivers": ["cap.leases"],
+   "requires_capabilities": [
+    {"capability": "cap.validation-baseline"}
+   ],
+   "aligns_with": ["R03"],
+   "gate": "Crash, expiry, cleanup and isolation suite",
+   "executor_classes": ["fake", "real-service"]
+  },
+  {
+   "id": "R09",
+   "title": "Real SQL transaction/journal adapters and domain maps",
+   "work_package": "W6",
+   "depends": ["R02", "R03", "R08"],
+   "delivers": ["cap.sql-journal"],
+   "requires_capabilities": [
+    {"capability": "cap.behavior-ir"},
+    {"capability": "cap.outcome-vocabulary"},
+    {"capability": "cap.leases"}
+   ],
+   "gate": "Real MySQL/PostgreSQL outcome tests",
+   "executor_classes": ["real-service"]
+  },
+  {
+   "id": "R10",
+   "title": "Migration decisions and three-way workflow on available capabilities",
+   "work_package": "B4",
+   "depends": ["R03", "R07"],
+   "delivers": ["cap.migration-decisions", "cap.three-way-report"],
+   "requires_capabilities": [
+    {"capability": "cap.decision-identity"},
+    {"capability": "cap.simulator"},
+    {"capability": "cap.conformance-monitor"}
+   ],
+   "gate": "Transfer/outbox/retry fixture: duplicate effect detected in a history with an indeterminate step, approved change checked, target mutant rejected; conservation is bounded per-transition checking, not proof",
+   "executor_classes": ["model", "fake"]
+  },
+  {
+   "id": "R11",
+   "title": "Sorted quantifier/equality kernel",
+   "work_package": "W4",
+   "depends": ["R04", "R05"],
+   "delivers": ["cap.quantifier-kernel"],
+   "requires_capabilities": [
+    {"capability": "cap.contract-checker"},
+    {"capability": "cap.checked-transformations"}
+   ],
+   "aligns_with": ["R06"],
+   "gate": "Binder/eigenvariable/definedness adversarial checks",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R12",
+   "title": "Structural induction, arithmetic and resource lemmas",
+   "work_package": "W4",
+   "depends": ["R11"],
+   "delivers": ["cap.structural-induction", "cap.conservation-proof"],
+   "requires_capabilities": [
+    {"capability": "cap.quantifier-kernel"}
+   ],
+   "gate": "Constructor coverage, range/conservation proofs",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R13",
+   "title": "Cross-key, domain-changing and nested completion",
+   "work_package": "W5",
+   "depends": ["R05", "R12"],
+   "delivers": ["cap.general-completion"],
+   "requires_capabilities": [
+    {"capability": "cap.checked-transformations"},
+    {"capability": "cap.structural-induction"}
+   ],
+   "gate": "Valid proofs and invalid-frame countercases",
+   "executor_classes": ["model"]
+  },
+  {
+   "id": "R14",
+   "title": "Redis/DocDB/queues and consistent observation cuts",
+   "work_package": "W6",
+   "depends": ["R09"],
+   "delivers": ["cap.multi-store-adapters", "cap.observation-cut"],
+   "requires_capabilities": [
+    {"capability": "cap.sql-journal"}
+   ],
+   "gate": "Real-service barriers and journal completeness",
+   "executor_classes": ["real-service"]
+  },
+  {
+   "id": "R15",
+   "title": "Controlled choices, uncertainty and durable replay",
+   "work_package": "W7",
+   "depends": ["R07", "R09"],
+   "delivers": ["cap.controlled-replay"],
+   "requires_capabilities": [
+    {"capability": "cap.simulator"},
+    {"capability": "cap.sql-journal"},
+    {"capability": "cap.observation-cut", "when": "multi-store-observation"}
+   ],
+   "gate": "Fresh-environment fault replay",
+   "executor_classes": ["model", "fake", "real-service"]
+  },
+  {
+   "id": "R16",
+   "title": "Causal minimization and Antithesis round trip",
+   "work_package": "W7",
+   "depends": ["R15"],
+   "delivers": ["cap.causal-minimization", "cap.antithesis-roundtrip"],
+   "requires_capabilities": [
+    {"capability": "cap.controlled-replay"}
+   ],
+   "gate": "Reduced reproducible failures and imported evidence",
+   "executor_classes": ["fake", "real-service"]
+  },
+  {
+   "id": "R10q",
+   "title": "Three-way qualification of the transfer/outbox/retry fixture",
+   "work_package": "B4",
+   "depends": ["R09", "R10", "R12", "R15", "R16"],
+   "delivers": ["cap.three-way-qualified"],
+   "requires_capabilities": [
+    {"capability": "cap.sql-journal"},
+    {"capability": "cap.three-way-report"},
+    {"capability": "cap.conservation-proof"},
+    {"capability": "cap.controlled-replay"},
+    {"capability": "cap.causal-minimization"}
+   ],
+   "gate": "R10 fixture against real-service adapters with conservation proved, failure replayed in a fresh environment and minimized; replay identity drift detected",
+   "executor_classes": ["model", "fake", "real-service"]
+  },
+  {
+   "id": "R17",
+   "title": "Concurrent behaviors, histories and temporal contracts",
+   "work_package": "W8",
+   "depends": ["R04", "R15"],
+   "delivers": ["cap.concurrent-histories"],
+   "requires_capabilities": [
+    {"capability": "cap.contract-checker"},
+    {"capability": "cap.controlled-replay"},
+    {"capability": "cap.structural-induction", "when": "unbounded-progress"}
+   ],
+   "gate": "Independent small-history oracles and progress assumptions",
+   "executor_classes": ["model", "fake", "real-service"]
+  },
+  {
+   "id": "R18",
+   "title": "Souffle-guided targeting and optional GraphWalker projection",
+   "work_package": "B3",
+   "depends": ["R06", "R07"],
+   "delivers": ["cap.graph-projection"],
+   "requires_capabilities": [
+    {"capability": "cap.typed-claims"},
+    {"capability": "cap.simulator"},
+    {"capability": "cap.controlled-replay", "when": "replay-claims"}
+   ],
+   "gate": "Projection mapping, feasibility and seed/control distinction",
+   "executor_classes": ["model"]
+  },
+  {
+   "id": "R19",
+   "title": "Full consumer inventory, decisions and evidence rollout",
+   "work_package": "W9",
+   "depends": [],
+   "delivers": ["cap.consumer-inventory", "cap.consumer-qualification"],
+   "requires_capabilities": [
+    {"capability": "cap.three-way-qualified", "stage": "qualification"},
+    {"capability": "cap.observation-cut", "stage": "qualification", "when": "multi-store-observation"},
+    {"capability": "cap.concurrent-histories", "stage": "qualification", "when": "concurrent-or-retry"}
+   ],
+   "qualification_depends": ["R10q"],
+   "gate": "Every entry disposed with its condition classification recorded; critical gaps resolved",
+   "executor_classes": ["model", "real-service"]
+  },
+  {
+   "id": "R20",
+   "title": "Batch, cache and isolated workers",
+   "work_package": "W10",
+   "depends": ["R01", "R03"],
+   "delivers": ["cap.batched-workers"],
+   "requires_capabilities": [
+    {"capability": "cap.benchmarks"},
+    {"capability": "cap.artifact-envelope"}
+   ],
+   "gate": "Measured cross-mode agreement",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R21",
+   "title": "Incremental fact/proof/decision invalidation",
+   "work_package": "W10",
+   "depends": ["R05", "R06", "R20"],
+   "delivers": ["cap.incremental-invalidation"],
+   "requires_capabilities": [
+    {"capability": "cap.checked-transformations"},
+    {"capability": "cap.typed-claims"},
+    {"capability": "cap.batched-workers"}
+   ],
+   "gate": "Full recomputation agreement including removals",
+   "executor_classes": ["none"]
+  },
+  {
+   "id": "R22",
+   "title": "Complete release qualification",
+   "work_package": "W11",
+   "depends": ["R19"],
+   "delivers": ["cap.release"],
+   "requires_capabilities": [
+    {"capability": "cap.consumer-qualification"},
+    {"capability": "cap.general-completion", "when": "advertised"},
+    {"capability": "cap.multi-store-adapters", "when": "advertised"},
+    {"capability": "cap.antithesis-roundtrip", "when": "advertised"},
+    {"capability": "cap.concurrent-histories", "when": "advertised"},
+    {"capability": "cap.graph-projection", "when": "advertised"},
+    {"capability": "cap.incremental-invalidation", "when": "advertised"}
+   ],
+   "gate": "Scope-specific release bundle",
+   "executor_classes": ["model", "real-service"]
+  }
+ ]
+}
