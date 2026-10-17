@@ -288,3 +288,6 @@ refinement across concurrent histories, adapter implementations for real service
 and an executor that controls scheduling, time, entropy, network and persistence.
 These are explicit capabilities beyond this implemented workbench, not guarantees
 obtained by choosing Shen or by replaying a model twice.
+
+Production adapter contracts and unbounded transition-system safety induction
+are documented in [adapters-and-induction.md](adapters-and-induction.md).

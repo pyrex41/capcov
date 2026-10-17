@@ -132,6 +132,8 @@ def main(argv=None):
         choices=(
             "compile",
             "prove",
+            "induct",
+            "check-induction",
             "check",
             "relation",
             "solve",
@@ -149,7 +151,7 @@ def main(argv=None):
     parser.add_argument("--spec", type=Path)
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--adapter", nargs="+")
+    parser.add_argument("--adapter", nargs=argparse.REMAINDER)
     parser.add_argument("--timeout", type=float, default=60)
     args = parser.parse_args(argv)
     try:
@@ -185,6 +187,16 @@ def main(argv=None):
                     for i, p in enumerate(result["catalog"])
                 )
             )
+        elif args.mode == "induct":
+            from .induction import prove_induction
+
+            result = prove_induction(payload, timeout=args.timeout)
+            code = int(result["status"] != "proved")
+        elif args.mode == "check-induction":
+            from .induction import check_induction
+
+            result = {"verified": check_induction(payload, timeout=args.timeout)}
+            code = int(not result["verified"])
         elif args.mode == "prove":
             result = prove(**payload, timeout=args.timeout)
             code = int(result["answer"][0] != "proved")

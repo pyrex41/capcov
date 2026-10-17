@@ -47,7 +47,8 @@
     "tests.claim_semantics.test_spec_compiler.NativeSpecTests",
     "tests.claim_semantics.test_operations.NativeOperationTests",
     "tests.claim_semantics.test_systems.NativeSystemTests",
-    "tests.claim_semantics.test_reasoning.NativeReasoningTests"
+    "tests.claim_semantics.test_reasoning.NativeReasoningTests",
+    "tests.claim_semantics.test_adapters_induction.NativeInductionTests"
    ]
   },
   "indexers": {

@@ -144,6 +144,16 @@
       "tests": [
         "tests.claim_semantics.test_reasoning.SouffleSourceTests.test_transitive_invalidation_agrees_with_python"
       ]
+    },
+    {
+      "reason": "Requires native Shen; runs in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_http_model_conformance",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_induction_and_forgery",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_missing_frame_is_not_assumed",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_base_and_safety_fail_independently",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_protocol_with_cycles"
+      ]
     }
   ]
 }
