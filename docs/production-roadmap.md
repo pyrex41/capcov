@@ -109,7 +109,8 @@ unbounded unreachability proof.
 
 Generated from [roadmap-deps.json](roadmap-deps.json); edit that file and run
 `python scripts/roadmap-deps.py`. A conditional requirement applies to a record
-(an inventory entry, claim or release scope) for which its condition holds.
+(an inventory entry, a claim, or a capability in a release) for which its
+condition holds.
 
 <!-- generated: roadmap-deps section=4 -->
 
@@ -118,27 +119,27 @@ Generated from [roadmap-deps.json](roadmap-deps.json); edit that file and run
 | W0: Baseline and validation | R01 | — | — |
 | B1: Domain language and model variants | R02 | R01 | — |
 | W1: Evidence/checker contracts | R03 | R02 | — |
-| B2: Checked rules and behavior composition | R04 | R02, R03 | — |
-| W3: Checked compiler transformations | R05 | R02, R03 | — |
-| W2: Typed claims and authority | R06 | R03, R04 | — |
+| B2: Checked rules and behavior composition | R04 | R03 | — |
+| W3: Checked compiler transformations | R05 | R03 | — |
+| W2: Typed claims and authority | R06 | R04 | — |
 | B3: Model execution, generation and correspondence | R07, R18 | R07 ← R04, R05; R18 ← R06, R07 | R18: R15 if `replay-claims` |
-| W6: Production adapter enforcement | R08, R09, R14 | R08 ← R01; R09 ← R02, R03, R08; R14 ← R09 | — |
-| B4: Migration contracts and three-way qualification | R10, R10q | R10 ← R03, R07; R10q ← R09, R10, R12, R15, R16 | — |
+| W6: Production adapter enforcement | R08, R09, R14 | R08 ← R01; R09 ← R03, R08; R14 ← R09 | — |
+| B4: Migration contracts and three-way qualification | R10, R10q | R10 ← R07; R10q ← R10, R12, R16 | — |
 | W4: Quantified/structural induction | R11, R12 | R11 ← R04, R05; R12 ← R11 | — |
-| W5: General frames and completion | R13 | R05, R12 | — |
+| W5: General frames and completion | R13 | R12 | — |
 | W7: Deterministic controls and replay | R15, R16 | R15 ← R07, R09; R16 ← R15 | R15: R14 if `multi-store-observation` |
-| W8: Concurrency and temporal properties | R17 | R04, R15 | R12 if `unbounded-progress` |
+| W8: Concurrency and temporal properties | R17 | R15 | R12 if `unbounded-progress` |
 | W9: Complete application migration | R19 | none to start; R10q to qualify | to qualify, R14 if `multi-store-observation`; to qualify, R17 if `concurrent-or-retry` |
-| W10: Performance and incrementality | R20, R21 | R20 ← R01, R03; R21 ← R05, R06, R20 | — |
+| W10: Performance and incrementality | R20, R21 | R20 ← R03; R21 ← R05, R06, R20 | — |
 | W11: Release qualification | R22 | R19 | R13, R14, R16, R17, R18, R21 if `advertised` |
 
-Conditions are evaluated per record, not by judgment:
+Conditions are evaluated per record, not by judgment. The fields a condition reads belong to the record it applies to; for an inventory entry they are part of the R19 inventory schema, which R19 owns.
 
 * `multi-store-observation` (per inventory entry): The observation map reads more than one store, or any store with asynchronous workers or TTL.
 * `concurrent-or-retry` (per inventory entry): Two or more commands can be in flight concurrently, or an info-able step is followed by a retry.
 * `unbounded-progress` (per claim): A progress or liveness claim beyond a bounded campaign, needing ranking or well-founded arguments.
 * `replay-claims` (per claim): A projection or targeting result is reported as a replayable execution claim.
-* `advertised` (per release): The capability is part of the release's advertised scope.
+* `advertised` (per (release, capability) pair): The capability is in that release's advertised scope; recorded separately for each capability of each release.
 
 <!-- end generated: roadmap-deps -->
 
@@ -179,7 +180,8 @@ Separate structural well-formedness, contract derivability and execution outcome
 Define trusted primitive rules and checked derived rules, then sequencing,
 branching, frames, transactional commit/abort, effects and resource accounting.
 Integrate existing loop proofs; add retry/idempotency, recursive and concurrent
-rules only with the relevant R12/R13/R17 obligations. Unsupported contracts stay open.
+rules only once the changes that check their obligations have landed (§17).
+Unsupported contracts stay open.
 
 **Deliverables:** frozen primitive/axiom ledger, rule declaration syntax, explicit
 proof terms, independent checker, elaboration diagnostics and reusable behavior
@@ -199,7 +201,8 @@ Execute canonical behavior IR in the reference Shen interpreter. Generate legal
 inputs/histories through typed modes and finite constraints; label invalid-input
 campaigns separately. Emit transition witnesses and typed effect requests. Derive
 obligations and finite graph/relation projections from that same model, retaining
-translation witnesses or explicit trust boundaries under R05.
+translation witnesses or explicit trust boundaries under the checked
+transformation protocol.
 
 Define adapter observation maps for arguments, returns, errors, state and effects,
 including hidden transitions and pending outcomes. A conformance monitor tracks
@@ -241,8 +244,8 @@ artifact names its executor class; a Python fake is never called a legacy
 implementation.
 
 **Gate (R10q):** the same contract against real-service adapters, with
-conservation proved (R12), the failure replayed in a fresh environment (R15) and
-minimized (R16), and replay identity drift detected. Then apply the contract to
+conservation proved, the failure replayed in a fresh environment and minimized,
+and replay identity drift detected. Then apply the contract to
 real consumer capabilities under R19. One passing fixture validates integration
 only; it does not qualify the full migration.
 
@@ -311,7 +314,7 @@ Failure cannot become a successful claim through folding or CLI exit handling.
 
 **Changes:** R06 (§17). <!-- generated: roadmap-deps wp=W2 -->
 
-Integrate R02 domain sorts and R04 behavioral derivations into evidence admission.
+Integrate typed domain sorts and checked behavioral derivations into evidence admission.
 Behavior validity and producer authority remain separate checked judgments.
 Build typed judgments around existing semantics rather than copying the untyped
 authority code and relabeling its column checks as a type system.
@@ -602,9 +605,10 @@ behavior, idempotent commands, outbox/worker workflows, then cross-store and
 concurrent scenarios. These are rollout groups, not the final scope. Finish every
 inventory entry and its declared critical behavior.
 
-Record per entry whether `multi-store-observation` and `concurrent-or-retry`
-hold (section 4); they decide whether its qualification needs R14 and R17. A
-three-way report that marks an entry preserved without the required change fails.
+Record per entry whether each inventory-entry condition of section 4 holds;
+the conditional requirements there decide what its qualification needs. A
+three-way report that marks an entry preserved without a requirement its
+conditions impose fails.
 
 **Gate:** all entries have traceable dispositions; critical target obligations
 meet the agreed evidence policy; mismatches have reproducible minimized cases;
@@ -650,8 +654,8 @@ A release claiming the full workflow requires:
   paths for prior artifacts. Changed checker semantics cannot silently reuse proofs.
 * Real-service qualification of the adapter/control scope actually advertised.
 * Cold restoration of replay bundles, crash recovery, cleanup and identity checks.
-* Checked R02/R04 behavior/rule judgments and R07 correspondence boundaries, with
-  versioned R10 migration decisions; distinguish model proofs from implementation evidence.
+* Checked behavior/rule judgments and correspondence boundaries, with versioned
+  migration decisions; distinguish model proofs from implementation evidence.
 * A consuming application report that covers its entire reconciled inventory and
   keeps unresolved/unsupported cases visible.
 * A trusted-code/assumption ledger with no undocumented semantic authority.
@@ -667,9 +671,7 @@ cloud applications” is not justified by the current implementation or this pla
 This R-series supersedes N01-N19 from the previous roadmap. All original work
 packages remain above; the revised order adds typed behavior as the common basis.
 Each row is a reviewable change or small series. Dependencies gate admission.
-The table is generated from [roadmap-deps.json](roadmap-deps.json). Executors
-name what an exit artifact executes: the Shen `model`, a synthetic `fake`, a
-`real-service`, or `none` for checker and proof work.
+The table is generated from [roadmap-deps.json](roadmap-deps.json).
 
 <!-- generated: roadmap-deps section=17 -->
 
@@ -678,26 +680,33 @@ name what an exit artifact executes: the Shen `model`, a synthetic `fake`, a
 | R01 | Full pinned baseline, trust inventory and benchmarks (W0) | — | — | model, fake | Accounted test families and named validation report |
 | R02 | Typed domain/behavior IR, variants and `.ops` compatibility (B1) | R01 | — | model | Reviewed IR specification; construction and compatibility fixtures |
 | R03 | Common artifacts, outcomes, mappings and decision identities (W1) | R02 | — | none | Cross-version/adversarial envelope checks |
-| R04 | Primitive contract rules and composition checker (B2) | R02, R03 | — | none | Independent valid/forged derivation checks |
-| R05 | Checked WP/frame/substitution transformation protocol (W3) | R02, R03 | — | model | Checked rewrites and mutant detection |
-| R06 | Typed claims, authority and pack migration (W2) | R03, R04 | — | none | Differential admission and occurrence checks |
+| R04 | Primitive contract rules and composition checker (B2) | R03 | — | none | Independent valid/forged derivation checks |
+| R05 | Checked WP/frame/substitution transformation protocol (W3) | R03 | — | model | Checked rewrites and mutant detection |
+| R06 | Typed claims, authority and pack migration (W2) | R04 | — | none | Differential admission and occurrence checks |
 | R07 | Shared simulator, typed generation and conformance monitor (B3) | R04, R05 | — | model, fake | Cross-interpretation and ambiguity checks on the supported fragment |
 | R08 | Enforced leases, fencing and server lifecycle (W6) | R01 | — | fake, real-service | Crash, expiry, cleanup and isolation suite |
-| R09 | Real SQL transaction/journal adapters and domain maps (W6) | R02, R03, R08 | — | real-service | Real MySQL/PostgreSQL outcome tests |
-| R10 | Migration decisions and three-way workflow on available capabilities (B4) | R03, R07 | — | model, fake | Transfer/outbox/retry fixture: duplicate effect detected in a history with an indeterminate step, approved change checked, target mutant rejected; conservation is bounded per-transition checking, not proof |
+| R09 | Real SQL transaction/journal adapters and domain maps (W6) | R03, R08 | — | real-service | Real MySQL/PostgreSQL outcome tests |
+| R10 | Migration decisions and three-way workflow on available capabilities (B4) | R07 | — | model, fake | Transfer/outbox/retry fixture: duplicate effect detected in a history with an indeterminate step, approved change checked, target mutant rejected; conservation is bounded per-transition checking, not proof |
 | R11 | Sorted quantifier/equality kernel (W4) | R04, R05 | — | none | Binder/eigenvariable/definedness adversarial checks |
 | R12 | Structural induction, arithmetic and resource lemmas (W4) | R11 | — | none | Constructor coverage, range/conservation proofs |
-| R13 | Cross-key, domain-changing and nested completion (W5) | R05, R12 | — | model | Valid proofs and invalid-frame countercases |
+| R13 | Cross-key, domain-changing and nested completion (W5) | R12 | — | model | Valid proofs and invalid-frame countercases |
 | R14 | Redis/DocDB/queues and consistent observation cuts (W6) | R09 | — | real-service | Real-service barriers and journal completeness |
 | R15 | Controlled choices, uncertainty and durable replay (W7) | R07, R09 | R14 if `multi-store-observation` | model, fake, real-service | Fresh-environment fault replay |
 | R16 | Causal minimization and Antithesis round trip (W7) | R15 | — | fake, real-service | Reduced reproducible failures and imported evidence |
-| R10q | Three-way qualification of the transfer/outbox/retry fixture (B4) | R09, R10, R12, R15, R16 | — | model, fake, real-service | R10 fixture against real-service adapters with conservation proved, failure replayed in a fresh environment and minimized; replay identity drift detected |
-| R17 | Concurrent behaviors, histories and temporal contracts (W8) | R04, R15 | R12 if `unbounded-progress` | model, fake, real-service | Independent small-history oracles and progress assumptions |
+| R10q | Three-way qualification of the transfer/outbox/retry fixture (B4) | R10, R12, R16 | — | model, fake, real-service | R10 fixture against real-service adapters with conservation proved, failure replayed in a fresh environment and minimized; replay identity drift detected |
+| R17 | Concurrent behaviors, histories and temporal contracts (W8) | R15 | R12 if `unbounded-progress` | model, fake, real-service | Independent small-history oracles and progress assumptions |
 | R18 | Souffle-guided targeting and optional GraphWalker projection (B3) | R06, R07 | R15 if `replay-claims` | model | Projection mapping, feasibility and seed/control distinction |
 | R19 | Full consumer inventory, decisions and evidence rollout (W9) | none to start; R10q to qualify | to qualify, R14 if `multi-store-observation`; to qualify, R17 if `concurrent-or-retry` | model, real-service | Every entry disposed with its condition classification recorded; critical gaps resolved |
-| R20 | Batch, cache and isolated workers (W10) | R01, R03 | — | none | Measured cross-mode agreement |
+| R20 | Batch, cache and isolated workers (W10) | R03 | — | none | Measured cross-mode agreement |
 | R21 | Incremental fact/proof/decision invalidation (W10) | R05, R06, R20 | — | none | Full recomputation agreement including removals |
 | R22 | Complete release qualification (W11) | R19 | R13, R14, R16, R17, R18, R21 if `advertised` | model, real-service | Scope-specific release bundle |
+
+Executors name what an exit artifact executes:
+
+* `model`: Shen reference model execution.
+* `fake`: Synthetic in-process adapter or service substitute; never called a legacy or target implementation.
+* `real-service`: Pinned real service or deployed implementation behind an enforced adapter.
+* `none`: No implementation is executed; checker, schema or proof work.
 
 <!-- end generated: roadmap-deps -->
 
@@ -713,14 +722,14 @@ name what an exit artifact executes: the Shen `model`, a synthetic `fake`, a
 4. Concrete IR specification, driven by those fixtures: indeterminate outcomes,
    intent/attempt identity, outbox record versus delivery, and the `.ops`
    compatibility mapping. It is the review gate for R02.
-5. R02, then R03 as a coordinated schema increment, followed by R04/R05/R07.
+5. R02, with R03 as a coordinated schema increment, then the table's order.
 
-R08 and the R19 inventory proceed alongside. R10 is the first complete
-behavioral migration loop on model/fake executors; R10q qualifies it; neither is
-the release endpoint. R19 covers the whole application. R18 is optional and
-blocks R22 only if that integration is advertised. Do not substitute another
-isolated example or a larger Boolean search bound for the behavioral-language
-milestone.
+Changes outside each other's dependency closure proceed alongside. R10 is the
+first complete behavioral migration loop on model/fake executors; R10q
+qualifies it; neither is the release endpoint. R19 covers the whole
+application. R18 is optional; whether a release needs it follows from the
+`advertised` condition. Do not substitute another isolated example or a larger
+Boolean search bound for the behavioral-language milestone.
 
 ## 18. Migration, rollback and stop conditions
 

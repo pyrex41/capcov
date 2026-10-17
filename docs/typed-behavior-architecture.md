@@ -275,7 +275,12 @@ critical obligation blocks target admission. capcov does not infer it.
 assumptions and operational controls satisfy an obligation. It has no weighted
 confidence score. No evidence-policy artifact exists yet. Existing code has
 narrower policy components that an evidence policy may reference, but they are
-not that concept: `DerivedCompletenessPolicy` (`claims/contracts.py`) names one
+not that concept. An evidence-policy bundle in `capcov.claims` gives each
+evidence relation an explicit polarity toward a claim (`EvidenceMapping` with
+support, refutation, observation or forbidden effect, `claims/ir.py`);
+`tests/claim_semantics/test_evidence_policy.py` checks that the claim-semantics
+corpus compiles into that form and that malformed bundles are refused.
+`DerivedCompletenessPolicy` (`claims/contracts.py`) names one
 reviewed exact closure rule, by digest, as an admissible way to establish a
 relation's completeness; `DiagnosticPolicy` (`claims/ir.py`) declares how a
 bundle reports missing or inconsistent premises, out-of-scope and forbidden

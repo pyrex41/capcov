@@ -25,9 +25,10 @@
   "W10": "Performance and incrementality",
   "W11": "Release qualification"
  },
+ "conditions_about": "The fields a condition reads belong to the record it applies to; for an inventory entry they are part of the R19 inventory schema, which R19 owns.",
  "conditions": {
   "multi-store-observation": {
-   "applies_to": "inventory-entry",
+   "applies_to": "inventory entry",
    "description": "The observation map reads more than one store, or any store with asynchronous workers or TTL.",
    "any_of": [
     {"field": "observation_stores", "test": "count_gt", "value": 1},
@@ -35,7 +36,7 @@
    ]
   },
   "concurrent-or-retry": {
-   "applies_to": "inventory-entry",
+   "applies_to": "inventory entry",
    "description": "Two or more commands can be in flight concurrently, or an info-able step is followed by a retry.",
    "any_of": [
     {"field": "max_concurrent_commands", "test": "gt", "value": 1},
@@ -57,8 +58,8 @@
    ]
   },
   "advertised": {
-   "applies_to": "release",
-   "description": "The capability is part of the release's advertised scope.",
+   "applies_to": "(release, capability) pair",
+   "description": "The capability is in that release's advertised scope; recorded separately for each capability of each release.",
    "any_of": [
     {"field": "advertised", "test": "true"}
    ]
@@ -84,7 +85,6 @@
    "requires_capabilities": [
     {"capability": "cap.validation-baseline"}
    ],
-   "aligns_with": ["R03"],
    "gate": "Reviewed IR specification; construction and compatibility fixtures",
    "executor_classes": ["model"]
   },
@@ -104,7 +104,7 @@
    "id": "R04",
    "title": "Primitive contract rules and composition checker",
    "work_package": "B2",
-   "depends": ["R02", "R03"],
+   "depends": ["R03"],
    "delivers": ["cap.contract-checker"],
    "requires_capabilities": [
     {"capability": "cap.behavior-ir"},
@@ -117,7 +117,7 @@
    "id": "R05",
    "title": "Checked WP/frame/substitution transformation protocol",
    "work_package": "W3",
-   "depends": ["R02", "R03"],
+   "depends": ["R03"],
    "delivers": ["cap.checked-transformations"],
    "requires_capabilities": [
     {"capability": "cap.behavior-ir"},
@@ -130,7 +130,7 @@
    "id": "R06",
    "title": "Typed claims, authority and pack migration",
    "work_package": "W2",
-   "depends": ["R03", "R04"],
+   "depends": ["R04"],
    "delivers": ["cap.typed-claims"],
    "requires_capabilities": [
     {"capability": "cap.artifact-envelope"},
@@ -161,7 +161,6 @@
    "requires_capabilities": [
     {"capability": "cap.validation-baseline"}
    ],
-   "aligns_with": ["R03"],
    "gate": "Crash, expiry, cleanup and isolation suite",
    "executor_classes": ["fake", "real-service"]
   },
@@ -169,7 +168,7 @@
    "id": "R09",
    "title": "Real SQL transaction/journal adapters and domain maps",
    "work_package": "W6",
-   "depends": ["R02", "R03", "R08"],
+   "depends": ["R03", "R08"],
    "delivers": ["cap.sql-journal"],
    "requires_capabilities": [
     {"capability": "cap.behavior-ir"},
@@ -183,7 +182,7 @@
    "id": "R10",
    "title": "Migration decisions and three-way workflow on available capabilities",
    "work_package": "B4",
-   "depends": ["R03", "R07"],
+   "depends": ["R07"],
    "delivers": ["cap.migration-decisions", "cap.three-way-report"],
    "requires_capabilities": [
     {"capability": "cap.decision-identity"},
@@ -203,7 +202,6 @@
     {"capability": "cap.contract-checker"},
     {"capability": "cap.checked-transformations"}
    ],
-   "aligns_with": ["R06"],
    "gate": "Binder/eigenvariable/definedness adversarial checks",
    "executor_classes": ["none"]
   },
@@ -223,7 +221,7 @@
    "id": "R13",
    "title": "Cross-key, domain-changing and nested completion",
    "work_package": "W5",
-   "depends": ["R05", "R12"],
+   "depends": ["R12"],
    "delivers": ["cap.general-completion"],
    "requires_capabilities": [
     {"capability": "cap.checked-transformations"},
@@ -274,7 +272,7 @@
    "id": "R10q",
    "title": "Three-way qualification of the transfer/outbox/retry fixture",
    "work_package": "B4",
-   "depends": ["R09", "R10", "R12", "R15", "R16"],
+   "depends": ["R10", "R12", "R16"],
    "delivers": ["cap.three-way-qualified"],
    "requires_capabilities": [
     {"capability": "cap.sql-journal"},
@@ -290,7 +288,7 @@
    "id": "R17",
    "title": "Concurrent behaviors, histories and temporal contracts",
    "work_package": "W8",
-   "depends": ["R04", "R15"],
+   "depends": ["R15"],
    "delivers": ["cap.concurrent-histories"],
    "requires_capabilities": [
     {"capability": "cap.contract-checker"},
@@ -333,7 +331,7 @@
    "id": "R20",
    "title": "Batch, cache and isolated workers",
    "work_package": "W10",
-   "depends": ["R01", "R03"],
+   "depends": ["R03"],
    "delivers": ["cap.batched-workers"],
    "requires_capabilities": [
     {"capability": "cap.benchmarks"},

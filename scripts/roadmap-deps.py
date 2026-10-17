@@ -16,7 +16,9 @@ from what the data generates. Run it from the project root.
 Validation:
 * ids are unique and every referenced R-id, work package, condition and
   executor class is declared;
-* an entry depends only on entries listed before it, and the graph is acyclic;
+* an entry depends only on entries listed before it, which makes the graph
+  acyclic, and no dependency is implied by another of the same entry's, so each
+  graph has one spelling;
 * every capability is delivered by exactly one entry, and every required
   capability is delivered by an entry listed before the one that needs it;
 * an unconditional requirement is delivered within the entry's own dependency
@@ -94,6 +96,13 @@ def validate(data: dict) -> list[str]:
         for test in tests:
             if test.get("test") not in TESTS or not test.get("field"):
                 errors.append(f"condition {name}: unsupported test {test!r}")
+            elif test["test"] in ("gt", "count_gt") and not _is_number(test.get("value")):
+                errors.append(f"condition {name}: {test['test']} on {test['field']} needs a numeric value")
+            elif test["test"] == "any_flag" and not test.get("flag"):
+                errors.append(f"condition {name}: any_flag on {test['field']} needs a flag")
+
+    if not isinstance(data.get("conditions_about"), str):
+        errors.append("conditions_about must say whose schema the condition fields belong to")
 
     order: dict[str, int] = {}
     for index, entry in enumerate(changes):
@@ -129,15 +138,20 @@ def validate(data: dict) -> list[str]:
             errors.append(f"{rid}: executor class none cannot be combined")
         if not entry.get("delivers"):
             errors.append(f"{rid}: delivers no capability")
-        for field in ("depends", "qualification_depends", "aligns_with"):
+        for field in ("depends", "qualification_depends"):
             for dep in entry.get(field, []):
                 if dep not in order:
                     errors.append(f"{rid}: {field} names unknown id {dep}")
                 elif dep == rid:
                     errors.append(f"{rid}: {field} names itself")
-                elif field != "aligns_with" and order[dep] > order[rid]:
+                elif order[dep] > order[rid]:
                     errors.append(f"{rid}: {field} names {dep}, which is listed later")
 
+        direct = list(entry.get("depends", [])) + list(entry.get("qualification_depends", []))
+        for dep in direct:
+            via = [other for other in direct if other != dep and dep in _closure(by_id, [other]) - {other}]
+            if via:
+                errors.append(f"{rid}: dependency on {dep} is redundant; it is implied by {via[0]}")
         start_closure = _closure(by_id, entry.get("depends", []))
         full_closure = start_closure | _closure(by_id, entry.get("qualification_depends", []))
         supplied: set[str] = set()
@@ -161,50 +175,46 @@ def validate(data: dict) -> list[str]:
                 if source not in closure:
                     errors.append(f"{rid}: requires {capability} at {stage} but {source} is not in its dependencies")
                 supplied.add(source)
-        direct = set(entry.get("depends", [])) | set(entry.get("qualification_depends", []))
-        for dep in sorted(direct):
+        for dep in sorted(set(direct)):
             if dep in by_id and dep not in supplied:
                 errors.append(f"{rid}: depends on {dep} but requires none of the capabilities it supplies")
 
-    errors.extend(_cycles(by_id))
     return errors
 
 
-def _cycles(by_id: dict[str, dict]) -> list[str]:
-    state: dict[str, int] = {}
-    found: list[str] = []
-
-    def visit(rid: str, path: list[str]) -> None:
-        state[rid] = 1
-        entry = by_id[rid]
-        for dep in entry.get("depends", []) + entry.get("qualification_depends", []):
-            if dep not in by_id:
-                continue
-            if state.get(dep) == 1:
-                found.append("cycle: " + " -> ".join(path[path.index(dep):] + [dep]))
-            elif dep not in state:
-                visit(dep, path + [dep])
-        state[rid] = 2
-
-    for rid in by_id:
-        if rid not in state:
-            visit(rid, [rid])
-    return found
+def _is_number(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def holds(data: dict, condition: str, record: dict) -> bool:
-    """Evaluate a declared condition against one record (e.g. an inventory entry)."""
+    """Evaluate a declared condition against one record (e.g. an R19 inventory entry).
+
+    A field of the wrong type is a DepsError naming the field, not a guess.
+    """
     for test in data["conditions"][condition]["any_of"]:
-        value = record.get(test["field"])
-        kind = test["test"]
-        if kind == "count_gt" and len(value or ()) > test["value"]:
-            return True
-        if kind == "gt" and value is not None and value > test["value"]:
-            return True
-        if kind == "true" and value is True:
-            return True
-        if kind == "any_flag" and any(item.get(test["flag"]) is True for item in value or ()):
-            return True
+        field, kind = test["field"], test["test"]
+        value = record.get(field)
+        if kind in ("count_gt", "any_flag"):
+            if value is None:
+                value = []
+            if not isinstance(value, list) or (kind == "any_flag" and not all(isinstance(i, dict) for i in value)):
+                raise DepsError(f"{condition}: field {field} must be a list" + (" of objects" if kind == "any_flag" else ""))
+            if kind == "count_gt" and len(value) > test["value"]:
+                return True
+            if kind == "any_flag" and any(item.get(test["flag"]) is True for item in value):
+                return True
+        elif kind == "gt":
+            if value is None:
+                continue
+            if not _is_number(value):
+                raise DepsError(f"{condition}: field {field} must be a number, got {value!r}")
+            if value > test["value"]:
+                return True
+        elif kind == "true":
+            if value is not None and not isinstance(value, bool):
+                raise DepsError(f"{condition}: field {field} must be true or false, got {value!r}")
+            if value is True:
+                return True
     return False
 
 
@@ -256,9 +266,9 @@ def render_section4(data: dict) -> list[str]:
             f"{e['id']}: {c}" if len(entries) > 1 else c
             for e, c in ((e, _conditional(e, deliverer)) for e in entries) if c != "—") or "—"
         lines.append(f"| {wp}: {data['work_packages'][wp]} | {_ids([e['id'] for e in entries])} | {depends} | {conditional} |")
-    lines += ["", "Conditions are evaluated per record, not by judgment:", ""]
+    lines += ["", f"Conditions are evaluated per record, not by judgment. {data['conditions_about']}", ""]
     for name, condition in data["conditions"].items():
-        lines.append(f"* `{name}` (per {condition['applies_to'].replace('-', ' ')}): {condition['description']}")
+        lines.append(f"* `{name}` (per {condition['applies_to']}): {condition['description']}")
     return lines
 
 
@@ -270,6 +280,9 @@ def render_section17(data: dict) -> list[str]:
         lines.append(
             f"| {entry['id']} | {entry['title']} ({entry['work_package']}) | {_depends(entry)} | "
             f"{_conditional(entry, deliverer)} | {', '.join(entry['executor_classes'])} | {entry['gate']} |")
+    lines += ["", "Executors name what an exit artifact executes:", ""]
+    for name, description in data["executor_classes"].items():
+        lines.append(f"* `{name}`: {description}.")
     return lines
 
 

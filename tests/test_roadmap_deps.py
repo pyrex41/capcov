@@ -37,8 +37,9 @@ class CommittedRoadmapTest(unittest.TestCase):
         data = roadmap_deps.load(DEPS)
         r10, r10q = _entry(data, "R10"), _entry(data, "R10q")
         self.assertEqual(set(r10["executor_classes"]), {"model", "fake"})
-        self.assertNotIn("R09", roadmap_deps._closure({e["id"]: e for e in data["changes"]}, r10["depends"]))
-        self.assertLessEqual({"R12", "R15", "R16"}, set(r10q["depends"]))
+        by_id = {e["id"]: e for e in data["changes"]}
+        self.assertNotIn("R09", roadmap_deps._closure(by_id, r10["depends"]))
+        self.assertLessEqual({"R09", "R10", "R12", "R15", "R16"}, roadmap_deps._closure(by_id, r10q["depends"]))
 
 
 class ValidateTest(unittest.TestCase):
@@ -56,9 +57,17 @@ class ValidateTest(unittest.TestCase):
         _entry(self.data, "R02")["depends"].append("R03")
         self.assertIn("R02: depends names R03, which is listed later", self._errors())
 
-    def test_a_cycle_is_reported(self) -> None:
-        _entry(self.data, "R02")["depends"].append("R03")
-        self.assertIn("cycle:", self._errors())
+    def test_a_dependency_implied_by_another_is_reported(self) -> None:
+        _entry(self.data, "R04")["depends"].append("R02")
+        self.assertIn("R04: dependency on R02 is redundant; it is implied by R03", self._errors())
+
+    def test_a_non_numeric_threshold_is_reported(self) -> None:
+        self.data["conditions"]["concurrent-or-retry"]["any_of"][0]["value"] = "one"
+        self.assertIn("gt on max_concurrent_commands needs a numeric value", self._errors())
+
+    def test_the_condition_fields_need_an_owner(self) -> None:
+        del self.data["conditions_about"]
+        self.assertIn("conditions_about", self._errors())
 
     def test_a_capability_nobody_delivers_is_reported(self) -> None:
         _entry(self.data, "R10")["requires_capabilities"].append({"capability": "cap.nowhere"})
@@ -98,10 +107,19 @@ class ConditionTest(unittest.TestCase):
         self.assertTrue(roadmap_deps.holds(self.data, "concurrent-or-retry", {"max_concurrent_commands": 2}))
         self.assertTrue(roadmap_deps.holds(self.data, "concurrent-or-retry", {"info_step_then_retry": True}))
 
+    def test_a_field_of_the_wrong_type_is_an_error_not_a_guess(self) -> None:
+        for condition, entry in (("concurrent-or-retry", {"max_concurrent_commands": "2"}),
+                                 ("concurrent-or-retry", {"info_step_then_retry": "yes"}),
+                                 ("multi-store-observation", {"observation_stores": "mysql"})):
+            with self.subTest(entry=entry), self.assertRaises(roadmap_deps.DepsError):
+                roadmap_deps.holds(self.data, condition, entry)
+
 
 class RegenerateTest(unittest.TestCase):
     def test_a_hand_edit_inside_a_generated_region_fails_the_check(self) -> None:
-        text = ROADMAP.read_text(encoding="utf-8").replace("| R10 ← R03, R07;", "| R10 ← R03, R07, R09;", 1)
+        original = ROADMAP.read_text(encoding="utf-8")
+        text = original.replace("| R10 ← R07;", "| R10 ← R07, R09;", 1)
+        self.assertNotEqual(text, original)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "roadmap.md"
             path.write_text(text, encoding="utf-8")
