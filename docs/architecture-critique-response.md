@@ -11,7 +11,7 @@ or LuaJIT plugin runtime as an accepted implementation requirement.
 | Sequent datatypes are narrower than “typed rules” suggests | Added actual Shen datatypes for completion formulas, contexts and judgments. The claim authorities and semantic checker functions remain untyped. No hand-written shape test is described as a Shen type proof. |
 | Shen is invoked per request | Unchanged. Neither loop checking nor completion adds a persistent process or incremental evaluator. Model validation now binds the model once per invocation rather than repeating its text for every annotation. |
 | Confidence has separate semantic and operational dimensions | Retained. Open obligations, operational errors, checked model proofs, source freshness and observed conformance are not collapsed into a confidence score. |
-| Soufflé supplies relation closure with differential checking | No changes to that subsystem in this milestone, and no claim that new Soufflé validation was performed. Completion uses the Shen proof path. |
+| Soufflé supplies relation closure with differential checking | The completion milestone (`dc3d57b`) changed no Soufflé code; completion uses the Shen proof path. The branch did add one Soufflé program earlier: `operations/evidence.dl` (`1068859`), the source-evidence invalidation closure described in the [reasoning workbench](reasoning-workbench.md#source-evidence-and-souffle-change-impact), tested by `tests.claim_semantics.test_reasoning.SouffleSourceTests` in the `souffle` family. No current Soufflé validation is recorded for either; the R01 validation report will state it. |
 | Reuse content identities, manifests and marker transport | Extended existing identities and native runner. New code and datatype resources are hashed and packaged; model/source binding is preserved. |
 | Binary fact schema and disassembly mapping were guesses | Not promoted into implementation assumptions or proved facts. No ELF adapter or binary-analysis fact schema has been added. |
 | LuaJIT is absent | No LuaJIT runtime/plugin architecture has been introduced. |
@@ -44,6 +44,7 @@ The [typed behavior architecture](typed-behavior-architecture.md) and revised
 [roadmap](production-roadmap.md) extend the critique into the executable model
 itself: typed states, commands, effects, rule contracts and behavioral composition
 precede full evidence admission. They distinguish reconstructed legacy behavior,
-approved intended behavior and explicit migration contracts. B1-B4 and R01-R22
-are planned work; none of these documentation changes makes the existing untyped
-authorities or trusted transformations typechecked or proved.
+approved intended behavior and explicit migration contracts. The R-changes,
+grouped under B1-B4 and W0-W11, are planned work; none of these documentation
+changes makes the existing untyped authorities or trusted transformations
+typechecked or proved.
