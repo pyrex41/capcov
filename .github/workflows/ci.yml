@@ -73,6 +73,7 @@ jobs:
       - name: Run the shard
         id: run
         run: |
+          if [ "${{ matrix.family }}" = "shen" ]; then export CAPCOV_SHEN_REQUIRED=1; fi
           result="shard-${{ matrix.family }}-$(echo '${{ matrix.shard }}' | tr / -).json"
           echo "result=${result}" >> "$GITHUB_OUTPUT"
           nix develop --no-update-lock-file '.#${{ matrix.family }}' --command bash -lc \

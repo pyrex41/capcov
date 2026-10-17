@@ -178,3 +178,11 @@ The operation framework, Shen datatype judgments and Prolog search, templates,
 declarative reporting policy, remaining pack migrations, and full release gates
 are still outstanding. This milestone demonstrates real replay closure
 elaboration; it does not claim the complete original architecture is delivered.
+
+### Typed operation milestone
+
+See [operation specifications](../../docs/operation-specifications.md) for the
+new native Shen instruction kernel, sequent construction judgments, one-source
+delete-issue example, explicit deployed divergence, Prolog observation/search,
+and independent transition corpus. This is an opt-in experimental API; it does
+not promote operation outputs into completeness or reviewer-admission facts.

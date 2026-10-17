@@ -1,0 +1,51 @@
+{
+  "state": [
+    {
+      "table": "issue",
+      "key": "i1",
+      "fields": {
+        "state": "active",
+        "tenant": "t1"
+      }
+    },
+    {
+      "table": "comment",
+      "key": "c1",
+      "fields": {
+        "issue_id": "i1"
+      }
+    },
+    {
+      "table": "file",
+      "key": "f1",
+      "fields": {
+        "issue_id": "i1"
+      }
+    },
+    {
+      "table": "comment",
+      "key": "c2",
+      "fields": {
+        "issue_id": "i2"
+      }
+    },
+    {
+      "table": "issue",
+      "key": "i2",
+      "fields": {
+        "state": "active",
+        "tenant": "t2"
+      }
+    },
+    {
+      "table": "issue_equipment",
+      "key": "link1",
+      "fields": {
+        "issue_id": "i1",
+        "equipment_id": "e1"
+      }
+    }
+  ],
+  "target": "i1",
+  "outcome": "committed"
+}

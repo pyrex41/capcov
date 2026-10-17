@@ -7,3 +7,6 @@ recursive-include src/capcov/claims/observation *.json
 recursive-include src/capcov/faults *.json
 include tests/fixtures/rea-api-view.json tests/fixtures/rea-api-view.README.md
 include src/capcov_contrib/REA.md
+
+recursive-include src/capcov/operations *.shen
+recursive-include tests/claim_semantics/fixtures/operations *.op *.json

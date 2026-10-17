@@ -89,6 +89,21 @@
         "tests.test_faults_checker.EngineTest.test_python_and_souffle_agree_on_the_pack",
         "tests.test_faults_checker.EngineTest.test_souffle_reports_the_same_closure_and_claims"
       ]
+    },
+    {
+      "reason": "Needs the native Shen runtime and bifrost. The plain Python image does not carry them; these tests run in the Shen CI family and are not accepted skips in the full toolchain.",
+      "tests": [
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_cli_uses_exit_code_for_disagreement",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_independent_transition_and_outcome_corpus",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_may_write_is_an_upper_bound_not_observed_coverage",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_new_fields_keep_canonical_order",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_order_extra_effect_and_wrong_state_rejected",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_prolog_finds_first_observable_disagreement",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_real_typechecker_and_invalid_data",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_trace_rechecks_and_binds_named_actions",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_transport_unicode_quotes_and_determinism",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_variant_does_not_authorize_intended_behavior"
+      ]
     }
   ]
 }

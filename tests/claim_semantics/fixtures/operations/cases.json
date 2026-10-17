@@ -1,0 +1,614 @@
+{
+  "description": "Independently authored synthetic expected behavior; never regenerated from the operation engine.",
+  "cases": [
+    {
+      "name": "intended-cascade",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "active",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "file",
+            "key": "f1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "i1",
+        "outcome": "committed"
+      },
+      "expected_state": [
+        {
+          "table": "issue",
+          "key": "i1",
+          "fields": {
+            "state": "deleted",
+            "tenant": "t1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c2",
+          "fields": {
+            "issue_id": "i2"
+          }
+        },
+        {
+          "table": "issue",
+          "key": "i2",
+          "fields": {
+            "state": "active",
+            "tenant": "t2"
+          }
+        },
+        {
+          "table": "issue_equipment",
+          "key": "link1",
+          "fields": {
+            "issue_id": "i1",
+            "equipment_id": "e1"
+          }
+        }
+      ],
+      "expected_effects": [
+        [
+          "delete",
+          "comment",
+          "c1"
+        ],
+        [
+          "delete",
+          "file",
+          "f1"
+        ],
+        [
+          "put",
+          "issue",
+          "i1",
+          "state",
+          "deleted"
+        ],
+        [
+          "emit",
+          "stats-recompute",
+          "e1"
+        ],
+        [
+          "emit",
+          "audit:issue-deleted",
+          "i1"
+        ]
+      ],
+      "alternatives": 1
+    },
+    {
+      "name": "deployed-omission",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "active",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "file",
+            "key": "f1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "i1",
+        "outcome": "committed",
+        "variant": {
+          "divergence": "d-01: missing child cascade",
+          "omit": [
+            "cascade-comments",
+            "cascade-files"
+          ]
+        }
+      },
+      "expected_state": [
+        {
+          "table": "issue",
+          "key": "i1",
+          "fields": {
+            "state": "deleted",
+            "tenant": "t1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "file",
+          "key": "f1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c2",
+          "fields": {
+            "issue_id": "i2"
+          }
+        },
+        {
+          "table": "issue",
+          "key": "i2",
+          "fields": {
+            "state": "active",
+            "tenant": "t2"
+          }
+        },
+        {
+          "table": "issue_equipment",
+          "key": "link1",
+          "fields": {
+            "issue_id": "i1",
+            "equipment_id": "e1"
+          }
+        }
+      ],
+      "expected_effects": [
+        [
+          "put",
+          "issue",
+          "i1",
+          "state",
+          "deleted"
+        ],
+        [
+          "emit",
+          "stats-recompute",
+          "e1"
+        ],
+        [
+          "emit",
+          "audit:issue-deleted",
+          "i1"
+        ]
+      ],
+      "alternatives": 1
+    },
+    {
+      "name": "abort-does-not-commit",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "active",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "file",
+            "key": "f1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "i1",
+        "outcome": "aborted"
+      },
+      "expected_state": [
+        {
+          "table": "issue",
+          "key": "i1",
+          "fields": {
+            "state": "active",
+            "tenant": "t1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "file",
+          "key": "f1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c2",
+          "fields": {
+            "issue_id": "i2"
+          }
+        },
+        {
+          "table": "issue",
+          "key": "i2",
+          "fields": {
+            "state": "active",
+            "tenant": "t2"
+          }
+        },
+        {
+          "table": "issue_equipment",
+          "key": "link1",
+          "fields": {
+            "issue_id": "i1",
+            "equipment_id": "e1"
+          }
+        }
+      ],
+      "expected_effects": [],
+      "alternatives": 1
+    },
+    {
+      "name": "unknown-preserves-both",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "active",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "file",
+            "key": "f1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "i1",
+        "outcome": "unknown"
+      },
+      "expected_state": [
+        {
+          "table": "issue",
+          "key": "i1",
+          "fields": {
+            "state": "deleted",
+            "tenant": "t1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c2",
+          "fields": {
+            "issue_id": "i2"
+          }
+        },
+        {
+          "table": "issue",
+          "key": "i2",
+          "fields": {
+            "state": "active",
+            "tenant": "t2"
+          }
+        },
+        {
+          "table": "issue_equipment",
+          "key": "link1",
+          "fields": {
+            "issue_id": "i1",
+            "equipment_id": "e1"
+          }
+        }
+      ],
+      "expected_effects": [
+        [
+          "delete",
+          "comment",
+          "c1"
+        ],
+        [
+          "delete",
+          "file",
+          "f1"
+        ],
+        [
+          "put",
+          "issue",
+          "i1",
+          "state",
+          "deleted"
+        ],
+        [
+          "emit",
+          "stats-recompute",
+          "e1"
+        ],
+        [
+          "emit",
+          "audit:issue-deleted",
+          "i1"
+        ]
+      ],
+      "alternatives": 2
+    },
+    {
+      "name": "repeat-commit-refused",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "deleted",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "i1",
+        "outcome": "committed"
+      },
+      "alternatives": 0
+    },
+    {
+      "name": "missing-unknown-is-prestate",
+      "request": {
+        "state": [
+          {
+            "table": "issue",
+            "key": "i1",
+            "fields": {
+              "state": "active",
+              "tenant": "t1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "file",
+            "key": "f1",
+            "fields": {
+              "issue_id": "i1"
+            }
+          },
+          {
+            "table": "comment",
+            "key": "c2",
+            "fields": {
+              "issue_id": "i2"
+            }
+          },
+          {
+            "table": "issue",
+            "key": "i2",
+            "fields": {
+              "state": "active",
+              "tenant": "t2"
+            }
+          },
+          {
+            "table": "issue_equipment",
+            "key": "link1",
+            "fields": {
+              "issue_id": "i1",
+              "equipment_id": "e1"
+            }
+          }
+        ],
+        "target": "missing",
+        "outcome": "unknown"
+      },
+      "expected_state": [
+        {
+          "table": "issue",
+          "key": "i1",
+          "fields": {
+            "state": "active",
+            "tenant": "t1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "file",
+          "key": "f1",
+          "fields": {
+            "issue_id": "i1"
+          }
+        },
+        {
+          "table": "comment",
+          "key": "c2",
+          "fields": {
+            "issue_id": "i2"
+          }
+        },
+        {
+          "table": "issue",
+          "key": "i2",
+          "fields": {
+            "state": "active",
+            "tenant": "t2"
+          }
+        },
+        {
+          "table": "issue_equipment",
+          "key": "link1",
+          "fields": {
+            "issue_id": "i1",
+            "equipment_id": "e1"
+          }
+        }
+      ],
+      "expected_effects": [],
+      "alternatives": 1
+    }
+  ]
+}
