@@ -10,3 +10,4 @@ include src/capcov_contrib/REA.md
 
 recursive-include src/capcov/operations *.shen
 recursive-include tests/claim_semantics/fixtures/operations *.op *.json
+recursive-include tests/claim_semantics/fixtures/systems *.ops *.json

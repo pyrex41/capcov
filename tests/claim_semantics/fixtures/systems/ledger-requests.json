@@ -1,0 +1,28 @@
+[
+  {
+    "command": "transfer",
+    "args": {
+      "from": "a",
+      "to": "b",
+      "amount": "3",
+      "request": "r"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  }
+]

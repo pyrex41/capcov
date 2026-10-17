@@ -11,14 +11,15 @@
     "Replay declares 37 completeness scopes and 17 named exact-rule closure policies. Shen regenerates 24 required premises; independent Python reconstruction verifies each insertion.",
     "All 28 frozen replay cases and individual completeness/assumption withdrawals retain identical relation closures under v1 and v2.",
     "Replay v2 runs through installed profile selection, receipt export, exact declaration combination, evaluation, reporting, and evaluation-bound v2 certificates. Receipt format versions are unchanged.",
-    "Experimental typed operation specifications derive transitions, ordered effect intents, outcome alternatives, traces and access summaries in Shen. Native Prolog checks observations and searches supplied finite state domains; the synthetic delete-issue corpus has hand-authored expectations. Existing model_min and evidence admission remain unchanged."
+    "Experimental typed operation specifications derive transitions, ordered effect intents, outcome alternatives, traces and access summaries in Shen. Native Prolog checks observations and searches supplied finite state domains; the synthetic delete-issue corpus has hand-authored expectations. Existing model_min and evidence admission remain unchanged.",
+    "Compositional finite systems now support schemas, scoped operation judgments, arithmetic, predicates, CRUD, branches, bounded iteration, before/after properties, invariants, workflows, adapter-driven observation checks, certificate reproduction, independent patch/trace/frame checking and case-scoped capcov claim export. Synthetic workspace, ledger and outbox regressions exercise distinct operation families."
   ],
   "pending": [
     "Static and observation v2 migrations, declarative reporting policies, and default selection after the full release gate.",
     "V2 mapping, aggregation, universal-domain, and native derivation admission.",
-    "Declaration templates, declarative reporting policies, and full operation specifications.",
-    "General operation invariant judgments, non-atomic effects, independent proof certificates, and a reviewed production model/receipt adapter.",
-    "Automatic bounded scenario generation and richer Prolog explanations; current discrepancy search requires an explicit finite state domain.",
+    "Declaration templates and declarative reporting policies for claim packs.",
+    "Static invariant-preservation proofs beyond runtime checks, unbounded/non-serial concurrency reasoning, and reviewed application-specific model/receipt adapters.",
+    "Automatic application-domain inference and richer Prolog explanations; system campaigns enumerate only explicit bounded argument, state and schedule domains.",
     "Complete pinned release CI gates; the operation milestone has native tests and a synthetic independent transition corpus, not a release-readiness claim."
   ],
   "native_authority_disagreements": [

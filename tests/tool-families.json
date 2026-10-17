@@ -44,7 +44,8 @@
     "tests.claim_semantics.test_shen_workbench.ShenDeriveTest",
     "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest",
     "tests.claim_semantics.test_spec_compiler.NativeSpecTests",
-    "tests.claim_semantics.test_operations.NativeOperationTests"
+    "tests.claim_semantics.test_operations.NativeOperationTests",
+    "tests.claim_semantics.test_systems.NativeSystemTests"
    ]
   },
   "indexers": {

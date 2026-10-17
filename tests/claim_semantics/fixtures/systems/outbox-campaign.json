@@ -1,0 +1,59 @@
+{
+  "initial": [
+    {
+      "table": "job",
+      "key": "j",
+      "fields": {
+        "status": "pending",
+        "payload": "hello"
+      }
+    }
+  ],
+  "calls": [
+    {
+      "command": "send",
+      "args": {
+        "id": "j"
+      },
+      "outcome": "committed"
+    },
+    {
+      "command": "ack",
+      "args": {
+        "id": "j"
+      },
+      "outcome": "committed"
+    }
+  ],
+  "depth": 3,
+  "schedule": [
+    [
+      {
+        "command": "send",
+        "args": {
+          "id": "j"
+        },
+        "outcome": "committed"
+      }
+    ],
+    [
+      {
+        "command": "send",
+        "args": {
+          "id": "j"
+        },
+        "outcome": "committed"
+      }
+    ],
+    [
+      {
+        "command": "ack",
+        "args": {
+          "id": "j"
+        },
+        "outcome": "committed"
+      }
+    ]
+  ],
+  "max_nodes": 32
+}

@@ -186,3 +186,8 @@ new native Shen instruction kernel, sequent construction judgments, one-source
 delete-issue example, explicit deployed divergence, Prolog observation/search,
 and independent transition corpus. This is an opt-in experimental API; it does
 not promote operation outputs into completeness or reviewer-admission facts.
+
+The compositional system suite (`test_systems.py`) covers workspace CRUD and
+authorization, ledger transfers/idempotency/conservation, and split outbox
+workflows. See [System specifications](../../docs/system-specifications.md)
+for the native language, harness, campaign and claim-export interfaces.

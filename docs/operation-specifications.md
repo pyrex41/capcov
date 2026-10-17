@@ -1,5 +1,8 @@
 # Typed operation specifications: delete-issue milestone
 
+For the compositional system engine, use [System specifications](system-specifications.md).
+This page documents the compatible original single-operation API.
+
 This experimental path defines an operation once, checks its construction with
 Shen's sequent datatypes, and uses a pure Shen effect interpreter to derive its
 state transition, ordered effects, outcome alternatives, trace and static access

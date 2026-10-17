@@ -651,6 +651,10 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     actual = sys.argv[1:] if argv is None else argv
+    if actual and actual[0] == "system":
+        from .operations.system import main as system_main
+
+        return system_main(actual[1:])
     if actual and actual[0] == "outcomes":
         from .outcomes import main as outcomes_main
 
@@ -681,6 +685,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="capcov", description=__doc__)
     parser.add_argument("--quiet", action="store_true")
     sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("system", help="typed Shen systems, simulation, campaigns and conformance checks")
     sub.add_parser("flows", help="source obligations, flow planning, and browser outcome evidence")
     sub.add_parser("outcomes", help="scoped behavior obligations and fresh pytest evidence")
     sub.add_parser("features", help="FODA feature-model validation, configuration check, coverage rollup")

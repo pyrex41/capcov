@@ -278,3 +278,9 @@ the claims engine, static evidence, replay verification and incremental caching.
 ## License
 
 [MIT](LICENSE).
+
+### Executable Shen system specifications
+
+`capcov system` runs typed, compositional state models for simulation, bounded
+workflow exploration, adapter-driven conformance checks and reproducible
+case-scoped claim evidence. See [System specifications](docs/system-specifications.md).

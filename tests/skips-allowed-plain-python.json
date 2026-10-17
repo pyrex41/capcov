@@ -104,6 +104,23 @@
         "tests.claim_semantics.test_operations.NativeOperationTests.test_transport_unicode_quotes_and_determinism",
         "tests.claim_semantics.test_operations.NativeOperationTests.test_variant_does_not_authorize_intended_behavior"
       ]
+    },
+    {
+      "reason": "Needs native Shen and bifrost. These system semantics tests run without skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_certificate_recheck_and_claim_judge",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_cli_returns_nonzero_on_disagreement",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_contextual_type_judgments_and_fuel",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_create_update_authorization_delete_and_preservation",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_external_adapter_passes_and_mutant_fails",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_idempotency_outcomes_and_retry",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_ledger_atomic_arithmetic_and_idempotency_conflicts",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_model_comparison_and_trace_tampering",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_postcondition_conservation_and_integer_overflow",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_schema_constraints_and_invariant_rollback",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_split_workflow_exposes_duplicate_send_after_missing_ack",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_unknown_workflow_exhausts_declared_choices"
+      ]
     }
   ]
 }
