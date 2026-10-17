@@ -10,6 +10,7 @@ from importlib import resources
 from pathlib import Path
 
 from . import OperationError, _sha
+from . import completion
 from .compiler import model, wp, formula, _distinct, _instances, _unfreeze, Unresolved
 from .native import invoke, term
 from .proofs import KERNEL, _validate, prove_many, check
@@ -22,6 +23,12 @@ def _compiler_identity():
     return {
         "loops": _sha(Path(__file__).read_bytes()),
         "wp": _sha(Path(compiler.__file__).read_bytes()),
+        "completion": _sha(Path(completion.__file__).read_bytes()),
+        "completion_types": _sha(
+            resources.files("capcov.operations")
+            .joinpath("shen", "completion-types.shen")
+            .read_bytes()
+        ),
         "rule": _sha(
             resources.files("capcov.operations")
             .joinpath("shen", "loop-check.shen")
@@ -64,7 +71,7 @@ def _prepare(source, invariants, timeout):
     if not isinstance(invariants, dict) or not invariants:
         raise OperationError("provide a nonempty command-to-loop invariant mapping")
     commands = {c[1]: c for c in m[3]}
-    predicates, judgments = {}, [f"(caps.typechecks? {_term(source)})"]
+    predicates, judgments = {}, ["(caps.typechecks? M)"]
     for command, contracts in sorted(invariants.items()):
         if command not in commands or not isinstance(contracts, dict) or not contracts:
             raise OperationError(
@@ -72,20 +79,35 @@ def _prepare(source, invariants, timeout):
             )
         loops = _loops(commands[command][4])
         predicates[command] = {}
-        for name, predicate in sorted(contracts.items()):
+        for name, contract in sorted(contracts.items()):
             if name not in loops:
                 raise OperationError("invariant references an unknown loop")
-            p = _term(predicate)
-            predicates[command][name] = model(predicate)
-            # Reuse the system's actual Shen datatype and scope judgments. The
-            # invariant is a state predicate, never a free row predicate.
-            judgments.append(
-                f"(let M {_term(source)} (and "
-                f"(= caps-pred (shen.typecheck (capop.syntax {p}) caps-pred)) "
-                f"(caps.scope-pred? {p} [caps.before | {term(commands[command][2])}] no-row (nth 3 M))))"
-            )
+            if isinstance(contract, str):
+                contract = {"invariant": contract}
+            if (
+                not isinstance(contract, dict)
+                or not {"invariant"} <= set(contract)
+                or set(contract) - {"invariant", "completes"}
+            ):
+                raise OperationError(
+                    "loop contract requires invariant and optional completes"
+                )
+            predicates[command][name] = {}
+            for kind, predicate in sorted(contract.items()):
+                p = _term(predicate)
+                predicates[command][name][kind] = model(predicate)
+                row = "no-row" if kind == "invariant" else term(loops[name][1])
+                args = term(commands[command][2])
+                if kind == "invariant":
+                    args = "[caps.before | " + args + "]"
+                judgments.append(
+                    f"(and (= caps-pred (shen.typecheck (capop.syntax {p}) caps-pred)) "
+                    f"(caps.scope-pred? {p} {args} {row} (nth 3 M)))"
+                )
     valid, identity = invoke(
-        "[" + " ".join(judgments) + "]", SYSTEM_LIBRARIES, timeout=timeout
+        f"(let M {_term(source)} [" + " ".join(judgments) + "])",
+        SYSTEM_LIBRARIES,
+        timeout=timeout,
     )
     if not all(v is True for v in valid):
         raise OperationError(
@@ -126,14 +148,27 @@ def _derive(source, invariants, timeout):
                 return value
 
             bindings[name] = {"key": fresh(), "fields": {f: fresh() for f in fields}}
-        preservation = {}
+        preservation, completions = {}, {}
 
         def loop(name, action, continuation):
             if name not in contracts:
                 # Existing frame/deletion rules remain available. A loop that
                 # needs induction and lacks a contract remains unresolved.
                 return wp([["named", name, action]], continuation)
-            invariant = contracts[name]
+            invariant = contracts[name]["invariant"]
+            completed = None
+            if "completes" in contracts[name]:
+                if name not in completions:
+                    completed = completion.derive(
+                        action, contracts[name]["completes"], bindings[name], _captured
+                    )
+                    completed["step"] = add(
+                        f"{command}:loop:{name}:complete",
+                        completed["left"],
+                        completed["right"],
+                    )
+                    completions[name] = completed
+                completed = completions[name]
             if name not in preservation:
                 body = _captured(action[3], bindings[name])
                 body_wp = wp(body, invariant, _distinct(invariant), loop=loop)
@@ -149,7 +184,8 @@ def _derive(source, invariants, timeout):
             step, left, body_formula = preservation[name]
             exit_index = add(
                 f"{command}:loop:{name}:exit:{len(obligations)}",
-                [formula(invariant)],
+                [formula(invariant)]
+                + ([formula(completed["established"])] if completed else []),
                 [formula(continuation)],
             )
             rules.append(
@@ -160,8 +196,11 @@ def _derive(source, invariants, timeout):
                     "continuation": formula(continuation),
                     "preservation": step,
                     "exit": exit_index,
+                    **({"completion": completed} if completed else {}),
                 }
             )
+            if completed and completed["coverage"] != ["yes"]:
+                return ["both", invariant, completed["coverage"]]
             return invariant
 
         goals = [("postcondition", post), *[("invariant:" + n, p) for n, p in m[4]]]
@@ -271,13 +310,38 @@ def check_loops(source, artifact, *, invariants=None, timeout=60):
     for rule in rules:
         step = supplied[rule["preservation"]]["proof"]["answer"][1]
         exit_proof = supplied[rule["exit"]]["proof"]["answer"][1]
-        expressions.append(
-            f"(cl.loop {term(rule['premises'])} {term(rule['invariant'])} "
-            f"{term(rule['body_wp'])} {term(rule['continuation'])} {term(step)} {term(exit_proof)})"
-        )
+        if "completion" in rule:
+            c = rule["completion"]
+            completion_proof = supplied[c["step"]]["proof"]["answer"][1]
+            # This judgment has an actual Shen sequent-calculus datatype.
+            judgment = [
+                "snapshot-partition",
+                rule["invariant"],
+                formula(c["established"]),
+                c["left"],
+                c["right"][0],
+                rule["continuation"],
+            ]
+            expressions.append(
+                f"(cl.completed {term(judgment)} {term(c['table'])} {term(c['body'])} "
+                f"{term(rule['premises'])} {term(rule['body_wp'])} "
+                f"{term(step)} {term(completion_proof)} {term(exit_proof)})"
+            )
+        else:
+            expressions.append(
+                f"(cl.loop {term(rule['premises'])} {term(rule['invariant'])} "
+                f"{term(rule['body_wp'])} {term(rule['continuation'])} {term(step)} {term(exit_proof)})"
+            )
     results, native = invoke(
-        "[" + " ".join(expressions) + "]", (*KERNEL, "loop-check.shen"), timeout=timeout
+        "[" + " ".join(expressions) + "]",
+        (*KERNEL, "completion-types.shen", "loop-check.shen"),
+        timeout=timeout,
     )
     if native["libraries"]["loop-check.shen"] != artifact["compiler"]["rule"]:
         raise OperationError("loop composition rule changed")
+    if (
+        native["libraries"]["completion-types.shen"]
+        != artifact["compiler"]["completion_types"]
+    ):
+        raise OperationError("completion datatype identity changed")
     return all(result is True for result in results)

@@ -294,3 +294,7 @@ are documented in [adapters-and-induction.md](adapters-and-induction.md).
 
 [Loop induction](loop-induction.md) connects explicit invariants to executable
 `for-each` commands and the source-evidence verification pipeline.
+
+[Snapshot completion](snapshot-completion.md) proves completed row transforms.
+The [architecture critique response](architecture-critique-response.md) records
+which typing, runtime and trust-boundary changes are implemented and still open.

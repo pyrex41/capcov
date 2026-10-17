@@ -1,0 +1,8 @@
+{
+  "close-all": {
+    "items": {
+      "invariant": "[every-row \"item\" [either [equal [row-field \"status\"] [literal \"open\"]] [equal [row-field \"status\"] [literal \"closed\"]]]]",
+      "completes": "[equal [row-field \"status\"] [literal \"closed\"]]"
+    }
+  }
+}

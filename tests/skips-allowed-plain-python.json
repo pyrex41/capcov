@@ -167,6 +167,19 @@
         "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_contract_scope_and_names_checked_by_shen",
         "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_entry_snapshot_and_conjunctive_invariant"
       ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_completes_all_rows_and_executes",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_filtered_snapshot_and_mutated_selector",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_unselected_rows_need_entry_coverage",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_missing_work_and_stale_restore_rejected",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_cross_row_mutation_and_stateful_selector_open",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_shen_datatype_and_frame_judgments",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_forged_completion_and_frame_rejected",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_completion_reaches_claim_pipeline"
+      ]
     }
   ]
 }

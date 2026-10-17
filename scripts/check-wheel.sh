@@ -29,7 +29,7 @@ from capcov.faults import checker
 
 assert checker.load_pack()["id"] == checker.PACK_ID
 operations = resources.files("capcov.operations")
-for name in ("proof-check.shen", "induction-check.shen", "loop-check.shen", "proof-search.shen", "relations.shen", "search.shen"):
+for name in ("proof-check.shen", "induction-check.shen", "loop-check.shen", "completion-types.shen", "proof-search.shen", "relations.shen", "search.shen"):
     assert operations.joinpath("shen", name).read_bytes(), name
 assert operations.joinpath("evidence.dl").read_bytes()
 version = metadata.version("capcov")

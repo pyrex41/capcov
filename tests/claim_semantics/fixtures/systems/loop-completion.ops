@@ -1,0 +1,9 @@
+[system "snapshot-invariants"
+ [[table "item" ["status"] [] []]]
+ [[command "close-all" [] [yes]
+   [[named "items" [for-each "item" [yes]
+     [[named "close" [update "item" [row-key] "status" [literal "closed"]]]]]]]
+   [every-row "item" [equal [row-field "status"] [literal "closed"]]]]]
+ [["legal-status" [every-row "item"
+   [either [equal [row-field "status"] [literal "open"]]
+           [equal [row-field "status"] [literal "closed"]]]]]]]

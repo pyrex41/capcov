@@ -140,10 +140,8 @@ migration target or establish equivalence to a production service.
 
 ## Further induction work
 
-The next proof-language extensions are explicit relations over captured,
-processed and remaining rows, followed by quantified datatype induction and
-checked refinement of compiler transformations. Those would allow establishing
-properties such as “all selected rows were transformed” from a weaker entry
-condition. A state-only invariant plus continuation implication cannot generally
-prove that result today. Existing unannotated loops continue to use the original
-frame/deletion rules or remain open.
+The [snapshot completion rule](snapshot-completion.md) now uses processed and
+remaining rows to establish completed transformations for row-local updates with
+a checked mutation frame. Cross-key/domain-changing transformations, generalized
+quantified datatype induction and checked compiler refinement remain further
+work. Existing unannotated loops retain their frame/deletion rules or stay open.
