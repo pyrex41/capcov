@@ -27,6 +27,7 @@
     "tests.claim_semantics.test_static_adversarial_both_engines.AdversarialCasesInBothEngines",
     "tests.claim_semantics.test_static_corpus_evaluation.SouffleAgreesWithPythonOnEveryStaticCase",
     "tests.claim_semantics.test_static_evidence_policy.StaticEvidencePolicyTest",
+    "tests.claim_semantics.test_static_spec.NativeStaticSpecTests",
     "tests.test_claim_souffle.SouffleBackendTests",
     "tests.test_faults_checker.EngineTest",
     "tests.claim_semantics.test_reasoning.SouffleSourceTests"

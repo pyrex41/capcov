@@ -1,6 +1,6 @@
 .claims 2.
 // Authored finite logic. Closure contracts are elaborated by Shen.
-.pack "rules-shared-v1" schema 1 description "Static/runtime bridges.".
+.pack "rules-shared-v2" schema 2 description "Static/runtime bridges.".
 
 .import "static-relations.claims".
 .decl runtime_route_observed_on_index(index: digest ctx, tenant: symbol ctx, surface: symbol ctx, run: symbol ctx) derived derived runtime.

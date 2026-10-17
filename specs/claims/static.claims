@@ -1,8 +1,13 @@
 .claims 2.
 // Authored finite logic. Closure contracts are elaborated by Shen.
-.pack "rules-static-v1" schema 1 description "SCIP -> Datalog static rule pack (EXPERIMENT-PLAN section 29). `primitives` is a byte-identical copy of claims/static/schema_static_v1.json; `supplementary_primitives` declares the runtime observation and assumptions the section names outside the frozen file; `derived` and `rules` are the reviewed program in raw IR JSON wire form." primitives_source "packages/capabilities/src/capcov/claims/static/schema_static_v1.json".
+.pack "rules-static-v2" schema 2 description "SCIP -> Datalog static rule pack (EXPERIMENT-PLAN section 29). `primitives` is a byte-identical copy of claims/static/schema_static_v1.json; `supplementary_primitives` declares the runtime observation and assumptions the section names outside the frozen file; `derived` and `rules` are the reviewed program in raw IR JSON wire form." primitives_source "packages/capabilities/src/capcov/claims/static/schema_static_v1.json".
 
 .import "static-relations.claims".
+
+// Reviewed closure derivations retain their full premise lists.
+
+.policy static_route_authorized_closed-policy rule static_route_authorized_closed completes static_route_authorized_closed digest "ef9a17d05bcbefc2305aca5de675c7d880d7adba47a96892618e2efb6cd84f74".
+
 scip_document_path: scip_document_path(IX, P) :-
     scip_document(IX, P, Lang, OccCount, SymCount, Synth).
 scip_definition_site_at: scip_definition_site_at(IX, P, L) :-
@@ -36,7 +41,7 @@ static_capability_op: static_capability_op(IX, S, E, Verb) :-
 static_capability: static_capability(IX, S, E, Verb) :-
     static_capability_op(IX, S, E, Verb), scip_index(IX, Indexer, IndexerVersion, Lang, ProjectRoot, DigestKind).
 static_file_unindexed: static_file_unindexed(IX, P) :-
-    static_source_file(IX, P, Lang), scip_documents_closed(IX), !scip_document_path(IX, P).
+    static_source_file(IX, P, Lang), !scip_document_path(IX, P).
 scip_duplicate_definition_path: scip_duplicate_definition(IX, Sym, PA, LA, PB, LB) :-
     scip_definition_site(IX, PA, LA, Sym), scip_definition_site(IX, PB, LB, Sym), scip_symbol(IX, Sym, Kind, Cat, Display), Cat != "other"::symbol, PA != PB.
 scip_duplicate_definition_line: scip_duplicate_definition(IX, Sym, PA, LA, PB, LB) :-
@@ -50,10 +55,10 @@ affected_capability_direct: affected_capability(IX, S, Changed) :-
 affected_capability_reaches: affected_capability(IX, S, Changed) :-
     static_route_handler(IX, S, H), change_reaches(IX, Changed, H), static_index_current(IX).
 runtime_route_without_static: runtime_route_without_static(T, S, Run, IX) :-
-    runtime_route_observed(T, S, Event, Run), index_describes_run(IX, Run), static_route_inventory_closed(IX), !static_route_declared_surface(IX, S).
+    runtime_route_observed(T, S, Event, Run), index_describes_run(IX, Run), !static_route_declared_surface(IX, S).
 static_route_authorized: static_route_authorized(IX, S) :-
     static_route_handler(IX, S, H), static_reaches_eq(IX, H, N), authz_symbol__accepted(IX, N), static_index_current(IX).
 static_route_authorized_closed: static_route_authorized_closed(IX) :-
     static_reachability_closed(IX), static_route_inventory_closed(IX), static_index_current(IX).
 static_route_authorization_gap: static_route_authorization_gap(IX, S) :-
-    static_route_declared_surface(IX, S), static_route_authorized_closed(IX), !static_route_authorized(IX, S).
+    static_route_declared_surface(IX, S), !static_route_authorized(IX, S).

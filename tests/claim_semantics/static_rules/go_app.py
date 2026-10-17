@@ -30,6 +30,7 @@ from capcov.claims import (Atom, Bundle, Claim, Column, Constant, Context, Evide
                            RelationDecl, Rule, Variable)
 from capcov.claims.static import scip_facts  # noqa: E402
 from capcov.claims.static.combine import combine  # noqa: E402
+from capcov.claims.pack_resources import resolve_profile  # noqa: E402
 from capcov.scip import runner  # noqa: E402
 
 try:
@@ -122,7 +123,7 @@ def ast_raw() -> dict:
 
 
 def export(raw: dict | None = None, *, ast: dict | None = None, file_digest: str | None = None,
-           describes_runs: Iterable[str] = ()) -> scip_facts.ExportResult:
+           describes_runs: Iterable[str] = (), version: int = 1) -> scip_facts.ExportResult:
     """Export ``raw`` (default: the golden); ``file_digest`` is the run receipt.
 
     The receipt defaults to the raw dict's JSON digest, which is order-sensitive
@@ -135,6 +136,7 @@ def export(raw: dict | None = None, *, ast: dict | None = None, file_digest: str
         normalized(raw), ast_raw=ast if ast is not None else ast_raw(), source_root=GO_APP,
         language=LANGUAGE, index_digest=file_digest if file_digest is not None else json_file_digest(raw),
         index_digest_kind=runner.INDEX_DIGEST_JSON, describes_runs=describes_runs,
+        pack_profile=resolve_profile("static", version),
     )
 
 
@@ -241,13 +243,18 @@ def claims_for(index: str, *, runtime: bool) -> tuple[Claim, ...]:
 
 
 def go_app_bundle(raw: dict | None = None, *, ast: dict | None = None, file_digest: str | None = None,
-                  runtime: bool = True, hops: bool = True,
-                  with_claims: bool = True) -> tuple[Bundle, scip_facts.ExportResult]:
-    """Exported golden facts + rule pack + claim-time facts (+ hop cross-check) + claims."""
-    exported = export(raw, ast=ast, file_digest=file_digest, describes_runs=(RUN,) if runtime else ())
+                  runtime: bool = True, hops: bool = True, with_claims: bool = True,
+                  version: int = 1) -> tuple[Bundle, scip_facts.ExportResult]:
+    """Exported golden facts + rule pack + claim-time facts (+ hop cross-check) + claims.
+
+    ``version`` selects the installed static profile once, for export and pack
+    alike; v1 reads the reviewed experiment pack, v2 the generated installed one.
+    """
+    exported = export(raw, ast=ast, file_digest=file_digest, describes_runs=(RUN,) if runtime else (),
+                      version=version)
     if exported.status != scip_facts.STATUS_COMPLETE:
         raise AssertionError(f"export failed: {exported.status} {exported.messages}")
-    pack = pack_bundle()
+    pack = pack_bundle() if version == 1 else resolve_profile("static", version).bundle
     decls = {decl.name: decl for decl in (*exported.bundle.relations, *pack.relations)}
     index = dict(exported.bundle.metadata)["index_digest"]
     additions = [source_tree_fact(decls, dict(dict(exported.bundle.metadata)["tree"])["digest"])]
@@ -257,7 +264,8 @@ def go_app_bundle(raw: dict | None = None, *, ast: dict | None = None, file_dige
     if hops:
         hop_rows = hop_facts(index)
         extra_bundles.append(Bundle((HOP_SUCC, REACHES_WITHIN), facts=tuple(a for a, _ in hop_rows),
-                                    rules=HOP_RULES, evidence=tuple(e for _, e in hop_rows)))
+                                    rules=HOP_RULES, evidence=tuple(e for _, e in hop_rows),
+                                    schema_version=version))
     bundle = combine(
         exported.bundle, pack, *extra_bundles,
         facts=[atom for atom, _ in additions], evidence=[record for _, record in additions],

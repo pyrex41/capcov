@@ -365,9 +365,12 @@ class _Facts:
     that yield one row yield one fact with one content-derived evidence id.
     """
 
-    def __init__(self, index_digest: str, relations: dict[str, RelationDecl]) -> None:
+    def __init__(self, index_digest: str, relations: dict[str, RelationDecl],
+                 identity_names: Iterable[str] | None = None) -> None:
         self.index_digest = index_digest
         self.relations = relations
+        # The relation names the content identity binds; profile-independent.
+        self.identity_names = tuple(relations if identity_names is None else identity_names)
         self.rows: dict[tuple[str, tuple], dict] = {}
 
     def add(self, relation: str, values: dict[str, Any], *, source: str,
@@ -414,7 +417,7 @@ class _Facts:
             skip = set(self._index_positions(relation))
             by_relation.setdefault(relation, []).append(
                 [v for i, v in enumerate(entry["row"]) if i not in skip])
-        return static_relations_index(by_relation, self.relations)
+        return static_relations_index(by_relation, self.identity_names)
 
     def rebase(self, index: str) -> None:
         """Set every ``index`` column to ``index`` and recompute evidence ids.
@@ -501,8 +504,18 @@ def export_bundle(
     index_digest_kind: str,
     commit: str | None = None,
     describes_runs: Iterable[str] = (),
+    pack_profile=None,
 ) -> ExportResult:
     """Export one retained index as a validated static-facts ``Bundle``.
+
+    ``pack_profile`` is the installed static pack profile, selected once by
+    the caller (default: v1); ``profile`` remains the slice/full export
+    profile. A v2 export carries that pack's exact declarations and evidence
+    contracts (never its rule-bound closure policies), so it combines only with
+    the v2 pack. The index identity binds the v1 export relation names under
+    either pack, so one index has one ``index`` value in both. A profile from
+    another domain, or one whose bundle schema disagrees with its version, is
+    refused.
 
     Pure over its inputs: no subprocesses, no index file; the only filesystem
     read is the language-scoped tree walk that produces ``scip_index_tree`` and
@@ -555,10 +568,17 @@ def export_bundle(
                             (f"ast_raw was computed over tree {expected_tree[:12]} but the "
                              f"source root hashes to {tree_digest[:12]} over {patterns}",))
 
-    relations = {decl.name: decl for decl in static_relations()}
+    from ..pack_resources import resolve_profile, PackProfile
+    pack_profile = resolve_profile('static') if pack_profile is None else pack_profile
+    if (not isinstance(pack_profile, PackProfile) or pack_profile.domain != 'static'
+            or pack_profile.version != pack_profile.bundle.schema_version):
+        raise ValueError('export requires a matching static pack profile')
+    identity_names = tuple(decl.name for decl in static_relations())
+    declarations = static_relations() if pack_profile.version == 1 else pack_profile.bundle.relations
+    relations = {decl.name: decl for decl in declarations}
     # Facts are keyed by a placeholder until the content identity is known
     # (module docstring, IDENTITY); ``index_digest`` is the file receipt.
-    facts = _Facts(_PLACEHOLDER_INDEX, relations)
+    facts = _Facts(_PLACEHOLDER_INDEX, relations, identity_names)
     ix = {"index": _PLACEHOLDER_INDEX}
     meta = normalized_retained.get("metadata") or {}
     indexer = meta.get("tool_name") or "unknown"
@@ -985,8 +1005,15 @@ def export_bundle(
     }
     if commit:
         metadata["commit"] = commit
+    from ..contracts import CONTRACT_FIELDS
+    # Policies bind pack rules; an export carries none, so it carries no policy.
+    contracts = {key: getattr(pack_profile.bundle, key) for key in CONTRACT_FIELDS
+                 if key != 'derived_completeness_policies'} if pack_profile.version == 2 else {}
+    if pack_profile.version == 2:
+        metadata["pack_profile"] = pack_profile.id
+        metadata["specification_manifest"] = pack_profile.manifest_digest
     bundle = Bundle(tuple(relations.values()), fact_atoms, (), (), tuple(metadata.items()),
-                    evidence=evidence)
+                    evidence=evidence, schema_version=pack_profile.version, **contracts)
     try:
         assert_valid(bundle)
     except ValidationError as exc:
@@ -1086,6 +1113,7 @@ def export_from_tree(
     commit: str | None = None,
     describes_runs: Iterable[str] = (),
     timeout: int = 600,
+    pack_profile=None,
 ) -> ExportResult:
     """Index ``source_root`` with the SCIP indexer for ``language``, hash the
     ``index.scip`` it wrote, remove it, and export the bundle.
@@ -1111,7 +1139,7 @@ def export_from_tree(
         normalized, ast_raw=ast_raw, source_root=root, language=language, scope=scope,
         profile=profile, limits=limits, index_digest=normalized["index_digest"],
         index_digest_kind=normalized["index_digest_kind"], commit=commit,
-        describes_runs=describes_runs,
+        describes_runs=describes_runs, pack_profile=pack_profile,
     )
 
 
