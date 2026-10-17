@@ -298,3 +298,6 @@ are documented in [adapters-and-induction.md](adapters-and-induction.md).
 [Snapshot completion](snapshot-completion.md) proves completed row transforms.
 The [architecture critique response](architecture-critique-response.md) records
 which typing, runtime and trust-boundary changes are implemented and still open.
+
+See the [Production roadmap](production-roadmap.md) for the complete remaining
+work, dependencies, validation gates and proposed change sequence.

@@ -150,8 +150,12 @@ remaining deliverables, not hidden premises discharged by these features:
   Shen theorem proving over recursive datatypes.
 * Loop integration now supports annotated snapshot-loop invariants with checked
   initiation, preservation and continuation obligations; see
-  [loop-induction.md](loop-induction.md). Explicit processed/remaining relations,
-  expression totality and fuel bounds remain separate work.
+  [loop-induction.md](loop-induction.md). The
+  [snapshot completion rule](snapshot-completion.md) covers row-local updates;
+  generalized relational frames, expression totality and fuel bounds remain open.
 * Environment exploration: run these adapters under Antithesis or equivalent
   controlled scheduling and fault injection. Repeated identical observations
   remain replay evidence, not a proof of environmental determinism.
+
+The consolidated dependency order, acceptance gates and remaining work are in
+[Production roadmap](production-roadmap.md).
