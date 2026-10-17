@@ -243,3 +243,64 @@ The compositional system suite (`test_systems.py`) covers workspace CRUD and
 authorization, ledger transfers/idempotency/conservation, and split outbox
 workflows. See [System specifications](../../docs/system-specifications.md)
 for the native language, harness, campaign and claim-export interfaces.
+
+## R10 probe: outbox migration on the current system IR
+
+`test_migration_probe.py` is a worked migration model, not a qualification.
+Legacy model `fixtures/systems/outbox.ops`; intended model
+`fixtures/systems/outbox-intended.ops` (send is idempotent per job: a second
+send of an `attempted` job publishes nothing); decision record
+`fixtures/systems/outbox-migration-decision.json`. The decision record is a
+fixture for this probe only and **not a schema commitment**; its approver is a
+placeholder with no reviewer authority.
+
+Every result names its executor class: `model` (the Shen system evaluator) or
+`fake` (`scenario-adapter.py`, a synthetic stand-in, never a legacy
+implementation). Outcomes use the `capcov.faults` vocabulary (`ok`/`fail`/
+`info`); `info` is the IR's `unknown`. Ledger conservation is a
+per-transition bounded check of the transfer postcondition over an explicit
+domain (`basis: explicit-bounded-domain`), not a proof; the proof is R12.
+
+Families: `MigrationDecisionRecordTests`, `FakeExecutorTests` and
+`InexpressibleFrontEndTests` run in `base`; `MigrationProbeModelTests` and
+`InexpressibleModelTests` need Shen and are in the `shen` family.
+
+### Expressible today
+
+| Case | Test | Executor | Result |
+|---|---|---|---|
+| Legacy explores to duplicate delivery-attempt (`send ok; send ok; ack ok`) | `test_legacy_explores_to_duplicate_delivery_attempt` | model | `effect_applied_twice` |
+| Intended does not deliver twice | `test_intended_does_not_deliver_twice` | model | satisfied |
+| Difference accepted only with an approved decision bound to both clause ids, the observation scope and checked obligations | `test_difference_accepted_only_with_an_approved_decision` | model | accepted / open |
+| M5 decision without approval provenance | same, and `test_m5_missing_approval_provenance_keeps_the_decision_open` | model / none | open |
+| Guard-dropping target mutant; legacy and target agreeing on a violation is still reported | `test_guard_dropping_target_mutant_is_rejected` | model | rejected |
+| M1 double delivery on `ok` | `test_m1_fake_double_delivery_on_ok_violates_the_intended_clause`, `test_m1_fake_double_delivery_is_rejected_by_the_legacy_model` | fake, model | rejected |
+| H1 `send info; send ok; ack ok`, truth 2 deliveries | `test_h1_info_then_ok_retry_two_deliveries`, `test_h1_truth_two_deliveries_from_the_fake` | model, fake | legacy finding; intended violation |
+| H2 same calls, truth 1 delivery; both info resolutions retained | `test_h2_info_then_ok_retry_one_delivery_keeps_alternatives` | model | pass |
+| H5 same idempotency key, different amount | `test_h5_same_idempotency_key_different_amount_conflicts_without_debit` | model | `idempotency-conflict`, no debit |
+| M2 payload dedupe drops a delivery (count falls) | `test_m2_payload_dedupe_loses_an_effect` | model | rejected |
+| M3 `ok` reported for an `info` send that did not land | `test_m3_reporting_ok_for_an_info_send_is_rejected` | model | rejected |
+| Harness negative: different `info` resolution is a different history, never a replay | `test_harness_negative_*` (both classes) | fake, model | distinct history ids |
+| Ledger conservation, bounded per transition | `test_ledger_conservation_is_a_per_transition_bounded_check_not_a_proof` | model | no violation within bound; mutant caught |
+
+All of these rest on the atomic-publish assumption of the current IR: a
+`publish` commits with its transaction (`system.shen:67`), so an `info` send
+has exactly two alternatives (`system.shen:165-166`).
+
+### Not expressible today (checked in as `unittest.expectedFailure`)
+
+This table is the input to the IR specification. Each row flips to an
+unexpected success, which fails the run, when the missing feature lands.
+
+| Case | Test | Missing IR feature | Where the IR stops |
+|---|---|---|---|
+| `info` send admits nothing / outbox-only / outbox+delivered | `test_info_send_has_at_least_three_alternatives` | an `info` outcome with more than two alternatives; an outbox-recorded-not-delivered state | `system.shen:165-166`; binary tape `scenarios.py:56-57`, `adapters.py:63-64` |
+| H3 delivery lands after the final read ⇒ `unresolved` | `test_h3_delivery_after_final_read_is_unresolved` | `info` invocations open until history close; a final-read / close marker | unknown resolved in its own transition `system.shen:165-166`, `scenarios.py:125-126`; no open set in `explore` `system.py:451-466`; request fields `system.py:113-127` |
+| H4 missing journal range ⇒ `unresolved` | `test_h4_missing_journal_range_is_unresolved` | partial observation (journal gaps, unestablished observation cut) | observation is exactly `{state, effects}` `system.py:132`, `scenarios.py:100`; whole-list match `system.shen:168-169` |
+| Intent / attempt identity on effects | `test_effects_carry_intent_and_attempt_identity` | `(intent-id, attempt-id, logical-effect)` effects | fixed-arity effects `system.py:100-104`; `[emit Kind Value]` `system.shen:67` |
+| Outbox record vs delivery attempt | `test_outbox_record_and_delivery_attempt_are_separate_constructors` | separate transactional outbox-record and external delivery-attempt constructors | single `publish` `system-types.shen:59-61`, `system.shen:67`; tag whitelist `system.py:24-26` |
+| M2 dedupe by intent, not payload | `test_m2_dedupe_by_intent_not_payload` | intent identity, so at-most-once can be stated per intent | equal payloads give equal journals (`system.py:100-104`); the correct model and a "j twice, k never" mutant are indistinguishable |
+| M4 adapter normalizes effects to a set | `test_m4_adapter_that_normalizes_effects_to_a_set_is_rejected` | attempt identity, so attempts stay distinct under normalization | equal tuples collapse (`system.py:100-104`); `caps.accepts?` `system.shen:168-169` |
+
+Deferred to qualification, explicitly: conservation proof (R12), controlled
+replay (R15), causal minimization (R16).

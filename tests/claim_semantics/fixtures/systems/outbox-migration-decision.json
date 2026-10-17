@@ -1,0 +1,38 @@
+{
+  "_note": "R10 probe fixture only. This file is NOT a schema commitment: the field names exist so tests/claim_semantics/test_migration_probe.py can bind a legacy/intended difference to an approved decision. The approver is a fixture placeholder and carries no reviewer authority outside this probe.",
+  "id": "outbox-send-at-most-once",
+  "kind": "change",
+  "legacy": {
+    "model": "outbox.ops",
+    "clause": "outbox.send.redelivers-while-pending"
+  },
+  "intended": {
+    "model": "outbox-intended.ops",
+    "clause": "outbox.send.at-most-once-delivery-per-job"
+  },
+  "scope": {
+    "initial": [
+      {"table": "job", "key": "j", "fields": {"status": "pending", "payload": "hello"}}
+    ],
+    "schedule": [
+      [{"command": "send", "args": {"id": "j"}, "result": "info"}],
+      [{"command": "send", "args": {"id": "j"}, "result": "ok"}],
+      [{"command": "ack", "args": {"id": "j"}, "result": "ok"}]
+    ],
+    "effect": "delivery-attempt",
+    "observation": "per-step effect journal of every admissible history; delivery attempts counted by payload because the current IR has no intent id"
+  },
+  "rationale": "Legacy send publishes again whenever a job is still pending, so a retry after an info (unknown) send can deliver twice. The intended contract for delivery-attempt is at most once per job; a retry of an attempted job must publish nothing.",
+  "approval": {
+    "approver": "fixture-reviewer",
+    "date": "2026-10-17"
+  },
+  "obligation": {
+    "id": "outbox-send-at-most-once/replacement",
+    "checks": [
+      "legacy-counterexample-violates-intended",
+      "target-satisfies-intended",
+      "guard-dropping-mutant-rejected"
+    ]
+  }
+}
