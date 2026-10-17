@@ -1,0 +1,6 @@
+.claims 2.
+// Refused: the expansion's a_ok collides with the hand-written a_ok (template-name-collision).
+.pack "template-test-v2" schema 2.
+.import "side.claims".
+a_ok: a_ok(R, X) :- a_seen(R, X).
+.instantiate side(a).

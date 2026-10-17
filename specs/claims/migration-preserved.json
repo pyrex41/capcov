@@ -12,12 +12,13 @@
     "All 28 frozen replay cases and individual completeness/assumption withdrawals retain identical relation closures under v1 and v2.",
     "Replay v2 runs through installed profile selection, receipt export, exact declaration combination, evaluation, reporting, and evaluation-bound v2 certificates. Receipt format versions are unchanged.",
     "Experimental typed operation specifications derive transitions, ordered effect intents, outcome alternatives, traces and access summaries in Shen. Native Prolog checks observations and searches supplied finite state domains; the synthetic delete-issue corpus has hand-authored expectations. Existing model_min and evidence admission remain unchanged.",
-    "Compositional finite systems now support schemas, scoped operation judgments, arithmetic, predicates, CRUD, branches, bounded iteration, before/after properties, invariants, workflows, adapter-driven observation checks, certificate reproduction, independent patch/trace/frame checking and case-scoped capcov claim export. Synthetic workspace, ledger and outbox regressions exercise distinct operation families."
+    "Compositional finite systems now support schemas, scoped operation judgments, arithmetic, predicates, CRUD, branches, bounded iteration, before/after properties, invariants, workflows, adapter-driven observation checks, certificate reproduction, independent patch/trace/frame checking and case-scoped capcov claim export. Synthetic workspace, ledger and outbox regressions exercise distinct operation families.",
+    "Rule declaration templates (.template/.instantiate) expand once at decode; native Shen re-expands from the raw template data and any disagreement refuses compilation. Replay's 13 php/go rule families are one template instantiated twice; the templated source decodes to canonical IR byte-identical to the pre-template file and still reconstructs the frozen v1 replay digest."
   ],
   "pending": [
     "Static and observation v2 migrations, declarative reporting policies, and default selection after the full release gate.",
     "V2 mapping, aggregation, universal-domain, and native derivation admission.",
-    "Declaration templates and declarative reporting policies for claim packs.",
+    "Declarative reporting policies for claim packs; templated .decl declarations (installed pack bytes keep declaration order, which instantiation-point emission does not reproduce for interleaved php/go decls).",
     "Static invariant-preservation proofs beyond runtime checks, unbounded/non-serial concurrency reasoning, and reviewed application-specific model/receipt adapters.",
     "Automatic application-domain inference and richer Prolog explanations; system campaigns enumerate only explicit bounded argument, state and schedule domains.",
     "Complete pinned release CI gates; the operation milestone has native tests and a synthetic independent transition corpus, not a release-readiness claim."

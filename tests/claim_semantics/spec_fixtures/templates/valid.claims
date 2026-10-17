@@ -1,0 +1,5 @@
+.claims 2.
+.pack "template-test-v2" schema 2.
+.import "side.claims".
+.instantiate side(a).
+.instantiate side(b).

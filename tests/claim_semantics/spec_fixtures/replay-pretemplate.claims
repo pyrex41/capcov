@@ -1,0 +1,326 @@
+.claims 2.
+// Authored finite logic. Closure contracts are elaborated by Shen.
+.pack "rules-replay-v2" schema 2 description "Replay judge rule pack (Phase 4, judge side). `primitives` is a byte-identical copy of claims/replay/schema_replay_v1.json; `supplementary_primitives` is empty (the frozen file declares every primitive the judge reads); `derived` opens with the two rule-less stubs the exporter carries (mutant_killed_in, op_qualified_rt), byte-identical to replay_facts._DERIVED_TARGET_DECLS so combine() accepts both, then the reviewed program; `rules` are in raw IR JSON wire form. op_qualified(index, run, op) is the qualification claim and the only static/runtime join, witnessed by index_describes_replay; repeat_delete_not_found(run, target) is the per-target cross-request claim. The checker-authority premises (model_well_formed, model_operation_checked, model_checker_admitted) sit last in op_qualified_rt's body -- the model fact is structural, while the operation fact and reviewer admission join the exact operation-scoped tuple; the why-not walk reports checker authority only after earlier system and model gaps. op_qualified_rt is additionally gated on the model's declared effect order (effect_order_*), on the repeat delete being not-found without effects (repeat_delete_closed / !repeat_delete_any: a second DELETE of a committed target that answers anything but 404 on either side, or writes any row outside the reviewer's scope exclusions, blocks the op it belongs to) and on the PHP oracle's cross-run stability (oracle_stable). A learn receipt, when one is bound to the run, is judged too: learn_consistent(run, op) says the model's predictions matched the oracle's observations for that op under both closures, and op_qualified_rt is downgraded by !learn_unmodeled_any -- an op the learn campaign reported as unmodelled does not qualify.  The downgrade can only take qualification away: a receipt with no learn files carries no learn_run row, derives no learn_unmodeled_any, and qualifies exactly as before. Operation qualification now joins the exact checked-operation tuple (model, operation, checker, semantic version, checker binary digest, semantic certificate digest) to an external reviewer admission; model_well_formed is structural validation only." primitives_source "packages/capabilities/src/capcov/claims/replay/schema_replay_v1.json".
+
+.decl replay_run(run: symbol ctx, nonce: digest, php_commit: symbol, go_commit: symbol, snapshot: digest, model: digest) primitive observation runtime finite nonempty producers(replay).
+.decl replay_request(run: symbol ctx, req: symbol, tenant: symbol, route: symbol, op: symbol) primitive observation runtime producers(replay).
+.decl php_post_state(run: symbol ctx, req: symbol, state_digest: digest) primitive observation runtime producers(php).
+.decl go_post_state(run: symbol ctx, req: symbol, state_digest: digest) primitive observation runtime producers(go).
+.decl php_effect(run: symbol ctx, req: symbol, table: symbol, kind: symbol, pk: digest, cols_digest: digest) primitive observation runtime producers(php).
+.decl go_effect(run: symbol ctx, req: symbol, table: symbol, kind: symbol, pk: digest, cols_digest: digest) primitive observation runtime producers(go).
+.decl model_effect(run: symbol ctx, model: digest, req: symbol, table: symbol, kind: symbol, pk: digest, cols_digest: digest) primitive observation runtime producers(shen).
+.decl model_admissible(run: symbol ctx, model: digest, req: symbol, state_digest: digest) primitive observation runtime producers(shen).
+.decl model_writes(model: digest ctx, op: symbol, table: symbol) primitive observation runtime producers(shen).
+.decl mutant(model: digest ctx, mutant: symbol, op: symbol) primitive observation runtime producers(mut).
+.decl mutant_killed(run: symbol ctx, mutant: symbol, req: symbol) primitive observation runtime producers(mut).
+.decl php_effect_seq(run: symbol ctx, req: symbol, seq: unsigned, table: symbol, kind: symbol, pk: digest) primitive observation runtime producers(php).
+.decl go_effect_seq(run: symbol ctx, req: symbol, seq: unsigned, table: symbol, kind: symbol, pk: digest) primitive observation runtime producers(go).
+.decl model_effect_seq(run: symbol ctx, model: digest, req: symbol, seq: unsigned, table: symbol, kind: symbol, pk: digest) primitive observation runtime producers(shen).
+.decl replay_request_seq(run: symbol ctx, req: symbol, seq: unsigned, target: symbol) primitive observation runtime producers(replay).
+.decl php_response(run: symbol ctx, req: symbol, status: unsigned) primitive observation runtime producers(php).
+.decl go_response(run: symbol ctx, req: symbol, status: unsigned) primitive observation runtime producers(go).
+.decl replay_stability(run: symbol ctx, run_a: symbol, run_b: symbol, side: symbol, stable: symbol) primitive observation runtime producers(replay).
+.decl model_well_formed(model: digest ctx, checker: symbol, checker_version: symbol, checker_binary: digest, certificate: digest) primitive observation runtime producers(modelcheck).
+.decl model_operation_checked(model: digest ctx, operation: symbol ctx, checker: symbol, checker_version: symbol, checker_binary: digest, certificate: digest) primitive observation runtime producers(modelcheck).
+.decl model_scope_exclusion(model: digest ctx, table: symbol, reason: symbol) primitive assumption runtime producers(reviewer).
+.decl run_nonce_observed(run: symbol, nonce: digest) primitive observation runtime producers(reviewer).
+.decl snapshot_observed(snapshot: digest) primitive observation runtime producers(reviewer).
+.decl model_observed(model: digest) primitive observation runtime producers(reviewer).
+.decl model_checker_admitted(model: digest ctx, operation: symbol ctx, checker: symbol, checker_version: symbol, checker_binary: digest, certificate: digest) primitive observation runtime producers(reviewer).
+.decl learn_run(run: symbol ctx, campaign: symbol, model: digest, learn: digest, php_commit: symbol, snapshot: digest) primitive observation runtime producers(replay).
+.decl learn_prediction(run: symbol ctx, model: digest, learn: digest, tape: symbol, req: symbol, op: symbol, predicted: symbol, state_digest: digest) primitive observation runtime producers(shen).
+.decl learn_observation(run: symbol ctx, tape: symbol, req: symbol, op: symbol, observed: symbol, state_digest: digest) primitive observation runtime producers(php).
+.decl learn_unmodeled(model: digest ctx, learn: digest, op: symbol) primitive observation runtime producers(shen).
+.decl op_declared(index: digest ctx, op: symbol) primitive observation static producers(php-census).
+.decl replay_requests_closed(run: symbol ctx) primitive completeness runtime completes replay_request producers(replay).
+.decl php_effects_closed(run: symbol ctx) primitive completeness runtime completes php_effect producers(replay).
+.decl go_effects_closed(run: symbol ctx) primitive completeness runtime completes go_effect producers(replay).
+.decl php_post_states_closed(run: symbol ctx) primitive completeness runtime completes php_post_state producers(replay).
+.decl go_post_states_closed(run: symbol ctx) primitive completeness runtime completes go_post_state producers(replay).
+.decl model_admissible_closed(run: symbol ctx, model: digest) primitive completeness runtime completes model_admissible producers(shen).
+.decl model_writes_closed(model: digest ctx, op: symbol) primitive completeness runtime completes model_writes producers(shen).
+.decl mutants_closed(model: digest ctx, op: symbol) primitive completeness runtime completes mutant producers(mut).
+.decl model_scope_exclusions_closed(model: digest ctx) primitive completeness runtime completes model_scope_exclusion producers(reviewer).
+.decl mutant_kills_closed(run: symbol ctx) primitive completeness runtime completes mutant_killed_in producers(replay).
+.decl php_effect_seqs_closed(run: symbol ctx) primitive completeness runtime completes php_effect_seq producers(replay).
+.decl go_effect_seqs_closed(run: symbol ctx) primitive completeness runtime completes go_effect_seq producers(replay).
+.decl model_effect_seqs_closed(run: symbol ctx, model: digest) primitive completeness runtime completes model_effect_seq producers(shen).
+.decl replay_request_seqs_closed(run: symbol ctx) primitive completeness runtime completes replay_request_seq producers(replay).
+.decl php_responses_closed(run: symbol ctx) primitive completeness runtime completes php_response producers(replay).
+.decl go_responses_closed(run: symbol ctx) primitive completeness runtime completes go_response producers(replay).
+.decl replay_stability_closed(run: symbol ctx) primitive completeness runtime completes replay_stability producers(replay).
+.decl learn_predictions_closed(run: symbol ctx, model: digest) primitive completeness runtime completes learn_prediction producers(shen).
+.decl learn_observations_closed(run: symbol ctx) primitive completeness runtime completes learn_observation producers(replay).
+.decl learn_unmodeled_closed(model: digest ctx, learn: digest) primitive completeness runtime completes learn_unmodeled producers(shen).
+.decl model_describes_run(model: digest, run: symbol) primitive compatibility runtime producers(shen).
+.decl index_describes_replay(index: digest, run: symbol) primitive compatibility runtime producers(reviewer).
+.decl learn_describes_model(learn: digest, model: digest) primitive compatibility runtime producers(shen).
+.decl mutant_killed_in(run: symbol ctx, mutant: symbol) derived derived runtime.
+.decl op_qualified_rt(index: digest ctx, run: symbol ctx, op: symbol) derived derived runtime.
+.decl replay_run_current(run: symbol ctx) derived derived runtime.
+.decl replay_run_stale(run: symbol ctx, nonce: digest, observed: digest) derived derived runtime.
+.decl requested(run: symbol ctx, req: symbol) derived derived runtime.
+.decl requested_closed(run: symbol ctx) derived completeness runtime completes requested.
+.decl replayed(run: symbol ctx, op: symbol) derived derived runtime.
+.decl php_model_agree(run: symbol ctx, req: symbol) derived derived runtime.
+.decl php_model_disagree(run: symbol ctx, req: symbol, state_digest: digest) derived derived runtime.
+.decl go_model_agree(run: symbol ctx, req: symbol) derived derived runtime.
+.decl go_model_disagree(run: symbol ctx, req: symbol, state_digest: digest) derived derived runtime.
+.decl op_exercised(run: symbol ctx, op: symbol) derived derived runtime.
+.decl php_observed(run: symbol ctx, req: symbol) derived derived runtime.
+.decl go_observed(run: symbol ctx, req: symbol) derived derived runtime.
+.decl php_observed_closed(run: symbol ctx) derived completeness runtime completes php_observed.
+.decl go_observed_closed(run: symbol ctx) derived completeness runtime completes go_observed.
+.decl post_state_gap(run: symbol ctx, req: symbol, side: symbol) derived derived runtime.
+.decl post_state_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl post_state_gap_closed(run: symbol ctx, op: symbol) derived completeness runtime completes post_state_any.
+.decl model_scope_excluded(model: digest ctx, table: symbol) derived derived runtime.
+.decl model_scope_excluded_closed(model: digest ctx) derived completeness runtime completes model_scope_excluded.
+.decl exclusion_applied(run: symbol ctx, op: symbol, table: symbol) derived derived runtime.
+.decl undeclared_write(run: symbol ctx, op: symbol, table: symbol) derived derived runtime.
+.decl surviving_mutant(run: symbol ctx, op: symbol, mutant: symbol) derived derived runtime.
+.decl op_has_surviving_mutant(run: symbol ctx, op: symbol) derived derived runtime.
+.decl op_surviving_closed(run: symbol ctx, op: symbol) derived completeness runtime completes op_has_surviving_mutant.
+.decl corpus_constrains(run: symbol ctx, op: symbol) derived derived runtime.
+.decl kill_closure_gap(run: symbol ctx, mutant: symbol, req: symbol) derived derived runtime.
+.decl kill_closure_gap_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl kill_gap_closed(run: symbol ctx) derived completeness runtime completes kill_closure_gap_any.
+.decl php_disagree_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl go_disagree_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl undeclared_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl php_disagreement_closed(run: symbol ctx, op: symbol) derived completeness runtime completes php_disagree_any.
+.decl go_disagreement_closed(run: symbol ctx, op: symbol) derived completeness runtime completes go_disagree_any.
+.decl undeclared_writes_closed(run: symbol ctx, op: symbol) derived completeness runtime completes undeclared_any.
+.decl effect_order_violation(run: symbol ctx, side: symbol, req: symbol, table_a: symbol, table_b: symbol) derived derived runtime.
+.decl effect_order_respected(run: symbol ctx, side: symbol, req: symbol) derived derived runtime.
+.decl effect_order_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl effect_order_exercised(run: symbol ctx, op: symbol) derived derived runtime.
+.decl effect_order_closed(run: symbol ctx, op: symbol) derived completeness runtime completes effect_order_any.
+.decl delete_target(run: symbol ctx, req: symbol, seq: unsigned, tenant: symbol, target: symbol) derived derived runtime.
+.decl earlier_delete(run: symbol ctx, tenant: symbol, target: symbol, seq: unsigned) derived derived runtime.
+.decl earlier_delete_closed(run: symbol ctx) derived completeness runtime completes earlier_delete.
+.decl first_delete_committed(run: symbol ctx, req: symbol, target: symbol) derived derived runtime.
+.decl repeat_delete(run: symbol ctx, req: symbol, target: symbol) derived derived runtime.
+.decl repeat_delete_has_effect(run: symbol ctx, req: symbol) derived derived runtime.
+.decl repeat_delete_effects_closed(run: symbol ctx) derived completeness runtime completes repeat_delete_has_effect.
+.decl repeat_delete_not_found(run: symbol ctx, target: symbol) derived claim runtime.
+.decl repeat_delete_violation(run: symbol ctx, req: symbol, side: symbol) derived derived runtime.
+.decl repeat_delete_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl repeat_delete_closed(run: symbol ctx, op: symbol) derived completeness runtime completes repeat_delete_any.
+.decl oracle_unstable(run: symbol ctx) derived derived runtime.
+.decl oracle_unstable_closed(run: symbol ctx) derived completeness runtime completes oracle_unstable.
+.decl oracle_stable(run: symbol ctx) derived derived runtime.
+.decl op_qualified(index: digest ctx, run: symbol ctx, op: symbol) derived claim runtime.
+.decl learn_predicted(run: symbol ctx, op: symbol) derived derived runtime.
+.decl learn_counterexample(run: symbol ctx, tape: symbol, req: symbol, op: symbol, predicted: symbol, observed: symbol) derived derived runtime.
+.decl learn_counterexample_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl learn_counterexample_closed(run: symbol ctx, op: symbol) derived completeness runtime completes learn_counterexample_any.
+.decl learn_consistent(run: symbol ctx, op: symbol) derived claim runtime.
+.decl learn_unmodeled_any(run: symbol ctx, op: symbol) derived derived runtime.
+.decl learn_unmodeled_gate_closed(run: symbol ctx, op: symbol) derived completeness runtime completes learn_unmodeled_any.
+
+// Explicit scope mappings. Elaboration inserts missing obligations, never facts.
+.completes learn_unmodeled_closed -> learn_unmodeled by model=model, learn=learn.
+.completes model_writes_closed -> model_writes by model=model, op=op.
+.completes mutants_closed -> mutant by model=model, op=op.
+.completes model_scope_excluded_closed -> model_scope_excluded by model=model.
+.completes model_scope_exclusions_closed -> model_scope_exclusion by model=model.
+.completes learn_predictions_closed -> learn_prediction by run=run, model=model.
+.completes model_admissible_closed -> model_admissible by run=run, model=model.
+.completes model_effect_seqs_closed -> model_effect_seq by run=run, model=model.
+.completes effect_order_closed -> effect_order_any by run=run, op=op.
+.completes go_disagreement_closed -> go_disagree_any by run=run, op=op.
+.completes learn_counterexample_closed -> learn_counterexample_any by run=run, op=op.
+.completes learn_unmodeled_gate_closed -> learn_unmodeled_any by run=run, op=op.
+.completes op_surviving_closed -> op_has_surviving_mutant by run=run, op=op.
+.completes php_disagreement_closed -> php_disagree_any by run=run, op=op.
+.completes post_state_gap_closed -> post_state_any by run=run, op=op.
+.completes repeat_delete_closed -> repeat_delete_any by run=run, op=op.
+.completes undeclared_writes_closed -> undeclared_any by run=run, op=op.
+.completes earlier_delete_closed -> earlier_delete by run=run.
+.completes go_effects_closed -> go_effect by run=run.
+.completes go_effect_seqs_closed -> go_effect_seq by run=run.
+.completes go_observed_closed -> go_observed by run=run.
+.completes go_post_states_closed -> go_post_state by run=run.
+.completes go_responses_closed -> go_response by run=run.
+.completes kill_gap_closed -> kill_closure_gap_any by run=run.
+.completes learn_observations_closed -> learn_observation by run=run.
+.completes mutant_kills_closed -> mutant_killed_in by run=run.
+.completes oracle_unstable_closed -> oracle_unstable by run=run.
+.completes php_effects_closed -> php_effect by run=run.
+.completes php_effect_seqs_closed -> php_effect_seq by run=run.
+.completes php_observed_closed -> php_observed by run=run.
+.completes php_post_states_closed -> php_post_state by run=run.
+.completes php_responses_closed -> php_response by run=run.
+.completes repeat_delete_effects_closed -> repeat_delete_has_effect by run=run.
+.completes replay_requests_closed -> replay_request by run=run.
+.completes replay_request_seqs_closed -> replay_request_seq by run=run.
+.completes replay_stability_closed -> replay_stability by run=run.
+.completes requested_closed -> requested by run=run.
+
+.capability model_describes_run-endpoints witness model_describes_run model:model -> run:run left(model_well_formed, learn_unmodeled, mutant, model_writes, model_scope_exclusion, model_scope_excluded, model_checker_admitted, model_operation_checked) right(op_qualified, op_qualified_rt, learn_run, learn_prediction, model_effect_seq, model_admissible, model_effect, kill_closure_gap, mutant_killed, mutant_killed_in, replay_run_stale, replay_run, surviving_mutant, exclusion_applied, undeclared_write, learn_consistent, corpus_constrains, effect_order_any, effect_order_exercised, go_disagree_any, kill_closure_gap_any, learn_counterexample_any, learn_predicted, learn_unmodeled_any, op_exercised, op_has_surviving_mutant, php_disagree_any, post_state_any, repeat_delete_any, replayed, undeclared_any, go_effect_seq, php_effect_seq, replay_request_seq, delete_target, post_state_gap, repeat_delete_violation, go_model_disagree, php_model_disagree, go_post_state, php_post_state, go_response, php_response, go_effect, php_effect, first_delete_committed, repeat_delete, replay_request, go_model_agree, go_observed, php_model_agree, php_observed, repeat_delete_has_effect, requested, replay_stability, effect_order_violation, effect_order_respected, learn_observation, learn_counterexample, repeat_delete_not_found, earlier_delete, oracle_stable, oracle_unstable, replay_run_current).
+.bridge model-run model -> run.
+.capability index_describes_replay-endpoints witness index_describes_replay index:index -> run:run left(op_qualified, op_qualified_rt, op_declared) right(op_qualified, op_qualified_rt, learn_run, learn_prediction, model_effect_seq, model_admissible, model_effect, kill_closure_gap, mutant_killed, mutant_killed_in, replay_run_stale, replay_run, surviving_mutant, exclusion_applied, undeclared_write, learn_consistent, corpus_constrains, effect_order_any, effect_order_exercised, go_disagree_any, kill_closure_gap_any, learn_counterexample_any, learn_predicted, learn_unmodeled_any, op_exercised, op_has_surviving_mutant, php_disagree_any, post_state_any, repeat_delete_any, replayed, undeclared_any, go_effect_seq, php_effect_seq, replay_request_seq, delete_target, post_state_gap, repeat_delete_violation, go_model_disagree, php_model_disagree, go_post_state, php_post_state, go_response, php_response, go_effect, php_effect, first_delete_committed, repeat_delete, replay_request, go_model_agree, go_observed, php_model_agree, php_observed, repeat_delete_has_effect, requested, replay_stability, effect_order_violation, effect_order_respected, learn_observation, learn_counterexample, repeat_delete_not_found, earlier_delete, oracle_stable, oracle_unstable, replay_run_current).
+.bridge index-run index -> run.
+
+// Reviewed closure derivations retain their full premise lists.
+.policy go_observed_closed-policy rule go_observed_closed completes go_observed_closed digest "062cddd6718a95e5f56ff5b485a67f3930a7834f774bee482cc7a3df3faf1e7b".
+.policy learn_counterexample_closed-policy rule learn_counterexample_closed completes learn_counterexample_closed digest "71d2712735d87b09830616a9b5d3fec3e413619b7dda91d5bd840e9313e4d546".
+.policy op_surviving_closed-policy rule op_surviving_closed completes op_surviving_closed digest "058d1f6839811003273ac131e1b67f6a16b4cbdfb2607f59995d48437743b6c4".
+.policy repeat_delete_effects_closed-policy rule repeat_delete_effects_closed completes repeat_delete_effects_closed digest "016872f9a9f33be37a91e7fc5e2a69f9d81f1b2f5900a11593c2a33817620e1f".
+.policy model_scope_excluded_closed-policy rule model_scope_excluded_closed completes model_scope_excluded_closed digest "ad6349678006e0fc4b23b0badae3daefa946ac5518fa0c6b3d2a04875f2a4429".
+.policy kill_gap_closed-policy rule kill_gap_closed completes kill_gap_closed digest "0044ea444721f135e3cfcb5f74b9b92a3e21787ff2756382c0d71f5de4f1dbce".
+.policy php_observed_closed-policy rule php_observed_closed completes php_observed_closed digest "527a93034e6f3e8e241005ff9591d5de4e3fa15a8e4c7b828fa2d227dfa2673f".
+.policy earlier_delete_closed-policy rule earlier_delete_closed completes earlier_delete_closed digest "68b6cef8c54a13e67c1504478fb66fa927ee0891ed7cfbb9fb8071e94ec230a7".
+.policy requested_closed-policy rule requested_closed completes requested_closed digest "62fb9bf48c7e20b6d26bc032e3fadd8718cf6b94da11360254c0823483e453b4".
+.policy oracle_unstable_closed-policy rule oracle_unstable_closed completes oracle_unstable_closed digest "748167167098b699077572bd31dd9f0107a6a38901292519a64c3494ec37f51b".
+.policy post_state_gap_closed-policy rule post_state_gap_closed completes post_state_gap_closed digest "b14a25f3233427318334fcfe63d683611e9c4ab2f13432b77597fd8219d898a7".
+.policy go_disagreement_closed-policy rule go_disagreement_closed completes go_disagreement_closed digest "ed68f5288130c625709cf972d75d395af45eb65ea2bf3af093165b2b573e483f".
+.policy effect_order_closed-policy rule effect_order_closed completes effect_order_closed digest "9fa1287bac240822963800269b33e0f9494aab0779e83828d544985573314c11".
+.policy undeclared_writes_closed-policy rule undeclared_writes_closed completes undeclared_writes_closed digest "dbd60057b79ee258a9932665216cbc694ca4ede82a804a7460f820a14008a502".
+.policy php_disagreement_closed-policy rule php_disagreement_closed completes php_disagreement_closed digest "13f797a96d0f2a65e080dd4f29f917581298909556a020c137484882f2a0a5bc".
+.policy repeat_delete_closed-policy rule repeat_delete_closed completes repeat_delete_closed digest "2dab0954dd625284f026885c8ced12310fa5397e96f0e41f47e1c5accd3be048".
+.policy learn_unmodeled_gate_closed-policy rule learn_unmodeled_gate_closed completes learn_unmodeled_gate_closed digest "be822c3f08c2590be7b25e9a9523c5d0414a13e2da847e0f045637f3edc226de".
+
+mutant_killed_in: mutant_killed_in(Run, Mu) :-
+    mutant_killed(Run, Mu, Req).
+replay_run_current: replay_run_current(Run) :-
+    replay_run(Run, Nonce, PhpCommit, GoCommit, Snap, Model), run_nonce_observed(Run, Nonce), snapshot_observed(Snap), model_observed(Model).
+replay_run_stale: replay_run_stale(Run, Nonce, Observed) :-
+    replay_run(Run, Nonce, PhpCommit, GoCommit, Snap, Model), run_nonce_observed(Run, Observed), Nonce != Observed.
+requested: requested(Run, Req) :-
+    replay_request(Run, Req, Tenant, Route, Op).
+requested_closed: requested_closed(Run) :-
+    replay_requests_closed(Run).
+replayed: replayed(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op).
+php_model_agree: php_model_agree(Run, Req) :-
+    php_post_state(Run, Req, S), model_describes_run(M, Run), model_admissible(Run, M, Req, S).
+php_model_disagree: php_model_disagree(Run, Req, S) :-
+    php_post_state(Run, Req, S), model_describes_run(M, Run), !model_admissible(Run, M, Req, S).
+go_model_agree: go_model_agree(Run, Req) :-
+    go_post_state(Run, Req, S), model_describes_run(M, Run), model_admissible(Run, M, Req, S).
+go_model_disagree: go_model_disagree(Run, Req, S) :-
+    go_post_state(Run, Req, S), model_describes_run(M, Run), !model_admissible(Run, M, Req, S).
+op_exercised: op_exercised(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), php_model_agree(Run, Req), go_model_agree(Run, Req).
+php_observed: php_observed(Run, Req) :-
+    php_post_state(Run, Req, S).
+go_observed: go_observed(Run, Req) :-
+    go_post_state(Run, Req, S).
+php_observed_closed: php_observed_closed(Run) :-
+    php_post_states_closed(Run).
+go_observed_closed: go_observed_closed(Run) :-
+    go_post_states_closed(Run).
+post_state_gap_php: post_state_gap(Run, Req, "php"::symbol) :-
+    requested(Run, Req), replay_requests_closed(Run), !php_observed(Run, Req).
+post_state_gap_go: post_state_gap(Run, Req, "go"::symbol) :-
+    requested(Run, Req), replay_requests_closed(Run), !go_observed(Run, Req).
+post_state_any: post_state_any(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), post_state_gap(Run, Req, Side).
+post_state_gap_closed: post_state_gap_closed(Run, Op) :-
+    replayed(Run, Op), replay_requests_closed(Run), php_post_states_closed(Run), go_post_states_closed(Run).
+model_scope_excluded: model_scope_excluded(M, Tb) :-
+    model_scope_exclusion(M, Tb, Reason).
+model_scope_excluded_closed: model_scope_excluded_closed(M) :-
+    model_scope_exclusions_closed(M).
+exclusion_applied_php: exclusion_applied(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), model_scope_excluded(M, Tb).
+exclusion_applied_go: exclusion_applied(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), model_scope_excluded(M, Tb).
+undeclared_write_php: undeclared_write(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_writes(M, Op, Tb), model_scope_exclusions_closed(M), !model_scope_excluded(M, Tb).
+undeclared_write_go: undeclared_write(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_writes(M, Op, Tb), model_scope_exclusions_closed(M), !model_scope_excluded(M, Tb).
+surviving_mutant: surviving_mutant(Run, Op, Mu) :-
+    model_describes_run(M, Run), mutant(M, Mu, Op), mutants_closed(M, Op), !mutant_killed_in(Run, Mu).
+op_has_surviving_mutant: op_has_surviving_mutant(Run, Op) :-
+    surviving_mutant(Run, Op, Mu).
+op_surviving_closed: op_surviving_closed(Run, Op) :-
+    model_describes_run(M, Run), mutants_closed(M, Op), mutant_kills_closed(Run).
+corpus_constrains: corpus_constrains(Run, Op) :-
+    model_describes_run(M, Run), mutant(M, Mu, Op), !op_has_surviving_mutant(Run, Op).
+kill_closure_gap: kill_closure_gap(Run, Mu, Req) :-
+    mutant_killed(Run, Mu, Req), mutant_kills_closed(Run), !requested(Run, Req).
+kill_closure_gap_any: kill_closure_gap_any(Run, Op) :-
+    replayed(Run, Op), kill_closure_gap(Run, Mu, Req).
+kill_gap_closed: kill_gap_closed(Run) :-
+    mutant_kills_closed(Run), replay_requests_closed(Run).
+php_disagree_any: php_disagree_any(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), php_model_disagree(Run, Req, S).
+go_disagree_any: go_disagree_any(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), go_model_disagree(Run, Req, S).
+undeclared_any: undeclared_any(Run, Op) :-
+    undeclared_write(Run, Op, Tb).
+php_disagreement_closed: php_disagreement_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), php_post_states_closed(Run), model_admissible_closed(Run, M).
+go_disagreement_closed: go_disagreement_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), go_post_states_closed(Run), model_admissible_closed(Run, M).
+undeclared_writes_closed: undeclared_writes_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), php_effects_closed(Run), go_effects_closed(Run), model_writes_closed(M, Op), model_scope_exclusions_closed(M).
+effect_order_violation_php: effect_order_violation(Run, "php"::symbol, Req, Ta, Tb) :-
+    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, php_effect_seq(Run, Req, O1, Ta, Ka, Qa), php_effect_seq(Run, Req, O2, Tb, Kb, Qb), O2 < O1.
+effect_order_respected_php: effect_order_respected(Run, "php"::symbol, Req) :-
+    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, php_effect_seq(Run, Req, O1, Ta, Ka, Qa), php_effect_seq(Run, Req, O2, Tb, Kb, Qb), O1 < O2.
+effect_order_violation_go: effect_order_violation(Run, "go"::symbol, Req, Ta, Tb) :-
+    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, go_effect_seq(Run, Req, O1, Ta, Ka, Qa), go_effect_seq(Run, Req, O2, Tb, Kb, Qb), O2 < O1.
+effect_order_respected_go: effect_order_respected(Run, "go"::symbol, Req) :-
+    model_describes_run(M, Run), model_effect_seq(Run, M, Req, S1, Ta, Ka, Pa), model_effect_seq(Run, M, Req, S2, Tb, Kb, Pb), S1 < S2, go_effect_seq(Run, Req, O1, Ta, Ka, Qa), go_effect_seq(Run, Req, O2, Tb, Kb, Qb), O1 < O2.
+effect_order_any: effect_order_any(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), effect_order_violation(Run, Side, Req, Ta, Tb).
+effect_order_exercised: effect_order_exercised(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), effect_order_respected(Run, "php"::symbol, Req), effect_order_respected(Run, "go"::symbol, Req).
+effect_order_closed: effect_order_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run), model_describes_run(M, Run), replay_requests_closed(Run), php_effect_seqs_closed(Run), go_effect_seqs_closed(Run), model_effect_seqs_closed(Run, M).
+delete_target: delete_target(Run, Req, Seq, Tenant, T) :-
+    replay_request_seq(Run, Req, Seq, T), replay_request(Run, Req, Tenant, Route, "delete-issue"::symbol).
+earlier_delete: earlier_delete(Run, Tenant, T, Seq) :-
+    delete_target(Run, Req1, Seq1, Tenant, T), delete_target(Run, Req2, Seq, Tenant, T), Seq1 < Seq.
+earlier_delete_closed: earlier_delete_closed(Run) :-
+    replay_requests_closed(Run), replay_request_seqs_closed(Run).
+first_delete_committed: first_delete_committed(Run, Req, T) :-
+    delete_target(Run, Req, Seq, Tenant, T), !earlier_delete(Run, Tenant, T, Seq), php_response(Run, Req, 200::unsigned), go_response(Run, Req, 200::unsigned), php_effect(Run, Req, "issue"::symbol, "update"::symbol, Pk1, Cols1), go_effect(Run, Req, "issue"::symbol, "update"::symbol, Pk2, Cols2).
+repeat_delete: repeat_delete(Run, Req, T) :-
+    delete_target(Run, Req1, S1, Tenant, T), delete_target(Run, Req, S2, Tenant, T), S1 < S2.
+repeat_delete_has_effect_php: repeat_delete_has_effect(Run, Req) :-
+    repeat_delete(Run, Req, T), php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_scope_excluded(M, Tb).
+repeat_delete_has_effect_go: repeat_delete_has_effect(Run, Req) :-
+    repeat_delete(Run, Req, T), go_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run), !model_scope_excluded(M, Tb).
+repeat_delete_effects_closed: repeat_delete_effects_closed(Run) :-
+    model_describes_run(M, Run), php_effects_closed(Run), go_effects_closed(Run), model_scope_exclusions_closed(M).
+repeat_delete_not_found: repeat_delete_not_found(Run, T) :-
+    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), php_response(Run, Req, 404::unsigned), go_response(Run, Req, 404::unsigned), !repeat_delete_has_effect(Run, Req).
+repeat_delete_violation_php: repeat_delete_violation(Run, Req, "php"::symbol) :-
+    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), php_response(Run, Req, St), St != 404::unsigned.
+repeat_delete_violation_go: repeat_delete_violation(Run, Req, "go"::symbol) :-
+    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), go_response(Run, Req, St), St != 404::unsigned.
+repeat_delete_violation_effects: repeat_delete_violation(Run, Req, "effects"::symbol) :-
+    repeat_delete(Run, Req, T), first_delete_committed(Run, ReqF, T), repeat_delete_has_effect(Run, Req).
+repeat_delete_any: repeat_delete_any(Run, Op) :-
+    replay_request(Run, Req, Tenant, Route, Op), repeat_delete_violation(Run, Req, Side).
+repeat_delete_closed: repeat_delete_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run), replay_requests_closed(Run), replay_request_seqs_closed(Run), php_responses_closed(Run), go_responses_closed(Run), php_effects_closed(Run), go_effects_closed(Run), model_describes_run(M, Run), model_scope_exclusions_closed(M).
+oracle_unstable: oracle_unstable(Run) :-
+    replay_stability(Run, RunA, RunB, Side, "false"::symbol).
+oracle_unstable_closed: oracle_unstable_closed(Run) :-
+    replay_stability_closed(Run).
+oracle_stable: oracle_stable(Run) :-
+    replay_stability(Run, RunA, RunB, "php"::symbol, "true"::symbol), replay_stability_closed(Run), !oracle_unstable(Run).
+learn_predicted: learn_predicted(Run, Op) :-
+    learn_prediction(Run, M, L, Tape, Req, Op, P, SD), P != "unknown"::symbol.
+learn_counterexample: learn_counterexample(Run, Tape, Req, Op, P, O) :-
+    learn_prediction(Run, M, L, Tape, Req, Op, P, SP), learn_observation(Run, Tape, Req, Op, O, SO), P != O, P != "unknown"::symbol.
+learn_counterexample_any: learn_counterexample_any(Run, Op) :-
+    learn_counterexample(Run, Tape, Req, Op, P, O).
+learn_counterexample_closed: learn_counterexample_closed(Run, Op) :-
+    learn_predicted(Run, Op), learn_run(Run, Camp, M, L, Php, Snap), model_describes_run(M, Run), learn_describes_model(L, M), learn_predictions_closed(Run, M), learn_observations_closed(Run).
+learn_consistent: learn_consistent(Run, Op) :-
+    learn_counterexample_closed(Run, Op), !learn_counterexample_any(Run, Op).
+learn_unmodeled_any: learn_unmodeled_any(Run, Op) :-
+    learn_run(Run, Camp, M, L, Php, Snap), model_describes_run(M, Run), learn_describes_model(L, M), learn_unmodeled_closed(M, L), learn_unmodeled(M, L, Op).
+learn_unmodeled_gate_closed: learn_unmodeled_gate_closed(Run, Op) :-
+    replayed(Run, Op), replay_run_current(Run).
+op_qualified_rt: op_qualified_rt(IX, Run, Op) :-
+    index_describes_replay(IX, Run), replayed(Run, Op), op_exercised(Run, Op), model_describes_run(M, Run), corpus_constrains(Run, Op), !php_disagree_any(Run, Op), !go_disagree_any(Run, Op), !undeclared_any(Run, Op), !post_state_any(Run, Op), !kill_closure_gap_any(Run, Op), !effect_order_any(Run, Op), effect_order_exercised(Run, Op), oracle_stable(Run), !repeat_delete_any(Run, Op), !learn_unmodeled_any(Run, Op), model_well_formed(M, Checker, Version, Binary, StructureCert), model_operation_checked(M, Op, Checker, Version, Binary, OperationCert), model_checker_admitted(M, Op, Checker, Version, Binary, OperationCert).
+op_qualified: op_qualified(IX, Run, Op) :-
+    op_declared(IX, Op), index_describes_replay(IX, Run), op_qualified_rt(IX, Run, Op).

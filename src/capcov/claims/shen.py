@@ -47,7 +47,8 @@ from .static.certificate import DEFAULT_MAX_DEPTH, DEFAULT_MAX_NODES, rules_dige
 
 DEFAULT_TIMEOUT = 60.0
 IMPL = "shen-go"
-LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen")
+LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen",
+                 "spec-templates.shen")
 BEGIN_MARKER = "<<<CAPCOV-SHEN-JSON-BEGIN>>>"
 END_MARKER = "<<<CAPCOV-SHEN-JSON-END>>>"
 _EXACT_INT_LIMIT = 2 ** 53  # shen-go numbers are float64
@@ -273,6 +274,40 @@ def _request_literal(request: Mapping[str, Any]) -> str:
     return f"[{tag} {_string(request['relation'])} {row}]"
 
 
+def _template_term(term: Mapping[str, Any]) -> str:
+    if set(term) == {"name"}:
+        return f"[capcov.v {_string(term['name'])}]"
+    if set(term) == {"parameter", "type"}:
+        return f"[capcov.param {_string(term['parameter'])} {_string(term['type'])}]"
+    if set(term) == {"value", "type"}:
+        return f"[capcov.c {_literal(term['value'])} {_string(term['type'])}]"
+    raise ShenFailure("invalid-input", "template term is not a variable, constant or parameter")
+
+
+def _template_item(item: Mapping[str, Any]) -> str:
+    if set(item) == {"relation", "terms", "negated"}:
+        tag = "capcov.neg" if item["negated"] is True else "capcov.pos"
+        return f"[{tag} {_string(item['relation'])} [{' '.join(_template_term(t) for t in item['terms'])}]]"
+    if set(item) == {"left", "operator", "right"}:
+        return f"[capcov.cmp {_template_term(item['left'])} {_string(item['operator'])} {_template_term(item['right'])}]"
+    raise ShenFailure("invalid-input", "template body item is neither an atom nor a comparison")
+
+
+def _templates_literal(templates: Sequence[Any], instantiations: Sequence[Any]) -> str:
+    """Raw, unexpanded template data for shen/spec-templates.shen.
+
+    Template: [Name [Param ...] [[RuleName [HeadRel HeadTerms] Body] ...]];
+    instantiation: [Name [Arg ...]]. Identifiers keep their ``$P`` text.
+    """
+    strings = lambda items: "[" + " ".join(_string(s) for s in items) + "]"  # noqa: E731
+    rules = lambda items: "[" + " ".join(  # noqa: E731
+        f"[{_string(r['name'])} [{_string(r['head']['relation'])} "
+        f"[{' '.join(_template_term(t) for t in r['head']['terms'])}]] "
+        f"[{' '.join(_template_item(i) for i in r['body'])}]]" for r in items) + "]"
+    return ("[[" + " ".join(f"[{_string(n)} {strings(ps)} {rules(rs)}]" for n, ps, rs in templates) + "] ["
+            + " ".join(f"[{_string(n)} {strings(args)}]" for n, args in instantiations) + "]]")
+
+
 def render_driver(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | None,
                   max_depth: int, max_nodes: int, directory: Path, bundle_digest: str,
                   rules_digest_value: str) -> str:
@@ -289,6 +324,9 @@ def render_driver(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | N
     lines.append(f"(do (set capcov.*in-bounds* [{int(max_depth)} {int(max_nodes)}]) ok)")
     lines.append(f"(do (set capcov.*in-digests* [{_string(bundle_digest)} {_string(rules_digest_value)}]) ok)")
     lines.append(f"(do (set capcov.*in-request* {_request_literal(request)}) ok)")
+    if request.get("kind") == "compile-spec" and "templates" in request:
+        lines.append(f"(do (set capcov.*spec-templates* "
+                     f"{_templates_literal(request['templates'], request['instantiations'])}) ok)")
     lines.append(f"(do (set capcov.*schema-version* {bundle.schema_version}) ok)")
     capabilities = [[c.name, c.witness, c.left_dimension, c.right_dimension,
                      c.left_column, c.right_column, list(c.left_targets),
