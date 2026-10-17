@@ -154,6 +154,19 @@
         "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_base_and_safety_fail_independently",
         "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_protocol_with_cycles"
       ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_proof_recheck_serialization_and_execution",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_invalid_body_and_unestablished_invariant_stay_open",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_nested_loops",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_forged_missing_and_substituted_obligations",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_snapshot_execution_and_unproved_continuation",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_verification_pipeline_retains_provenance",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_contract_scope_and_names_checked_by_shen",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_entry_snapshot_and_conjunctive_invariant"
+      ]
     }
   ]
 }

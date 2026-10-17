@@ -228,9 +228,9 @@ def _rewrite(p, a, distinct=()):
     ]
 
 
-def wp(actions, post, distinct=()):
+def wp(actions, post, distinct=(), *, loop=None):
     result = post
-    for _, _, a in reversed(actions):
+    for _, name, a in reversed(actions):
         if a[0] == "publish":
             continue
         if a[0] == "require":
@@ -238,10 +238,13 @@ def wp(actions, post, distinct=()):
         elif a[0] == "choose":
             result = [
                 "both",
-                ["either", ["negate", a[1]], wp(a[2], result, distinct)],
-                ["either", a[1], wp(a[3], result, distinct)],
+                ["either", ["negate", a[1]], wp(a[2], result, distinct, loop=loop)],
+                ["either", a[1], wp(a[3], result, distinct, loop=loop)],
             ]
         elif a[0] == "for-each":
+            if loop is not None:
+                result = loop(name, a, result)
+                continue
             deletion_preserves = (
                 result[0] == "every-row"
                 and _row_local(result[2])

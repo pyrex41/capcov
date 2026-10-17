@@ -148,10 +148,10 @@ remaining deliverables, not hidden premises discharged by these features:
   invariants, capture-avoiding substitution and checked induction hypotheses.
   The current feature is transition-system safety induction, not unrestricted
   Shen theorem proving over recursive datatypes.
-* Loop integration: compile annotated `for-each` snapshot loops into base,
-  body-preservation and exit obligations. Track the remaining snapshot separately
-  from mutable storage; prove a decreasing natural measure separately when
-  total correctness is required. Existing unsupported loops stay open.
+* Loop integration now supports annotated snapshot-loop invariants with checked
+  initiation, preservation and continuation obligations; see
+  [loop-induction.md](loop-induction.md). Explicit processed/remaining relations,
+  expression totality and fuel bounds remain separate work.
 * Environment exploration: run these adapters under Antithesis or equivalent
   controlled scheduling and fault injection. Repeated identical observations
   remain replay evidence, not a proof of environmental determinism.

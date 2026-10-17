@@ -19,6 +19,7 @@ def verify(
     timeout=60,
     fuel=1024,
     minimize_runs=16,
+    loop_invariants=None,
 ):
     validate(inventory)
     freshness = invalidate(root, inventory)
@@ -32,6 +33,22 @@ def verify(
     for o in obligations.values():
         if o["status"] == "proved" and not check(o["proof"], timeout=timeout):
             raise OperationError("independent proof checking failed")
+    loop_report, loop_proved = None, set()
+    if loop_invariants is not None:
+        from .loops import prove_loops, check_loops
+
+        loop_report = prove_loops(source, loop_invariants, timeout=timeout)
+        if loop_report["status"] == "proved":
+            if not check_loops(
+                source, loop_report, invariants=loop_invariants, timeout=timeout
+            ):
+                raise OperationError("independent loop checking failed")
+            loop_proved = {
+                o["id"]
+                for c in compilation["commands"]
+                if c["command"] in loop_invariants
+                for o in c["obligations"]
+            }
     if not isinstance(campaigns, list) or len(campaigns) > 64:
         raise OperationError("provide at most 64 campaigns")
     reports = []
@@ -83,10 +100,17 @@ def verify(
                 "source_anchored": bool(c["anchors"]),
                 "source_current": c["id"] not in freshness["stale_claims"],
                 "proved_model_obligations": [
-                    n for n in c["obligations"] if obligations[n]["status"] == "proved"
+                    n
+                    for n in c["obligations"]
+                    if obligations[n]["status"] == "proved" or n in loop_proved
                 ],
                 "open_model_obligations": [
-                    n for n in c["obligations"] if obligations[n]["status"] != "proved"
+                    n
+                    for n in c["obligations"]
+                    if obligations[n]["status"] != "proved" and n not in loop_proved
+                ],
+                "loop_proved_model_obligations": [
+                    n for n in c["obligations"] if n in loop_proved
                 ],
                 "witnessed_campaigns": [
                     r["id"] for r in related if r["search"]["status"] == "witness"
@@ -107,6 +131,7 @@ def verify(
         "inventory": inventory["sha256"],
         "freshness": freshness,
         "compilation": compilation,
+        "loop_induction": loop_report,
         "campaigns": reports,
         "claims": claims,
         "admission": "case evidence and scoped model proofs only; no automatic source-to-model equivalence or target approval",
@@ -134,6 +159,8 @@ def main(argv=None):
             "prove",
             "induct",
             "check-induction",
+            "loops",
+            "check-loops",
             "check",
             "relation",
             "solve",
@@ -159,7 +186,16 @@ def main(argv=None):
         source = args.spec.read_text() if args.spec else None
         if (
             args.mode
-            in ("compile", "search", "scenario", "minimize", "verify", "properties")
+            in (
+                "compile",
+                "search",
+                "scenario",
+                "minimize",
+                "verify",
+                "properties",
+                "loops",
+                "check-loops",
+            )
             and source is None
         ):
             raise OperationError("mode requires --spec")
@@ -187,6 +223,16 @@ def main(argv=None):
                     for i, p in enumerate(result["catalog"])
                 )
             )
+        elif args.mode == "loops":
+            from .loops import prove_loops
+
+            result = prove_loops(source, payload, timeout=args.timeout)
+            code = int(result["status"] != "proved")
+        elif args.mode == "check-loops":
+            from .loops import check_loops
+
+            result = {"verified": check_loops(source, payload, timeout=args.timeout)}
+            code = int(not result["verified"])
         elif args.mode == "induct":
             from .induction import prove_induction
 

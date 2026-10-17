@@ -291,3 +291,6 @@ obtained by choosing Shen or by replaying a model twice.
 
 Production adapter contracts and unbounded transition-system safety induction
 are documented in [adapters-and-induction.md](adapters-and-induction.md).
+
+[Loop induction](loop-induction.md) connects explicit invariants to executable
+`for-each` commands and the source-evidence verification pipeline.
