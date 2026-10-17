@@ -1,0 +1,5 @@
+.claims 2.
+// Refused: no template named sides is defined before this point (template-unknown).
+.pack "template-test-v2" schema 2.
+.import "side.claims".
+.instantiate sides(a).

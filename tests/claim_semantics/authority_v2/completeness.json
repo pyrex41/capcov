@@ -1,0 +1,459 @@
+{
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "missing",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "claim",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "derived",
+        "primitive": false,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "closed",
+        "columns": [
+          {
+            "name": "scope_run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          }
+        ],
+        "modality": "completeness",
+        "primitive": true,
+        "context_indices": [
+          "scope_run"
+        ],
+        "completes": "missing"
+      }
+    ],
+    "completeness_scopes": [
+      {
+        "relation": "closed",
+        "target": "missing",
+        "mapping": [
+          [
+            "scope_run",
+            "run"
+          ],
+          [
+            "operation",
+            "operation"
+          ],
+          [
+            "request",
+            "request"
+          ],
+          [
+            "path",
+            "path"
+          ],
+          [
+            "window",
+            "window"
+          ]
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "name": "absence",
+        "head": {
+          "relation": "claim",
+          "terms": [
+            {
+              "variable": "R"
+            },
+            {
+              "variable": "O"
+            },
+            {
+              "variable": "Q"
+            },
+            {
+              "variable": "P"
+            },
+            {
+              "variable": "W"
+            },
+            {
+              "variable": "I"
+            }
+          ],
+          "negated": false
+        },
+        "body": [
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              },
+              {
+                "variable": "I"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "closed",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "missing",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              },
+              {
+                "variable": "I"
+              }
+            ],
+            "negated": true
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "exact-mapped-closure",
+      "changes": [],
+      "categories": []
+    },
+    {
+      "name": "wrong-run-closure",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/0",
+          "value": {
+            "variable": "Wrong"
+          }
+        }
+      ],
+      "categories": [
+        "compatibility",
+        "completeness"
+      ]
+    },
+    {
+      "name": "wrong-operation-closure",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/1",
+          "value": {
+            "variable": "Wrong"
+          }
+        }
+      ],
+      "categories": [
+        "completeness"
+      ]
+    },
+    {
+      "name": "wrong-request-closure",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/2",
+          "value": {
+            "variable": "Wrong"
+          }
+        }
+      ],
+      "categories": [
+        "completeness"
+      ]
+    },
+    {
+      "name": "wrong-path-closure",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/3",
+          "value": {
+            "variable": "Wrong"
+          }
+        }
+      ],
+      "categories": [
+        "completeness"
+      ]
+    },
+    {
+      "name": "wrong-window-closure",
+      "changes": [
+        {
+          "path": "/rules/0/body/1/terms/4",
+          "value": {
+            "variable": "Wrong"
+          }
+        }
+      ],
+      "categories": [
+        "completeness"
+      ]
+    },
+    {
+      "name": "incomplete-map",
+      "changes": [
+        {
+          "path": "/completeness_scopes/0/mapping",
+          "value": [
+            [
+              "operation",
+              "operation"
+            ],
+            [
+              "request",
+              "request"
+            ],
+            [
+              "path",
+              "path"
+            ],
+            [
+              "window",
+              "window"
+            ]
+          ]
+        }
+      ],
+      "categories": [
+        "contracts"
+      ]
+    },
+    {
+      "name": "closure-withdrawn",
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            }
+          ]
+        }
+      ],
+      "categories": [
+        "completeness"
+      ]
+    }
+  ]
+}

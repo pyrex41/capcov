@@ -1,0 +1,10 @@
+.claims 2.
+// Authored finite logic. Closure contracts are elaborated by Shen.
+.pack "rules-shared-v2" schema 2 description "Static/runtime bridges.".
+
+.import "static-relations.claims".
+.decl runtime_route_observed_on_index(index: digest ctx, tenant: symbol ctx, surface: symbol ctx, run: symbol ctx) derived derived runtime.
+runtime_route_matches_scip_index: runtime_route_observed_on_index(IX, T, S, Run) :-
+    runtime_route_observed(T, S, Request, Run), index_describes_run(IX, Run), scip_index(IX, Indexer, Version, Language, Root, Kind).
+runtime_route_executes_committed_sql_on_index: runtime_route_reaches_sql_on_index(IX, Run, Request, Surface, Symbol, Tx, Operation) :-
+    runtime_route_observed(Tenant, Surface, Request, Run), runtime_function_entered(Run, Request, Symbol), runtime_sql_executed(Run, Request, Tx, Operation, Ordinal), runtime_tx_committed(Run, Request, Tx), runtime_route_completed(Run, Request, Surface), index_describes_run(IX, Run), scip_index(IX, Indexer, Version, Language, Root, Kind).

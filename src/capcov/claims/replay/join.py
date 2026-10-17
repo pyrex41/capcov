@@ -356,16 +356,18 @@ def _receipt_header(directory: Path) -> dict[str, Any]:
     return receipt
 
 
-def build(directory: Path, *, reviewer_admissions=()) -> ReplayJoin:
+def build(directory: Path, *, reviewer_admissions=(), version: int = 1) -> ReplayJoin:
+    from ..pack_resources import resolve_profile
+    profile = resolve_profile("replay", version)
     receipt = _receipt_header(directory)
     run = receipt["run"]
     exported = replay_facts.export_bundle(
-        directory, run=run, reviewer_admissions=reviewer_admissions)
+        directory, run=run, reviewer_admissions=reviewer_admissions, profile=profile)
     join = ReplayJoin(directory, receipt, run, exported)
     if exported.status != replay_facts.STATUS_COMPLETE:
         join.contract_findings = [f"exporter refused the receipt ({exported.status}): {m}" for m in exported.messages]
         return join
-    pack = pack_bundle()
+    pack = profile.bundle
     decls = {decl.name: decl for decl in (*exported.bundle.relations, *pack.relations)}
     ops = tuple(sorted({fact.terms[4].value for fact in exported.bundle.facts if fact.relation == "replay_request"}))
     join.ops = ops
@@ -449,6 +451,9 @@ def build(directory: Path, *, reviewer_admissions=()) -> ReplayJoin:
             context = ("run",) if relation in ("model_describes_run", "model_admissible_closed") else ()
             predicate = (("column", "operation"), ("operator", "="), ("value", op)) \
                 if relation in ("model_operation_checked", "model_checker_admitted") else ()
+            if profile.version == 2 and relation == 'model_describes_run':
+                context = ()
+                predicate = (("column", "run"), ("operator", "="), ("value", run))
             diagnostics.append(DiagnosticRule(relation, "observation", "complete", context,
                                               claim_id=qualified.id, predicate=predicate))
             structure_for_model = any(

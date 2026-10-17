@@ -1,0 +1,5 @@
+{
+  "close-all": {
+    "items": "[every-row \"item\" [either [equal [row-field \"status\"] [literal \"open\"]] [equal [row-field \"status\"] [literal \"closed\"]]]]"
+  }
+}

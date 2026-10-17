@@ -80,3 +80,166 @@ capcov experiment claims assumptions invalidate --receipt DIR --drop ID
 refuses. Exit 0 when the documents were produced, 2 for a refusal (an unknown id, or a
 withdrawal that would refute a claim rather than leave a premise missing), 3
 when the kernels disagree. Needs Soufflé, no replay environment.
+
+### Specification migration work in progress
+
+`specs/claims/` contains readable typed declarations and named logic rules for
+all 154 pack rules and the two shared bridges. Replay, static, observation and
+the shared bridges all use Bundle v2 and native closure elaboration.
+`baseline-v1.json` pins the compatibility identities and unchanged `model_min`
+fixture. All installed defaults remain v1; replay, static and observation v2
+profiles are selectable. The preserved-behavior and
+authority-tightening reports record the remaining work.
+
+The compiler requires the pinned native Shen runtime:
+
+```sh
+nix develop .#shen --command capcov experiment claims spec build \
+  --source specs/claims/replay.claims --out /tmp/replay-spec
+nix develop .#shen --command capcov experiment claims spec check \
+  --source specs/claims/replay.claims --artifacts /tmp/replay-spec
+```
+
+From an uninstalled checkout, use `env PYTHONPATH=src python -m capcov` instead
+of `capcov`. `compile_spec(source, timeout=60)` returns data without writing;
+`check_spec(source, artifacts)` recompiles and reports missing, changed, and
+unexpected artifacts without updating the directory. The manifest binds the
+import closure, compiler sources, Python/native runtime identities, and output
+digests. It omits timestamps and absolute paths. Missing Shen is an operational
+failure. Installed pack evaluation reads JSON and does not require Shen.
+
+Authored sources use `.claims 2.` followed by typed relation declarations and named
+Datalog rules. For example, replay now contains:
+
+```text
+.completes model_writes_closed -> model_writes by model=model, op=op.
+
+undeclared_write_php: undeclared_write(Run, Op, Tb) :-
+    replay_request(Run, Req, Tenant, Route, Op),
+    php_effect(Run, Req, Tb, Kind, Pk, Cols), model_describes_run(M, Run),
+    !model_writes(M, Op, Tb), model_scope_exclusions_closed(M),
+    !model_scope_excluded(M, Tb).
+```
+
+Native Shen inserts the two required closure premises. The independent Python
+checker reconstructs their exact terms, order, and source obligations. A
+compiler obligation never creates a closure fact. Replay declares 37 scopes
+and removes 24 redundant premises; its 71 elaborated rules equal the frozen v1
+rules exactly. Remaining closure premises express stronger gates, explicit
+closure policies, or bind an absence claim's domain. Observation declares 28
+scopes and 14 named exact-rule closure policies, and removes 21 premises --
+every closure that immediately guarded a negation; its 56 elaborated rules
+equal the frozen v1 rules exactly, in their original premise order. It declares
+no `.capability` or `.bridge`: every observation relation is runtime-bound and
+the pack is model-free, so a compatibility relation there would be ceremony.
+
+Static declares 7 scopes (in `static-relations.claims`, shared with the
+bridges) and 1 named closure policy (`static_route_authorized_closed`); native
+Shen regenerates 3 premises (`static_file_unindexed`,
+`runtime_route_without_static`, `static_route_authorization_gap`) and the 27
+elaborated rules equal the frozen v1 rules exactly, with digest `c11d6289…`
+reconstructed. `index_describes_run` is now an unscoped v2 witness with one
+directional capability (`scip_index` and `static_route_declared_surface` to the
+runtime route and trace primitives) and the `index-run` bridge. The two shared
+bridges regenerate no premises and equal the frozen
+`runtime-shared-v1.json` rules; that v1 bundle is now frozen generated data
+rather than recompiled from `shared.claims`.
+
+`.decl` marks context columns with `ctx`; `.capability` names directional
+endpoints; `.bridge` requires a dimension association; `.policy` binds a reviewed
+closure rule. Constants use JSON strings or integers with optional `::type`;
+variables begin with uppercase letters. `_` introduces a fresh variable.
+Negated variables must already be positively bound. Imports are literal paths
+relative to the entry source's directory. Escapes, cycles, executable forms,
+and unsupported syntax are rejected. The old bracketed data reader remains
+available for compatibility fixtures. Operations are not yet implemented.
+
+`.template side(Side) { rule ... }` and `.instantiate side(php).` expand rules
+once at decode, before elaboration; no kernel sees a template. `$Side` inside
+a rule or relation name substitutes the argument text, and a whole term
+`$Side::symbol` becomes `"php"::symbol`; variables and strings never change.
+Expanded rules are emitted at the instantiation, which is order-safe because
+Bundle rules are a canonically sorted set. Templates hold rules only, cannot
+instantiate one another and must be defined before use. Unbound parameters,
+arity mismatches, unknown templates and name collisions are named refusals.
+Native Shen (`shen/spec-templates.shen`) re-expands the raw template data and
+compilation refuses on any difference; `obligations.json` and the source map
+trace each expanded rule to its template rule and instantiation. Replay's
+13 php/go families are one template; `spec_fixtures/replay-pretemplate.claims`
+is the untemplated oracle it must decode identically to.
+
+Bundle v2 adds explicit directional capability endpoints, required bridges,
+complete closure-column maps, and named derived-completeness policies bound to
+exact rule identities. Complex policies retain their explicitly authored
+premises, including the learn reporting gate; absence of a reported downgrade
+is not comprehensive coverage. Scoped compatibility witnesses currently fail
+construction checking rather than silently ignoring their scope. V1 canonical serialization omits all v2 fields.
+`convert_v1` requires explicit contracts and returns the old and new identities;
+it never converts certificates. Combining versions or conflicting contracts
+fails. V2 mapping admission, aggregation closure, and universal-domain
+admission are explicitly unsupported pending their independent checks.
+
+`test_authority_v2.py` gives the same authored corpus independently to Python
+and Shen. Native tests call `authority(..., validate=False)` and retain native
+diagnostic identifiers. `test_v2_certificates.py` covers mutated obligations
+and evaluation bases. `recheck(...).ok` means structural validity;
+`fully_checked` additionally requires no unchecked obligations. V2 promotion
+requires an independently recomputed complete evaluation basis. This does not
+prove external-world completeness or replace producer admission. Native v2
+certificate generation is deliberately refused until its versioned basis
+protocol is implemented.
+
+The three native/Python disagreements are resolved: `learn_consistent` is a
+scoped absence claim; `model_scope_excluded` and `masked_admitted` are single
+assumption projections. Direct assumption-to-claim promotion still fails, as
+does laundering the assumption through a derived projection before the claim.
+Native tests are registered in the Shen CI family, which requires the runtime.
+
+Select replay v2 with `replay.join.build(..., version=2)` or
+`capcov experiment claims assumptions registry --receipt DIR --pack-version 2`.
+The immutable profile travels through export, combination, and evaluation.
+Installed v2 pack/schema/stub bytes are checked against their generated
+manifest. V1 remains the default and retains its canonical identities.
+`test_replay_spec.py` compares all 28 frozen cases and individual closure and
+assumption withdrawals, checks the receipt-to-certificate path, and compares
+Python, interpreted Souffle, and compiled Souffle. The installed-wheel test
+loads both replay and both observation versions without repository files or Shen.
+
+Select observation v2 with `observation.join.build(..., version=2)` or
+`python -m capcov.claims.observation.judge ... --pack-version 2`; a v2 judge
+report adds `pack_profile`, and v1 reports keep their exact shape. The
+exporter's rows, evidence ids and observation identity are computed over the
+frozen primitive schema under either profile. `test_observation_spec.py`
+compares the four committed receipts (agree, disagree, gap, masked) and the
+admitted-mask control under v1 and v2, including every individual closure and
+assumption withdrawal, checks v2 certificates against an evaluation basis,
+compares the judge CLI decision under both profiles, and runs all three
+kernels on v2. `test_spec_compiler.py` reconstructs the frozen observation
+rules from the native elaboration and checks each of the 21 insertions.
+
+Select static v2 with `static.pack.pack_bundle(version=2)` and
+`scip_facts.export_bundle(..., pack_profile=resolve_profile('static', 2))`
+(also `export_from_tree`). A v2 export carries the pack's exact declarations
+and contracts; its index identity is unchanged from v1. `test_static_spec.py`
+compares all 14 frozen static cases and individual closure and assumption
+withdrawals, checks the go_app export-to-certificate path, and compares
+Python, interpreted Souffle, and compiled Souffle. Claims are excluded there
+because v2 universal-domain admission is pending.
+
+The operation framework, Shen datatype judgments and Prolog search, templates,
+declarative reporting policy, the static pack migration, and full release gates
+are still outstanding. This milestone demonstrates real replay and observation closure
+elaboration; it does not claim the complete original architecture is delivered.
+
+### Typed operation milestone
+
+See [operation specifications](../../docs/operation-specifications.md) for the
+new native Shen instruction kernel, sequent construction judgments, one-source
+delete-issue example, explicit deployed divergence, Prolog observation/search,
+and independent transition corpus. This is an opt-in experimental API; it does
+not promote operation outputs into completeness or reviewer-admission facts.
+
+The compositional system suite (`test_systems.py`) covers workspace CRUD and
+authorization, ledger transfers/idempotency/conservation, and split outbox
+workflows. See [System specifications](../../docs/system-specifications.md)
+for the native language, harness, campaign and claim-export interfaces.

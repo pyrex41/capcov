@@ -47,7 +47,8 @@ from .static.certificate import DEFAULT_MAX_DEPTH, DEFAULT_MAX_NODES, rules_dige
 
 DEFAULT_TIMEOUT = 60.0
 IMPL = "shen-go"
-LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen")
+LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen",
+                 "spec-templates.shen")
 BEGIN_MARKER = "<<<CAPCOV-SHEN-JSON-BEGIN>>>"
 END_MARKER = "<<<CAPCOV-SHEN-JSON-END>>>"
 _EXACT_INT_LIMIT = 2 ** 53  # shen-go numbers are float64
@@ -264,11 +265,47 @@ def _facts(bundle: Bundle) -> list[str]:
 
 def _request_literal(request: Mapping[str, Any]) -> str:
     kind = request["kind"]
+    if kind == "compile-spec":
+        return "[capcov.compile-spec]"
     if kind == "authority":
         return "[capcov.authority]"
     tag = {"derive": "capcov.derive", "why-not": "capcov.why-not"}[kind]
     row = "[" + " ".join(_literal(v) for v in request["row"]) + "]"
     return f"[{tag} {_string(request['relation'])} {row}]"
+
+
+def _template_term(term: Mapping[str, Any]) -> str:
+    if set(term) == {"name"}:
+        return f"[capcov.v {_string(term['name'])}]"
+    if set(term) == {"parameter", "type"}:
+        return f"[capcov.param {_string(term['parameter'])} {_string(term['type'])}]"
+    if set(term) == {"value", "type"}:
+        return f"[capcov.c {_literal(term['value'])} {_string(term['type'])}]"
+    raise ShenFailure("invalid-input", "template term is not a variable, constant or parameter")
+
+
+def _template_item(item: Mapping[str, Any]) -> str:
+    if set(item) == {"relation", "terms", "negated"}:
+        tag = "capcov.neg" if item["negated"] is True else "capcov.pos"
+        return f"[{tag} {_string(item['relation'])} [{' '.join(_template_term(t) for t in item['terms'])}]]"
+    if set(item) == {"left", "operator", "right"}:
+        return f"[capcov.cmp {_template_term(item['left'])} {_string(item['operator'])} {_template_term(item['right'])}]"
+    raise ShenFailure("invalid-input", "template body item is neither an atom nor a comparison")
+
+
+def _templates_literal(templates: Sequence[Any], instantiations: Sequence[Any]) -> str:
+    """Raw, unexpanded template data for shen/spec-templates.shen.
+
+    Template: [Name [Param ...] [[RuleName [HeadRel HeadTerms] Body] ...]];
+    instantiation: [Name [Arg ...]]. Identifiers keep their ``$P`` text.
+    """
+    strings = lambda items: "[" + " ".join(_string(s) for s in items) + "]"  # noqa: E731
+    rules = lambda items: "[" + " ".join(  # noqa: E731
+        f"[{_string(r['name'])} [{_string(r['head']['relation'])} "
+        f"[{' '.join(_template_term(t) for t in r['head']['terms'])}]] "
+        f"[{' '.join(_template_item(i) for i in r['body'])}]]" for r in items) + "]"
+    return ("[[" + " ".join(f"[{_string(n)} {strings(ps)} {rules(rs)}]" for n, ps, rs in templates) + "] ["
+            + " ".join(f"[{_string(n)} {strings(args)}]" for n, args in instantiations) + "]]")
 
 
 def render_driver(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | None,
@@ -287,6 +324,22 @@ def render_driver(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | N
     lines.append(f"(do (set capcov.*in-bounds* [{int(max_depth)} {int(max_nodes)}]) ok)")
     lines.append(f"(do (set capcov.*in-digests* [{_string(bundle_digest)} {_string(rules_digest_value)}]) ok)")
     lines.append(f"(do (set capcov.*in-request* {_request_literal(request)}) ok)")
+    if request.get("kind") == "compile-spec" and "templates" in request:
+        lines.append(f"(do (set capcov.*spec-templates* "
+                     f"{_templates_literal(request['templates'], request['instantiations'])}) ok)")
+    lines.append(f"(do (set capcov.*schema-version* {bundle.schema_version}) ok)")
+    capabilities = [[c.name, c.witness, c.left_dimension, c.right_dimension,
+                     c.left_column, c.right_column, list(c.left_targets),
+                     list(c.right_targets), c.symmetric] for c in bundle.compatibility_capabilities]
+    scopes = [[s.relation, s.target, [list(p) for p in s.mapping]] for s in bundle.completeness_scopes]
+    bridges = [[b.name, b.left_dimension, b.right_dimension, list(b.left_targets),
+                list(b.right_targets)] for b in bundle.required_bridges]
+    policies = [[p.name, p.rule, p.relation, p.rule_digest] for p in bundle.derived_completeness_policies]
+    def data_literal(value):
+        return "[" + " ".join(data_literal(v) for v in value) + "]" if isinstance(value, list) else _literal(value)
+
+    for name, data in (("capabilities", capabilities), ("scopes", scopes), ("bridges", bridges), ("derived-policies", policies)):
+        lines.append(f"(do (set capcov.*{name}* {data_literal(data)}) ok)")
     lines.append("(capcov.main)")
     return "\n".join(lines) + "\n"
 
@@ -388,6 +441,8 @@ def run(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | None = None
     Raises ``ShenUnavailable`` when the runtime is missing and ``ShenFailure``
     for every run that does not yield a well-formed, non-error payload.
     """
+    if bundle.schema_version == 2 and request.get("kind") not in {"authority", "compile-spec"}:
+        raise ShenFailure("unsupported-construct", "native v2 derivations require the versioned evaluation-basis protocol")
     rt = runtime()
     if max_depth < 1 or max_nodes < 1:
         raise ShenFailure("invalid-input", "max_depth and max_nodes must be positive")
@@ -483,8 +538,11 @@ def _pack_bundle(rules: Any, *, validate: bool = True) -> Bundle:
     relations = [*rules.get("primitives", ()), *rules.get("supplementary_primitives", ()),
                  *rules.get("derived", ()), *rules.get("relations", ())]
     try:
-        return bundle_from_json({"schema_version": 1, "relations": relations, "rules": list(rules.get("rules", ()))},
-                                validate=validate)
+        from .contracts import CONTRACT_FIELDS
+        raw = {"schema_version": rules.get("schema_version", 1), "relations": relations,
+               "rules": list(rules.get("rules", ()))}
+        raw.update({key: rules[key] for key in CONTRACT_FIELDS if key in rules})
+        return bundle_from_json(raw, validate=validate)
     except (BundleIngestionError, ValidationError) as exc:
         raise ShenFailure("invalid-input", f"rule pack is not a valid bundle: {exc}") from exc
 
@@ -494,6 +552,11 @@ def _check_pack_against(bundle: Bundle, rules: Any) -> None:
     if rules is None:
         return
     pack = _pack_bundle(rules)
+    from .contracts import CONTRACT_FIELDS
+    if pack.schema_version != bundle.schema_version or any(
+        not set(getattr(pack, key)).issubset(getattr(bundle, key)) for key in CONTRACT_FIELDS
+    ):
+        raise ShenFailure("rule-pack-mismatch", "rule pack schema or authority contracts differ from the bundle")
     have_rules = {digest(rule) for rule in bundle.rules}
     have_relations = {decl.name: digest(decl) for decl in bundle.relations}
     missing = [rule.name or digest(rule) for rule in pack.rules if digest(rule) not in have_rules]

@@ -17,22 +17,27 @@
     "tests.claim_semantics.test_kernel_closure.KernelClosureTests",
     "tests.claim_semantics.test_kernel_closure.SouffleVariableOutputRelevanceTests",
     "tests.claim_semantics.test_observation_join.KernelDifferentialTest",
+    "tests.claim_semantics.test_observation_spec.NativeObservationSpecTests",
     "tests.claim_semantics.test_replay_adversarial_both_engines.AdversarialReplayCasesInBothEngines",
     "tests.claim_semantics.test_replay_corpus_evaluation.SouffleAgreesWithPythonOnEveryReplayCase",
     "tests.claim_semantics.test_replay_evidence_policy.ReplayEvidencePolicyTest",
+    "tests.claim_semantics.test_replay_spec.NativeReplaySpecTests",
     "tests.claim_semantics.test_shrinker_bundle.ShrinkerTests",
     "tests.claim_semantics.test_souffle_compiled_kernel.SouffleCompiledCorpusTests",
     "tests.claim_semantics.test_souffle_evaluator.SouffleCorpusSmokeTests",
     "tests.claim_semantics.test_static_adversarial_both_engines.AdversarialCasesInBothEngines",
     "tests.claim_semantics.test_static_corpus_evaluation.SouffleAgreesWithPythonOnEveryStaticCase",
     "tests.claim_semantics.test_static_evidence_policy.StaticEvidencePolicyTest",
+    "tests.claim_semantics.test_static_spec.NativeStaticSpecTests",
     "tests.test_claim_souffle.SouffleBackendTests",
-    "tests.test_faults_checker.EngineTest"
+    "tests.test_faults_checker.EngineTest",
+    "tests.claim_semantics.test_reasoning.SouffleSourceTests"
    ]
   },
   "shen": {
    "needs": "Starts the Shen runtime through bifrost.",
    "classes": [
+    "tests.claim_semantics.test_authority_v2.NativeAuthorityV2Tests",
     "tests.claim_semantics.test_modelcheck.CheckerTest",
     "tests.claim_semantics.test_modelcheck.LiveModelTest",
     "tests.claim_semantics.test_modelcheck.PreflightTest",
@@ -40,7 +45,14 @@
     "tests.claim_semantics.test_shen_transport.FakeLauncherFailureTest",
     "tests.claim_semantics.test_shen_workbench.ShenAuthorityTest",
     "tests.claim_semantics.test_shen_workbench.ShenDeriveTest",
-    "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest"
+    "tests.claim_semantics.test_shen_workbench.ShenFrozenPackTest",
+    "tests.claim_semantics.test_spec_compiler.NativeSpecTests",
+    "tests.claim_semantics.test_operations.NativeOperationTests",
+    "tests.claim_semantics.test_systems.NativeSystemTests",
+    "tests.claim_semantics.test_reasoning.NativeReasoningTests",
+    "tests.claim_semantics.test_adapters_induction.NativeInductionTests",
+    "tests.claim_semantics.test_loop_induction.NativeLoopTests",
+    "tests.claim_semantics.test_loop_completion.NativeCompletionTests"
    ]
   },
   "indexers": {

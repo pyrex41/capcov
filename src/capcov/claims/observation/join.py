@@ -2,7 +2,8 @@
 
 ``build`` exports the receipt directory (``observation_facts.export_bundle``; a
 refusal is a *contract finding* the caller reports, never something to work
-around), combines it with ``rules-observation-v1`` (``observation.pack``) and
+around), combines it with the selected installed profile (``rules-observation-v1``
+by default, or ``rules-observation-v2``; ``observation.pack``) and
 the claim-time rows a judge adds, and states TWO claims per run::
 
     claim-observations-agree-<run> : observations_agree(run, check, set, policy)
@@ -78,7 +79,6 @@ from .. import assumptions
 from ..static.ground import shared_assumptions, why, why_not
 from ..static.certificate import certify, claim_conclusions, recheck
 from . import observation_facts
-from .pack import pack_bundle
 
 REVIEWER_SOURCE = "reviewer claim-time observation"
 FIXTURE_SOURCE = "reviewer fixture-mode observation (no tree was inspected)"
@@ -403,7 +403,8 @@ def build(directory: Path | str, *, candidate_root: Path | str | None = None,
           expected_manifest_sha256: str | None = None,
           expected_source_digest: str | None = None,
           expected_candidate_commit: str | None = None,
-          expected_candidate_tree: str | None = None) -> ObservationJoin:
+          expected_candidate_tree: str | None = None,
+          version: int = 1) -> ObservationJoin:
     """Export the receipt, add the reviewer's three observations, state the two claims.
 
     ``candidate_root`` / ``incumbent_manifest`` are the trees under judgment.
@@ -413,7 +414,11 @@ def build(directory: Path | str, *, candidate_root: Path | str | None = None,
     copy of the run nonce; ``fixture_digest`` the reviewer's observation of the
     fixture.  ``fixture=True`` judges a committed fixture receipt with no tree
     to inspect and takes all three from the receipt, recording that it did.
+    ``version`` selects the installed pack profile (v1 by default) once, here;
+    the same profile declares the exported bundle and supplies the rules.
     """
+    from ..pack_resources import resolve_profile
+    profile = resolve_profile("observation", version)
     directory = Path(directory)
     if allow_receipt_admissions and not fixture:
         raise ValueError("receipt-local admissions are available only in explicit fixture mode")
@@ -426,7 +431,8 @@ def build(directory: Path | str, *, candidate_root: Path | str | None = None,
         directory, run=run or None, admissions_path=external_admissions_path,
         admissions_bytes=external_admissions_bytes,
         allow_receipt_admissions=(receipt_admissions and external_admissions_path is None
-                                  and external_admissions_bytes is None))
+                                  and external_admissions_bytes is None),
+        profile=profile)
     join = ObservationJoin(directory, receipt, run, exported)
     if exported.status != observation_facts.STATUS_COMPLETE:
         join.contract_findings = [f"exporter refused the receipt ({exported.status}): {m}"
@@ -439,7 +445,7 @@ def build(directory: Path | str, *, candidate_root: Path | str | None = None,
     join.fixture = metadata["fixture"]
     join.source_digest = metadata["source_digest"]
 
-    pack = pack_bundle()
+    pack = profile.bundle
     decls = {decl.name: decl for decl in (*exported.bundle.relations, *pack.relations)}
     additions: list[tuple[Atom, Evidence]] = []
 
@@ -581,14 +587,20 @@ def evaluate_python(join: ObservationJoin) -> ObservationJoin:
     if report.operational_failure is not None:
         return join
     try:
+        # A v2 certificate is fully checked only against a complete evaluation
+        # basis of the same bundle, exactly as ``assumptions.certify_claims``.
+        basis = None
+        if join.bundle.schema_version == 2:
+            from ..evaluation_basis import evaluate_basis
+            basis = evaluate_basis(join.bundle)
         for claim in join.bundle.claims:
             rows = claim_conclusions(join.bundle, report.relations, claim)
             for row in rows:
                 certificate = certify(join.bundle, report.relations, claim.relation, row)
                 if certificate.get("truncated"):
                     continue
-                checked = recheck(join.bundle, certificate, report.relations)
-                if not checked.ok:
+                checked = recheck(join.bundle, certificate, report.relations, evaluation_basis=basis)
+                if not checked.fully_checked:
                     raise ValueError("certificate failed recheck")
                 join.certificates.setdefault(claim.id, certificate)
                 join.row_certificates.setdefault(claim.id, []).append(certificate)

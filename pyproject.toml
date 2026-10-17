@@ -49,7 +49,8 @@ probe-python = ["sqlalchemy>=2.0", "pytest>=8"]
 # route opinion lives in a config-supplied query, so no per-language engine
 # code -- and core discovery stays stdlib-only, this extra is never imported by
 # `capcov gate`.
-treesitter = ["tree-sitter>=0.25,<0.27", "tree-sitter-language-pack>=0.7"]
+treesitter = ["tree-sitter>=0.25,<0.27", "tree-sitter-language-pack>=0.7",
+              "tree-sitter-go>=0.25,<0.26", "tree-sitter-php>=0.24,<0.25"]
 # `capcov.faults` is standard library only. This extra is for
 # `capcov.faults.machine.hypothesis_machine`, which imports Hypothesis inside the
 # function; the explicit enumerator beside it needs nothing.
@@ -100,6 +101,7 @@ where = ["src"]
 # (tests/claim_semantics/test_observation_pack_package_data.py fails if the
 # entry is dropped).
 [tool.setuptools.package-data]
+"capcov.operations" = ["shen/*.shen", "shen/types/*.shen", "*.dl"]
 "capcov.claims.static" = ["*.json"]
 "capcov.claims.replay" = ["*.json"]
 "capcov.claims.observation" = ["*.json"]

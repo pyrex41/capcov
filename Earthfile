@@ -40,7 +40,7 @@ src:
     COPY ${SRC_PATH}/README.md ${SRC_PATH}/LICENSE ${SRC_PATH}/MANIFEST.in \
          ${SRC_PATH}/capcov.toml ${SRC_PATH}/capcov.outcomes.json ./
     COPY --dir ${SRC_PATH}/src ${SRC_PATH}/tests ${SRC_PATH}/scripts ${SRC_PATH}/benchmarks \
-         ${SRC_PATH}/examples ${SRC_PATH}/experiments ${SRC_PATH}/shen ./
+         ${SRC_PATH}/examples ${SRC_PATH}/experiments ${SRC_PATH}/specs ${SRC_PATH}/shen ./
     RUN uv sync --frozen --extra probe-python --extra treesitter --extra faults-property --group lint
 
 # lint runs ruff with the rules selected in pyproject.toml
@@ -161,7 +161,7 @@ src-pinned:
          ${SRC_PATH}/capcov.toml ${SRC_PATH}/capcov.outcomes.json \
          ${SRC_PATH}/flake.nix ${SRC_PATH}/flake.lock ${SRC_PATH}/package.nix ./
     COPY --dir ${SRC_PATH}/src ${SRC_PATH}/tests ${SRC_PATH}/scripts ${SRC_PATH}/benchmarks \
-         ${SRC_PATH}/examples ${SRC_PATH}/experiments ${SRC_PATH}/shen ${SRC_PATH}/nix ./
+         ${SRC_PATH}/examples ${SRC_PATH}/experiments ${SRC_PATH}/specs ${SRC_PATH}/shen ${SRC_PATH}/nix ./
     RUN /toolchain/with-toolchain uv sync --frozen \
             --extra probe-python --extra treesitter --extra faults-property --group packaging --group lint
 
@@ -195,6 +195,9 @@ test-shard:
     ARG SHARDS=1
     ARG SHARD=1
     FROM +src-pinned --SRC_PATH=${SRC_PATH} --FAMILY=${FAMILY} --IMAGE=${IMAGE}
+    IF [ "${FAMILY}" = "shen" ]
+        ENV CAPCOV_SHEN_REQUIRED=1
+    END
     IF [ "${FAMILY}" = "souffle" ]
         COPY (+compiled-checkers/compile-keys.txt --SRC_PATH=${SRC_PATH} --IMAGE=${IMAGE}) /tmp/
     END

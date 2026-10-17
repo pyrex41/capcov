@@ -862,9 +862,84 @@
   [capcov.fact _ Row _] -> Row
   [capcov.rule-app _ _ _ Row _ _ _] -> Row)
 
-\\ ---------------------------------------------------------------- top-down derivation (mirrors certificate.py)
+\\ ---------------------------------------------------------------- top-down derivation (Horn clauses; mirrors certificate.py)
+
+\* The derivation search is the rule's sequent form written as Shen Prolog
+   clauses: capcov.derivation Rel Row Depth Node holds when Node derives
+   Rel(Row), capcov.application Rule Row Depth Rec Node when Rule concludes
+   Row from a first instantiation of its body, capcov.satisfies Body Env I
+   Pos Neg Cmp when the body holds under Env (positive atoms matched against
+   closure rows, negated atoms absent from the closure, comparisons true),
+   and capcov.premises when every positive premise has a derivation one
+   level deeper.  Python's extractor is reproduced exactly because the
+   clause search order IS the canonical order: rules in capcov.rules-for
+   order (sorted canonical rule keys), candidate rows in capcov.candidates
+   order (canonical row order inside the narrowest index bucket), body atoms
+   left to right, and a cut commits to the first instantiation.
+
+   Bounds are side conditions, never failures: capcov.nest, capcov.tick and
+   capcov.node-tick raise capcov-truncated / capcov-resource-exhausted at
+   the same points, in the same order, as the list-recursive search they
+   replace, so work, nodes and the truncation reason are unchanged.  A
+   derivation of a closure row never fails either: every way it could fail
+   (no rule applies, no base row, a stale step) is a named
+   capcov-inconsistent / capcov-internal error, so committing before the
+   premises are derived loses no derivation.
+
+   Recursive relations keep the breadth-first strategy: the frontier is
+   advanced by capcov.unvisited-predecessor (one linear step rule run
+   backwards, enumerated with findall in discovery order and then sorted
+   with capcov.sort-frontier), the parent table is the visited set, and the
+   first frontier row with a base application is chained back to the
+   requested row by re-applying each recorded step rule with its recursive
+   premise fixed (capcov.chain).
+
+   Shen data enters the queries ground (receive); every computed value is
+   bound with is from a plain function, so no derivation result depends on
+   hash or dictionary iteration order.  Arguments known to be ground once
+   dereferenced one level (rules, rows, environments, terms) are passed to
+   those functions as (1 X), which skips the full structural deref copy the
+   kernel otherwise makes per call; lists the clauses build themselves
+   (premises, satisfied rows, alternatives) are always fully dereferenced.
+   A query's success path keeps its
+   Prolog variables alive, and every derivation node, matched candidate and
+   searched predecessor is a node tick, so capcov.derive sizes the binding
+   store from max_nodes and the longest rule body (capcov.derive-memory);
+   overflowing it is reported as capcov-resource-exhausted, not as a crash. *\
+
+(defprolog capcov.member
+  X [X | _] <--;
+  X [_ | Xs] <-- (capcov.member X Xs);)
+
+(define capcov.max-body
+  [] M -> M
+  [R | Rs] M -> (capcov.max-body Rs (if (> (length (capcov.rule-body R)) M) (length (capcov.rule-body R)) M)))
+
+(define capcov.derive-memory
+  \\ per node tick: the derivation/application frame plus one frame per body
+  \\ atom (the go_app derivations keep about 5 variables alive per node)
+  -> (+ 1000 (* (+ 1 (value capcov.*max-nodes*)) (+ 8 (* 4 (capcov.max-body (value capcov.*rules*) 0))))))
+
+(define capcov.why-not-memory
+  \\ a why-not query keeps alive only the attempt of one rule body
+  -> (+ 1000 (* 32 (capcov.max-body (value capcov.*rules*) 0))))
+
+(define capcov.binding-store
+  \\ the shen-go message for a write past the end of the Prolog binding vector
+  Size Message -> (if (= Message (make-string "index ~A out of range ~A" Size Size))
+                      (error "capcov-resource-exhausted: derivation exceeds the Prolog binding store of ~A variables" Size)
+                      (simple-error Message)))
 
 (define capcov.derive
+  \\ the canonical derivation of Rel(Row) at nesting Depth, as one Prolog query
+  Rel Row Depth -> (let Size (capcov.derive-memory)
+                     (do (prolog-memory Size)
+                         (trap-error (prolog? (capcov.derivation (receive Rel) (receive Row) (receive Depth) Node)
+                                              (return Node))
+                                     (/. E (capcov.binding-store Size (error-to-string E)))))))
+
+(define capcov.derivation-kind
+  \\ the side conditions of entering one node: nesting, node budget, closure membership
   Rel Row Depth ->
     (do (capcov.nest Depth)
         (capcov.node-tick (cn "deriving " Rel))
@@ -872,44 +947,96 @@
           (cond ((= Decl capcov.none) (error "capcov-inconsistent: unknown relation ~A" Rel))
                 ((capcov.decl-primitive? Decl)
                  (if (capcov.present? Rel Row)
-                     (capcov.fact-node Rel Row)
+                     capcov.fact
                      (error "capcov-inconsistent: primitive row ~A~A is not in the closure" Rel (capcov.row-key Row))))
                 ((not (capcov.present? Rel Row))
                  (error "capcov-inconsistent: row ~A~A is not in the closure" Rel (capcov.row-key Row)))
-                ((capcov.recursive? Rel) (capcov.derive-recursive Rel Row Depth))
-                (true (capcov.derive-plain (capcov.rules-for Rel) Rel Row Depth))))))
+                ((capcov.recursive? Rel) capcov.recursive)
+                (true capcov.plain)))))
 
-(define capcov.derive-plain
-  [] Rel Row Depth -> (error "capcov-inconsistent: no rule derives ~A~A from the closure" Rel (capcov.row-key Row))
-  [R | Rs] Rel Row Depth -> (let Node (capcov.apply R Row Depth capcov.none)
-                              (if (= Node capcov.none) (capcov.derive-plain Rs Rel Row Depth) Node)))
+(define capcov.underivable
+  Rel Row -> (error "capcov-inconsistent: no rule derives ~A~A from the closure" Rel (capcov.row-key Row)))
 
-(define capcov.apply
-  \\ first instantiation of Rule concluding Row; Rec = capcov.none or [Index Node]
-  Rule Row Depth Rec ->
-    (let Env (capcov.unify (capcov.rule-head-terms Rule) Row [])
-      (if (= Env capcov.none)
-          capcov.none
-          (let R (capcov.inst (capcov.rule-body Rule) Env [] [] [] 0
-                              (/. E Pos Neg Cmp
-                                  (if (capcov.rec-ok? Rec Pos)
-                                      [capcov.stop (capcov.rule-node Rule Row (capcov.premises Pos Rec Depth) Neg Cmp)]
-                                      capcov.continue)))
-            (if (= R capcov.continue) capcov.none (capcov.stop-value R))))))
+(defprolog capcov.derivation
+  Rel Row Depth Node <-- (is Kind (capcov.derivation-kind (1 Rel) (1 Row) (1 Depth)))
+                         (capcov.derivation-by Kind Rel Row Depth Node);)
 
-(define capcov.rec-ok?
-  capcov.none _ -> true
-  [I Node] [] -> false
-  [I Node] [[J Rel Row] | Rest] -> (if (and (= I J) (= Row (capcov.node-row Node))) true (capcov.rec-ok? [I Node] Rest)))
+(defprolog capcov.derivation-by
+  capcov.fact Rel Row _ Node <-- (is Node (capcov.fact-node (1 Rel) (1 Row)));
+  capcov.plain Rel Row Depth Node <-- (capcov.rule-for Rel Rule) (capcov.application Rule Row Depth capcov.none Node) !;
+  capcov.plain Rel Row _ _ <-- (when (capcov.underivable Rel Row));
+  capcov.recursive Rel Row Depth Node <-- (capcov.chain-search Rel Row Depth Node);)
 
-(define capcov.premises
-  [] Rec Depth -> []
-  [[J Rel Row] | Rest] capcov.none Depth -> [(capcov.derive Rel Row (+ Depth 1)) | (capcov.premises Rest capcov.none Depth)]
-  [[J Rel Row] | Rest] [I Node] Depth -> [(if (= I J) Node (capcov.derive Rel Row (+ Depth 1))) | (capcov.premises Rest [I Node] Depth)])
+(defprolog capcov.rule-for
+  Rel Rule <-- (is Rules (capcov.rules-for (1 Rel))) (capcov.member Rule Rules);)
+
+(defprolog capcov.application
+  \\ Rec = capcov.none, or [I Node]: the I-th premise must be Node's row and is Node
+  Rule Row Depth Rec [capcov.rule-app Name Digest Rel Row Premises Neg Cmp] <--
+    (is Env (capcov.unify (capcov.rule-head-terms (1 Rule)) (1 Row) []))
+    (when (not (= (1 Env) capcov.none)))
+    (is Body (capcov.rule-body (1 Rule)))
+    (capcov.satisfies Body Env 0 Pos Neg Cmp)
+    (capcov.recursive-premise Rec Pos)
+    !
+    (is Name (capcov.rule-name (1 Rule)))
+    (is Digest (capcov.rule-digest (1 Rule)))
+    (is Rel (capcov.rule-head-rel (1 Rule)))
+    (capcov.premises Pos Rec Depth Premises);)
+
+(define capcov.ticked?
+  What -> (do (capcov.tick What) true))
+
+(define capcov.negated-row
+  Rel Terms Env -> (let Row (capcov.ground-row Terms Env)
+                     (if (capcov.fully-ground? Row)
+                         Row
+                         (error "capcov-inconsistent: negated atom ~A is not ground at check time" Rel))))
+
+(defprolog capcov.satisfies
+  \\ positives are [Index Rel Row], negatives [Rel Row], comparisons [L Op R]
+  [] _ _ [] [] [] <--;
+  [[capcov.cmp L Op R] | Body] Env I Pos Neg [[LV Op RV] | Cmp] <--
+    (when (capcov.holds? (1 L) (1 Op) (1 R) (1 Env)))
+    (is LV (capcov.ground (1 L) (1 Env)))
+    (is RV (capcov.ground (1 R) (1 Env)))
+    (is J (+ (1 I) 1))
+    (capcov.satisfies Body Env J Pos Neg Cmp);
+  [[capcov.neg Rel Terms] | Body] Env I Pos [[Rel Row] | Neg] Cmp <--
+    (is Row (capcov.negated-row (1 Rel) (1 Terms) (1 Env)))
+    (when (not (capcov.present? (1 Rel) (1 Row))))
+    (is J (+ (1 I) 1))
+    (capcov.satisfies Body Env J Pos Neg Cmp);
+  [[capcov.pos Rel Terms] | Body] Env I [[I Rel Row] | Pos] Neg Cmp <--
+    (is Rows (capcov.candidates (1 Rel) (1 Terms) (1 Env)))
+    (capcov.member Row Rows)
+    (when (capcov.ticked? (cn "matching " (1 Rel))))
+    (is Env2 (capcov.unify (1 Terms) (1 Row) (1 Env)))
+    (when (not (= (1 Env2) capcov.none)))
+    (is J (+ (1 I) 1))
+    (capcov.satisfies Body Env2 J Pos Neg Cmp);)
+
+(defprolog capcov.concludes
+  [capcov.fact _ Row _] Row <--;
+  [capcov.rule-app _ _ _ Row _ _ _] Row <--;)
+
+(defprolog capcov.recursive-premise
+  capcov.none _ <--;
+  [I Node] Pos <-- (capcov.concludes Node Row) (capcov.member [I PRel Row] Pos) !;)
+
+(defprolog capcov.premises
+  [] _ _ [] <--;
+  [[I Rel Row] | Pos] Rec Depth [Node | Nodes] <--
+    (capcov.premise I Rel Row Rec Depth Node)
+    (capcov.premises Pos Rec Depth Nodes);)
+
+(defprolog capcov.premise
+  I _ _ [I Node] _ Node <-- !;
+  _ Rel Row _ Depth Node <-- (is Deeper (+ (1 Depth) 1)) (capcov.derivation Rel Row Deeper Node);)
 
 \\ recursion: breadth-first backwards through the linear step rules, with an
-\\ explicit parent table as the visited set (no unbounded recursion on the
-\\ derivation chain; the chain is rebuilt iteratively from the table)
+\\ explicit parent table as the visited set; the derivation chain is rebuilt
+\\ from the table
 
 (define capcov.split-rules
   \\ (@p BaseRules StepRules) for Rel; a non-linear recursive rule is unsupported
@@ -922,6 +1049,12 @@
                               ((= (capcov.rule-kind R) capcov.plain) (capcov.split-h Rs [R | Base] Step))
                               (true (error "capcov-unsupported-construct: rule ~A is non-linear recursive" (capcov.rule-name R)))))
 
+(define capcov.base-rules
+  Rel -> (fst (capcov.split-rules Rel)))
+
+(define capcov.step-rules
+  Rel -> (snd (capcov.split-rules Rel)))
+
 (define capcov.rk
   Rel Row -> (cn Rel (cn "|" (capcov.skey Row))))
 
@@ -932,96 +1065,120 @@
   Parent Rel Row Link -> (let Key (capcov.rk Rel Row)
                            (capcov.ht-put Key [(@p [Rel Row] Link) | (capcov.ht-get Key Parent [])] Parent)))
 
-(define capcov.derive-recursive
-  Rel Row Depth -> (let Parent (capcov.ht-new 1021)
-                     (do (capcov.parent-put Parent Rel Row capcov.root)
-                         (capcov.bfs Rel Row [[Rel Row]] Parent Depth 0))))
+(define capcov.parent-table
+  Rel Row -> (let Parent (capcov.ht-new 1021)
+               (do (capcov.parent-put Parent Rel Row capcov.root) Parent)))
 
-(define capcov.bfs
-  Rel Row Frontier Parent Depth Steps ->
-    (if (> Steps (value capcov.*max-depth*))
-        (error "capcov-truncated: recursive derivation of ~A exceeds max_depth=~A steps" Rel (value capcov.*max-depth*))
-        (let Found (capcov.try-bases Frontier Depth Steps)
-          (if (= Found capcov.none)
-              (let Next (capcov.expand Frontier Parent Rel [])
-                (if (empty? Next)
-                    (error "capcov-inconsistent: recursive row ~A~A has no base derivation within the closure" Rel (capcov.row-key Row))
-                    (capcov.bfs Rel Row (capcov.sort-frontier Next) Parent Depth (+ Steps 1))))
-              (do (if (> Steps (value capcov.*max-steps*)) (set capcov.*max-steps* Steps) ok)
-                  (capcov.rebuild-chain Parent (fst Found) (snd Found) Depth Steps))))))
+(define capcov.within-steps?
+  Rel Steps -> (if (> Steps (value capcov.*max-depth*))
+                   (error "capcov-truncated: recursive derivation of ~A exceeds max_depth=~A steps" Rel (value capcov.*max-depth*))
+                   true))
 
-(define capcov.try-bases
-  [] Depth Steps -> capcov.none
-  [[R Rw] | Rest] Depth Steps -> (let Node (capcov.try-base-rules (fst (capcov.split-rules R)) Rw (+ Depth Steps))
-                                   (if (= Node capcov.none) (capcov.try-bases Rest Depth Steps) (@p [R Rw] Node))))
+(define capcov.note-steps
+  Steps -> (do (if (> Steps (value capcov.*max-steps*)) (set capcov.*max-steps* Steps) ok) true))
 
-(define capcov.try-base-rules
-  [] Row Depth -> capcov.none
-  [Rule | Rules] Row Depth -> (let Node (capcov.apply Rule Row Depth capcov.none)
-                                (if (= Node capcov.none) (capcov.try-base-rules Rules Row Depth) Node)))
-
-(define capcov.expand
-  [] Parent Rel Acc -> (reverse Acc)
-  [[R Rw] | Rest] Parent Rel Acc ->
-    (capcov.expand Rest Parent Rel (capcov.expand-steps (snd (capcov.split-rules R)) R Rw Parent Rel Acc)))
-
-(define capcov.expand-steps
-  [] R Rw Parent Rel Acc -> Acc
-  [Rule | Rules] R Rw Parent Rel Acc ->
-    (let Env (capcov.unify (capcov.rule-head-terms Rule) Rw [])
-      (if (= Env capcov.none)
-          (capcov.expand-steps Rules R Rw Parent Rel Acc)
-          (do (set capcov.*expand-acc* Acc)
-              (capcov.inst (capcov.rule-body Rule) Env [] [] [] 0
-                           (/. E Pos Neg Cmp
-                               (let RecIdx (nth 1 (capcov.rule-recursive-atoms Rule))
-                                    Pred (capcov.pos-row RecIdx Pos)
-                                    PredRel (capcov.pos-rel RecIdx Pos)
-                                 (do (if (= (capcov.parent-get Parent PredRel Pred) capcov.none)
-                                         (do (capcov.tick (cn "searching " Rel))
-                                             (capcov.parent-put Parent PredRel Pred [[R Rw] Rule RecIdx])
-                                             (set capcov.*expand-acc* [[PredRel Pred] | (value capcov.*expand-acc*)]))
-                                         ok)
-                                     capcov.continue))))
-              (capcov.expand-steps Rules R Rw Parent Rel (value capcov.*expand-acc*))))))
-
-(define capcov.pos-row
-  I [[J Rel Row] | Rest] -> (if (= I J) Row (capcov.pos-row I Rest))
-  I [] -> (error "capcov-internal: recursive premise ~A missing from instantiation" I))
-
-(define capcov.pos-rel
-  I [[J Rel Row] | Rest] -> (if (= I J) Rel (capcov.pos-rel I Rest)))
+(define capcov.visit!
+  \\ true (after a node tick) when PredRel(Pred) is reached for the first time
+  Parent Rel PredRel Pred Link -> (if (= (capcov.parent-get Parent PredRel Pred) capcov.none)
+                                      (do (capcov.tick (cn "searching " Rel))
+                                          (capcov.parent-put Parent PredRel Pred Link)
+                                          true)
+                                      false))
 
 (define capcov.sort-frontier
   \\ Python: sorted by (relation, canonical row key); NUL-joined text orders identically
   Items -> (capcov.sort-by-key (/. Item (cn (nth 1 Item) (cn (value capcov.*nul*) (capcov.row-key (nth 2 Item))))) Items))
 
-(define capcov.rebuild-chain
-  Parent [Rel Row] Node Depth Remaining ->
-    (let Link (capcov.parent-get Parent Rel Row)
-      (if (= Link capcov.root)
-          Node
-          (let PRel (nth 1 (nth 1 Link)) PRow (nth 2 (nth 1 Link)) Rule (nth 2 Link) RecIdx (nth 3 Link)
-               Rebuilt (capcov.apply Rule PRow (+ Depth (- Remaining 1)) [RecIdx Node])
-            (if (= Rebuilt capcov.none)
-                (error "capcov-internal: recorded step instantiation no longer applies")
-                (capcov.rebuild-chain Parent [PRel PRow] Rebuilt Depth (- Remaining 1)))))))
+(define capcov.next-frontier
+  \\ Found is findall's (reversed) discovery order
+  Rel Row [] -> (error "capcov-inconsistent: recursive row ~A~A has no base derivation within the closure" Rel (capcov.row-key Row))
+  _ _ Found -> (capcov.sort-frontier (reverse Found)))
+
+(define capcov.stale-step
+  -> (error "capcov-internal: recorded step instantiation no longer applies"))
+
+(defprolog capcov.chain-search
+  Rel Row Depth Node <-- (is Parent (capcov.parent-table Rel Row))
+                         (capcov.bfs Rel Row [[Rel Row]] Parent Depth 0 Node);)
+
+(defprolog capcov.bfs
+  Rel Row Frontier Parent Depth Steps Node <--
+    (when (capcov.within-steps? Rel Steps))
+    (capcov.bfs-step Rel Row Frontier Parent Depth Steps Node);)
+
+(defprolog capcov.bfs-step
+  _ _ Frontier Parent Depth Steps Node <--
+    (capcov.base-in Frontier Depth Steps Item Base) !
+    (when (capcov.note-steps Steps))
+    (capcov.chain Parent Item Base Depth Steps Node);
+  Rel Row Frontier Parent Depth Steps Node <--
+    (findall Pred (capcov.unvisited-predecessor Rel Frontier Parent Pred) Found)
+    (is Next (capcov.next-frontier Rel Row Found))
+    (is More (+ Steps 1))
+    (capcov.bfs Rel Row Next Parent Depth More Node);)
+
+(defprolog capcov.base-in
+  \\ the first frontier row (in order) with a base application at nesting Depth + Steps
+  Frontier Depth Steps [R Rw] Base <--
+    (capcov.member [R Rw] Frontier)
+    (is Rules (capcov.base-rules (1 R)))
+    (capcov.member Rule Rules)
+    (is At (+ Depth Steps))
+    (capcov.application Rule Rw At capcov.none Base);)
+
+(defprolog capcov.predecessor
+  \\ step rule Rule concludes R(Rw) with PredRel(Pred) as its RecIdx-th premise
+  R Rw Rule RecIdx PredRel Pred <--
+    (is Rules (capcov.step-rules (1 R)))
+    (capcov.member Rule Rules)
+    (is Env (capcov.unify (capcov.rule-head-terms (1 Rule)) (1 Rw) []))
+    (when (not (= (1 Env) capcov.none)))
+    (is Body (capcov.rule-body (1 Rule)))
+    (capcov.satisfies Body Env 0 Pos Neg Cmp)
+    (is RecIdx (hd (capcov.rule-recursive-atoms (1 Rule))))
+    (capcov.member [RecIdx PredRel Pred] Pos);)
+
+(defprolog capcov.unvisited-predecessor
+  Rel Frontier Parent [PredRel Pred] <--
+    (capcov.member [R Rw] Frontier)
+    (capcov.predecessor R Rw Rule RecIdx PredRel Pred)
+    (when (capcov.visit! Parent Rel PredRel Pred [[R Rw] Rule RecIdx]));)
+
+(defprolog capcov.chain
+  Parent [Rel Row] Node Depth Remaining Out <--
+    (is Link (capcov.parent-get (1 Parent) (1 Rel) (1 Row)))
+    (capcov.chain-link Link Parent Node Depth Remaining Out);)
+
+(defprolog capcov.chain-link
+  capcov.root _ Node _ _ Node <-- !;
+  [[PRel PRow] Rule RecIdx] Parent Node Depth Remaining Out <--
+    (is At (+ Depth (- Remaining 1)))
+    (capcov.application Rule PRow At [RecIdx Node] Rebuilt) !
+    (is Left (- Remaining 1))
+    (capcov.chain Parent [PRel PRow] Rebuilt Depth Left Out);
+  _ _ _ _ _ _ <-- (when (capcov.stale-step));)
 
 \\ ---------------------------------------------------------------- why-not (bounded missing-premise alternatives)
 
-\* For a row absent from the closure, enumerate for each rule concluding its
-   relation the instantiation attempts that fail, recording the first failing
-   premise (missing positive row, present negated row, or false comparison)
-   together with the premises that were satisfied.  A missing derived premise
-   that is fully ground is explained one level deeper.  Bounded by
-   *max-alternatives*, *max-why-not-depth*, and the work budget; the result
-   carries an explicit truncated flag. *\
+\* For a row absent from the closure, capcov.attempt Rel Row Depth Alt
+   enumerates, in the same canonical clause order as the derivation, every
+   attempt to conclude it that stops: per rule, a head that does not unify,
+   or a body walked left to right (matched positive rows are kept as
+   satisfied premises) up to its first failing premise (a positive atom no
+   candidate row matches, a negated atom that is present or not ground, or a
+   false comparison).  A missing derived premise that is fully ground is
+   explained one level deeper.  capcov.wn-alternatives records each attempt
+   as it is found (a failure-driven loop), so the *max-alternatives* bound,
+   *max-why-not-depth* and the work budget stop the enumeration at exactly
+   the attempt, and tick, where they are exceeded; the result carries an
+   explicit truncated flag. *\
 
 (define capcov.why-not
   Rel Row -> (do (set capcov.*alts* [])
                  (set capcov.*alt-count* 0)
                  (set capcov.*wn-truncated* false)
                  (set capcov.*wn-reason* capcov.null)
+                 (prolog-memory (capcov.why-not-memory))
                  (trap-error (capcov.wn-alternatives Rel Row 0)
                              (/. E (if (capcov.prefix? "capcov-truncated: " (error-to-string E))
                                        (do (set capcov.*wn-truncated* true)
@@ -1030,27 +1187,98 @@
                  (reverse (value capcov.*alts*))))
 
 (define capcov.wn-alternatives
-  Rel Row Depth -> (let Decl (capcov.decl Rel)
-                     (cond ((= Decl capcov.none) (error "capcov-invalid-input: unknown relation ~A" Rel))
-                           ((capcov.decl-primitive? Decl)
-                            (capcov.record-alt capcov.null capcov.null [] []
-                                               [(capcov.obj [(@p "kind" "fact") (@p "relation" Rel) (@p "row" (capcov.arr Row))
-                                                             (@p "detail" "no evidence attests this primitive row")])]))
-                           ((empty? (capcov.rules-for Rel))
-                            (capcov.record-alt capcov.null capcov.null [] []
-                                               [(capcov.obj [(@p "kind" "no-rule") (@p "relation" Rel) (@p "row" (capcov.arr Row))
-                                                             (@p "detail" "no rule concludes this relation")])]))
-                           (true (capcov.wn-rules (capcov.rules-for Rel) Row Depth)))))
+  Rel Row Depth -> (do (prolog? (capcov.attempt (receive Rel) (receive Row) (receive Depth) Alt)
+                                (when (capcov.recorded-then-fail Alt)))
+                       ok))
 
-(define capcov.wn-rules
-  [] Row Depth -> ok
-  [Rule | Rules] Row Depth -> (do (let Env (capcov.unify (capcov.rule-head-terms Rule) Row [])
-                                    (if (= Env capcov.none)
-                                        (capcov.record-alt (capcov.rule-name Rule) (capcov.rule-digest Rule) [] []
-                                                           [(capcov.obj [(@p "kind" "head") (@p "relation" (capcov.rule-head-rel Rule)) (@p "row" (capcov.arr Row))
-                                                                         (@p "detail" "rule head does not unify with the requested row")])])
-                                        (capcov.wn-walk Rule (capcov.rule-body Rule) Env [] Depth)))
-                                  (capcov.wn-rules Rules Row Depth)))
+(define capcov.recorded-then-fail
+  [Name Digest Env Sat Missing] -> (do (capcov.record-alt Name Digest Env Sat Missing) false))
+
+(define capcov.primitive-relation?
+  Rel -> (let Decl (capcov.decl Rel)
+           (if (= Decl capcov.none)
+               (error "capcov-invalid-input: unknown relation ~A" Rel)
+               (capcov.decl-primitive? Decl))))
+
+(define capcov.missing-fact
+  Rel Row -> (capcov.obj [(@p "kind" "fact") (@p "relation" Rel) (@p "row" (capcov.arr Row))
+                          (@p "detail" "no evidence attests this primitive row")]))
+
+(define capcov.missing-rule
+  Rel Row -> (capcov.obj [(@p "kind" "no-rule") (@p "relation" Rel) (@p "row" (capcov.arr Row))
+                          (@p "detail" "no rule concludes this relation")]))
+
+(define capcov.head-alt
+  Rule Row -> [(capcov.rule-name Rule) (capcov.rule-digest Rule) [] []
+               [(capcov.obj [(@p "kind" "head") (@p "relation" (capcov.rule-head-rel Rule)) (@p "row" (capcov.arr Row))
+                             (@p "detail" "rule head does not unify with the requested row")])]])
+
+(define capcov.comparison-alt
+  Rule L Op R Env Sat -> [(capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
+                          [(capcov.obj [(@p "kind" "comparison") (@p "left" (capcov.wn-term L Env)) (@p "operator" Op) (@p "right" (capcov.wn-term R Env))])]])
+
+(define capcov.absent?
+  Rel Terms Env -> (let Row (capcov.ground-row Terms Env)
+                     (and (capcov.fully-ground? Row) (not (capcov.present? Rel Row)))))
+
+(define capcov.absence-alt
+  Rule Rel Terms Env Sat -> (let Row (capcov.ground-row Terms Env)
+                              [(capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
+                               [(capcov.obj [(@p "kind" "absence") (@p "relation" Rel) (@p "row" (capcov.arr (capcov.partial-row Terms Env)))
+                                             (@p "detail" (if (capcov.fully-ground? Row) "negated row is present in the closure" "negated atom is not ground"))])]]))
+
+(define capcov.none-unify?
+  _ [] _ -> true
+  Terms [Row | Rows] Env -> (if (= (capcov.unify Terms Row Env) capcov.none) (capcov.none-unify? Terms Rows Env) false))
+
+(define capcov.premise-alt
+  \\ the nested explanation is computed (and its alternatives counted) before this one is recorded
+  Rule Rel Terms Env Sat Depth -> (let Row (capcov.ground-row Terms Env)
+                                       Nested (capcov.wn-nested Rel Row Depth)
+                                    [(capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
+                                     [(capcov.obj [(@p "kind" "premise") (@p "relation" Rel) (@p "row" (capcov.arr (capcov.partial-row Terms Env)))
+                                                   (@p "alternatives" Nested)])]]))
+
+(defprolog capcov.attempt
+  Rel Row _ [capcov.null capcov.null [] [] [Missing]] <--
+    (when (capcov.primitive-relation? Rel)) ! (is Missing (capcov.missing-fact Rel Row));
+  Rel Row _ [capcov.null capcov.null [] [] [Missing]] <--
+    (when (empty? (capcov.rules-for Rel))) ! (is Missing (capcov.missing-rule Rel Row));
+  Rel Row Depth Alt <-- (capcov.rule-for Rel Rule) (capcov.rule-attempt Rule Row Depth Alt);)
+
+(defprolog capcov.rule-attempt
+  Rule Row Depth Alt <-- (is Env (capcov.unify (capcov.rule-head-terms (1 Rule)) (1 Row) []))
+                         (capcov.attempt-from Env Rule Row Depth Alt);)
+
+(defprolog capcov.attempt-from
+  capcov.none Rule Row _ Alt <-- ! (is Alt (capcov.head-alt Rule Row));
+  Env Rule _ Depth Alt <-- (is Body (capcov.rule-body (1 Rule))) (capcov.blocked Rule Body Env [] Depth Alt);)
+
+(defprolog capcov.blocked
+  \\ Alt is where an attempt at the rest of Rule's body under Env stops
+  Rule [[capcov.cmp L Op R] | Body] Env Sat Depth Alt <--
+    (when (capcov.holds? (1 L) (1 Op) (1 R) (1 Env))) ! (capcov.blocked Rule Body Env Sat Depth Alt);
+  Rule [[capcov.cmp L Op R] | _] Env Sat _ Alt <--
+    (is Alt (capcov.comparison-alt Rule L Op R Env Sat));
+  Rule [[capcov.neg Rel Terms] | Body] Env Sat Depth Alt <--
+    (when (capcov.absent? (1 Rel) (1 Terms) (1 Env))) ! (capcov.blocked Rule Body Env Sat Depth Alt);
+  Rule [[capcov.neg Rel Terms] | _] Env Sat _ Alt <--
+    (is Alt (capcov.absence-alt Rule Rel Terms Env Sat));
+  Rule [[capcov.pos Rel Terms] | Body] Env Sat Depth Alt <--
+    (is Rows (capcov.candidates (1 Rel) (1 Terms) (1 Env)))
+    (capcov.blocked-at Rows Rule Rel Terms Body Env Sat Depth Alt);)
+
+(defprolog capcov.blocked-at
+  \\ every matching candidate is walked on; with none, the premise itself is missing
+  Rows Rule Rel Terms Body Env Sat Depth Alt <--
+    (capcov.member Row Rows)
+    (when (capcov.ticked? (cn "why-not " (1 Rel))))
+    (is Env2 (capcov.unify (1 Terms) (1 Row) (1 Env)))
+    (when (not (= (1 Env2) capcov.none)))
+    (capcov.blocked Rule Body Env2 [[Rel Row] | Sat] Depth Alt);
+  Rows Rule Rel Terms _ Env Sat Depth Alt <--
+    (when (capcov.none-unify? (1 Terms) (1 Rows) (1 Env)))
+    (is Alt (capcov.premise-alt Rule Rel Terms Env Sat Depth));)
 
 (define capcov.partial-row
   Terms Env -> (map (/. T (let V (capcov.ground T Env)
@@ -1072,39 +1300,6 @@
 (define capcov.env-pairs
   [] Seen -> []
   [(@p K V) | Rest] Seen -> (if (element? K Seen) (capcov.env-pairs Rest Seen) [(@p K V) | (capcov.env-pairs Rest [K | Seen])]))
-
-(define capcov.wn-walk
-  Rule [] Env Sat Depth -> ok
-  Rule [[capcov.cmp L Op R] | Rest] Env Sat Depth ->
-    (if (capcov.holds? L Op R Env)
-        (capcov.wn-walk Rule Rest Env Sat Depth)
-        (capcov.record-alt (capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
-                           [(capcov.obj [(@p "kind" "comparison") (@p "left" (capcov.wn-term L Env)) (@p "operator" Op) (@p "right" (capcov.wn-term R Env))])]))
-  Rule [[capcov.neg Rel Terms] | Rest] Env Sat Depth ->
-    (let Row (capcov.ground-row Terms Env)
-      (if (and (capcov.fully-ground? Row) (not (capcov.present? Rel Row)))
-          (capcov.wn-walk Rule Rest Env Sat Depth)
-          (capcov.record-alt (capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
-                             [(capcov.obj [(@p "kind" "absence") (@p "relation" Rel) (@p "row" (capcov.arr (capcov.partial-row Terms Env)))
-                                           (@p "detail" (if (capcov.fully-ground? Row) "negated row is present in the closure" "negated atom is not ground"))])])))
-  Rule [[capcov.pos Rel Terms] | Rest] Env Sat Depth ->
-    (capcov.wn-rows (capcov.candidates Rel Terms Env) Rule Rel Terms Rest Env Sat false Depth))
-
-(define capcov.wn-rows
-  \\ Matched records whether any candidate unified; if none did, the premise is missing
-  [] Rule Rel Terms Rest Env Sat Matched Depth ->
-    (if Matched ok
-        (let Row (capcov.ground-row Terms Env)
-          (capcov.record-alt (capcov.rule-name Rule) (capcov.rule-digest Rule) Env Sat
-                             [(capcov.obj [(@p "kind" "premise") (@p "relation" Rel) (@p "row" (capcov.arr (capcov.partial-row Terms Env)))
-                                           (@p "alternatives" (capcov.wn-nested Rel Row Depth))])])))
-  [Row | Rows] Rule Rel Terms Rest Env Sat Matched Depth ->
-    (do (capcov.tick (cn "why-not " Rel))
-        (let Env2 (capcov.unify Terms Row Env)
-          (if (= Env2 capcov.none)
-              (capcov.wn-rows Rows Rule Rel Terms Rest Env Sat Matched Depth)
-              (do (capcov.wn-walk Rule Rest Env2 [[Rel Row] | Sat] Depth)
-                  (capcov.wn-rows Rows Rule Rel Terms Rest Env Sat true Depth))))))
 
 (define capcov.wn-nested
   \\ explain a fully ground missing derived premise one level deeper (bounded)
@@ -1142,6 +1337,7 @@
                      (true ok))))
 
 (define capcov.run
+  [capcov.compile-spec] -> (capcov.spec-elaborate)
   [capcov.authority] -> (do (capcov.load-bundle) (capcov.authority-json))
   [capcov.derive Rel Row] -> (do (capcov.load-bundle)
                                  (capcov.check-request-row Rel Row)
