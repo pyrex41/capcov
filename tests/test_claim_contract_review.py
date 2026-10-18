@@ -115,8 +115,34 @@ class ContractReviewTests(unittest.TestCase):
         bad = dict(base); bad["extra"] = True
         with self.assertRaises(ValueError): bundle_from_json(bad)
         with self.assertRaises(ValueError): bundle_from_json('{"schema_version":1,"relations":[],"facts":[],"rules":[],"claims":[],"metadata":{},"x":NaN}')
-        bad = dict(base); bad["schema_version"] = 2
+        bad = dict(base); bad["schema_version"] = 3
         with self.assertRaises(ValueError): bundle_from_json(bad)
+
+    def test_json_ingestion_of_schema_2_is_v2_authority_not_a_relabelled_v1(self):
+        # Schema 2 is supported (960baee); an empty v2 bundle declares nothing
+        # because nothing needs declaring. What v2 adds is checked: the v1
+        # decoder refuses it, v1 refuses v2 contract fields, v2 decodes them
+        # strictly, and v2 refuses what its authority cannot yet admit.
+        from capcov.claims.ir import bundle_from_json_v1, bundle_from_json_v2
+        base = {"relations": [], "facts": [], "rules": [], "claims": [], "metadata": {}}
+        v2 = dict(base, schema_version=2)
+        self.assertEqual(bundle_from_json(v2).schema_version, 2)
+        self.assertEqual(bundle_from_json_v2(v2).schema_version, 2)
+        with self.assertRaises(ValueError): bundle_from_json_v1(v2)
+        with self.assertRaises(ValueError): bundle_from_json_v2(dict(base, schema_version=1))
+        forged = {"compatibility_capabilities": [{"x": 1}]}
+        with self.assertRaisesRegex(ValueError, "unknown fields"):
+            bundle_from_json(dict(base, schema_version=1, **forged))
+        with self.assertRaisesRegex(ValueError, "invalid compatibility_capabilities"):
+            bundle_from_json(dict(v2, **forged))
+        relations = [
+            {"name": "c", "columns": [{"name": "x", "type": "symbol"}], "modality": "claim", "primitive": False},
+            {"name": "e", "columns": [{"name": "x", "type": "symbol"}]},
+        ]
+        mappings = [{"claim_relation": "c", "evidence_relation": "e", "effect": "refutation", "bindings": [["x", "x"]]}]
+        self.assertEqual(bundle_from_json(dict(base, schema_version=1, relations=relations, mappings=mappings)).schema_version, 1)
+        with self.assertRaisesRegex(ValueError, "unsupported-v2-mapping"):
+            bundle_from_json(dict(v2, relations=relations, mappings=mappings))
 
     def test_validation_is_total_for_malformed_rule_parts(self):
         rel = R("a", (("x", TypeName.SYMBOL, False),))
