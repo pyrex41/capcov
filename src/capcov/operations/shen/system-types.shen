@@ -191,3 +191,64 @@
   T : string; F : string;
   ______________________
   [sum-field T F] : caps-expr;)
+
+\\ R02 PR 1 (docs/ir-specification.md, sections 4.1, 4.2 and 7). Outcome of
+\\ one invocation, in the capcov.faults alphabet. The v1 request outcomes
+\\ committed / rejected / aborted / unknown reach it through the bridge
+\\ (caps.bridge-outcome, system.shen).
+(datatype caps-outcome
+  ______________________
+  [ok] : caps-outcome;
+  R : caps-fail-reason;
+  ______________________
+  [fail R] : caps-outcome;
+  ______________________
+  [info] : caps-outcome;)
+
+(datatype caps-fail-reason
+  L : string;
+  ______________________
+  [rejected L] : caps-fail-reason;
+  ______________________
+  [aborted] : caps-fail-reason;)
+
+\\ Effect records: intent id, attempt id, logical effect. The logical effects
+\\ are v1's runtime effects (system.py, _effect_terms), now typed. Through the
+\\ bridge a v1 effect L of invocation Inv is [effect Inv Inv/body L].
+(datatype caps-effect
+  I : string; A : string; L : caps-logical-effect;
+  ______________________
+  [effect I A L] : caps-effect;)
+
+(datatype caps-logical-effect
+  T : string; K : string; Fs : caps-values;
+  ______________________
+  [create T K Fs] : caps-logical-effect;
+  T : string; K : string; F : string; V : string;
+  ______________________
+  [put T K F V] : caps-logical-effect;
+  T : string; K : string;
+  ______________________
+  [delete T K] : caps-logical-effect;
+  Kind : string; V : string;
+  ______________________
+  [emit Kind V] : caps-logical-effect;)
+
+(datatype caps-value
+  F : string; V : string;
+  ______________________
+  [F V] : caps-value;)
+
+(datatype caps-values
+  ______________________
+  [] : caps-values;
+  X : caps-value; Xs : caps-values;
+  ______________________
+  (cons X Xs) : caps-values;)
+
+\\ A system that names its assumptions (strings, section 7). R-ASSUME is a
+\\ side condition of caps.scoped? (system.shen).
+(datatype caps-system-assuming
+  N : string; As : (list string); Ts : caps-tables; Cs : caps-commands; Ps : caps-invariants;
+  ______________________
+  [system N As Ts Cs Ps] : caps-system-shape;)

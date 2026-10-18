@@ -37,6 +37,9 @@ SYSTEMS = ROOT / "tests" / "claim_semantics" / "fixtures" / "systems"
 V2 = SYSTEMS / "v2-draft"
 OVERLAY = V2 / "system-types.shen"
 POSITIVE = ("transfer-outbox.ops-v2", "histories.ops-v2")
+UNTAGGED = V2 / "rejected-untagged-effect.ops-v2"
+UNTAGGED_ENTRY = '[entry "2" [emit "delivery-attempt" "hello"]]'
+TAGGED_ENTRY = '[entry "2" [effect "j" "i2/publish" [emit "delivery-attempt" "hello"]]]'
 PROBE = ROOT / "tests" / "claim_semantics" / "test_migration_probe.py"
 NATIVE = bool(shutil.which("bifrost") and os.environ.get("BIFROST_SHEN_GO"))
 if os.environ.get("CAPCOV_SHEN_REQUIRED") and not NATIVE:
@@ -221,18 +224,24 @@ class CompatibilityTableTextTest(unittest.TestCase):
 
 class ProbeMappingTest(unittest.TestCase):
     def test_every_probe_ir_gap_test_is_mapped(self) -> None:
+        """Every IR-gap test is mapped; a flipped one is marked and no longer xfails."""
         tree = ast.parse(PROBE.read_text(encoding="utf-8"))
+        functions = {node.name: node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)}
         gaps = {
-            node.name
-            for node in ast.walk(tree)
-            if isinstance(node, ast.FunctionDef)
-            and any(ast.unparse(d) == "unittest.expectedFailure" for d in node.decorator_list)
+            name
+            for name, node in functions.items()
+            if any(ast.unparse(d) == "unittest.expectedFailure" for d in node.decorator_list)
         }
         self.assertTrue(gaps)
-        mapped = {ticks(r[0])[0] for r in rows(section(8)) if r[0].startswith("`test_")}
-        self.assertEqual(mapped, gaps)
+        table = {ticks(r[0])[0]: r[2] for r in rows(section(8)) if r[0].startswith("`test_")}
+        flipped = {name for name, flips in table.items() if "(flipped)" in flips}
+        self.assertEqual(set(table) - flipped, gaps)
+        for name in flipped:
+            with self.subTest(flipped=name):
+                self.assertIn(name, functions)
+                self.assertNotIn(name, gaps)
         delta = {t for r in rows(section(3)) for t in ticks(r[2]) if t.startswith("test_")}
-        self.assertEqual(delta, gaps)
+        self.assertEqual(delta, set(table))
 
 
 def shen_term(node) -> str:
@@ -271,6 +280,12 @@ class DraftTypecheckTest(unittest.TestCase):
                 head = term.value[0].value.text
                 kind = {"system": "caps-system-shape", "history": "caps-history"}[head]
                 cases.append((f"{path.name}#{index}", kind, expected, shen_term(term)))
+        # Control for T-effect: tagging the one bare entry makes the history type,
+        # so the untagged effect, and nothing else, is what rejects the fixture.
+        source = UNTAGGED.read_text(encoding="utf-8")
+        assert source.count(UNTAGGED_ENTRY) == 1
+        (term,) = parse(source.replace(UNTAGGED_ENTRY, TAGGED_ENTRY), UNTAGGED.name)
+        cases.append((f"{UNTAGGED.name}#tagged", "caps-history", True, shen_term(term)))
         root = resources.files("capcov.operations").joinpath("shen")
         with tempfile.TemporaryDirectory(prefix="capcov-draft-") as tmp:
             directory = Path(tmp)
@@ -308,6 +323,11 @@ class DraftTypecheckTest(unittest.TestCase):
             if kind == "caps-system":
                 with self.subTest(fixture=name):
                     self.assertIs(typed, True)
+
+    def test_an_untagged_effect_is_what_rejects_its_fixture(self) -> None:
+        typed = {name: result for (name, _, _, _), result in zip(self.cases, self.results)}
+        self.assertIs(typed[f"{UNTAGGED.name}#0"], False)
+        self.assertIs(typed[f"{UNTAGGED.name}#tagged"], True)
 
     def test_draft_fixtures_type_as_specified(self) -> None:
         for (name, kind, expected, _), typed in zip(self.cases, self.results):
