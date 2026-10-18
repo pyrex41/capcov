@@ -1,0 +1,14 @@
+; rejected-by: R-ASSUME
+; docs/ir-specification.md section 7. The system names its assumptions, and
+; its command publishes, so its info outcome has exactly the alternatives
+; {nothing, everything} only under atomic-publish-v1 as well as
+; info-in-place-v1. atomic-publish-v1 is missing, so the command's info
+; semantics is undefined.
+[system "command-without-assumption"
+ ["info-in-place-v1"]
+ [[table "job" ["payload"] [] []]]
+ [[command "send" ["id"]
+   [exists "job" [argument "id"]]
+   [[named "send" [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]]
+   [yes]]]
+ []]

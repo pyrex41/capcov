@@ -67,6 +67,8 @@ def _parser() -> argparse.ArgumentParser:
                         help="independently captured raw SHA-256 of --admission-record")
     parser.add_argument("--out-dir", required=True, type=Path,
                         help="new or empty directory for the bounded JSON report and certificates")
+    parser.add_argument("--pack-version", type=int, choices=(1, 2), default=1,
+                        help="observation specification profile (default: 1)")
     return parser
 
 
@@ -395,6 +397,7 @@ def main(argv: list[str] | None = None) -> int:
                                     if can_observe_source else None),
             expected_candidate_commit=expected_candidate.get("commit") if can_observe_source else None,
             expected_candidate_tree=expected_candidate.get("tree") if can_observe_source else None,
+            version=args.pack_version,
         )
         log_verified = (dict(join.exported.bundle.metadata).get("log", {}).get("verified", False)
                         if join.exported.bundle else False)
@@ -426,6 +429,9 @@ def main(argv: list[str] | None = None) -> int:
             } if invocation is not None else None),
         }
         document = _report(join, gate_reason, bindings)
+        if args.pack_version != 1:
+            # V1 reports keep their exact shape; any other profile names itself.
+            document["pack_profile"] = f"rules-observation-v{args.pack_version}"
         document["_certificate_documents"] = _certificate_documents(join)
         roots = ((str(args.receipt.resolve()), "<receipt-dir>"),
                  (str(args.candidate_root.resolve()), "<candidate-root>"),

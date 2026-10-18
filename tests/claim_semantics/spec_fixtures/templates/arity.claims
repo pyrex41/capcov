@@ -1,0 +1,5 @@
+.claims 2.
+// Refused: side takes one argument (template-arity-mismatch).
+.pack "template-test-v2" schema 2.
+.import "side.claims".
+.instantiate side(a, b).

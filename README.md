@@ -250,6 +250,38 @@ an action that puts `capcov` on `PATH`:
   on what exists and what was exercised. It does not mean the behaviour is
   correct.
 
+## Shen specifications and typed behavior
+
+This part of capcov is experimental. The checks above do not depend on it.
+v1 claim packs stay the default.
+
+- **Claims v2.** Readable `.claims` specifications (`specs/claims/`) compile
+  through Shen into v2 rule packs, pinned by manifests. Three independent
+  checkers decide them: the Python validator, an untyped Shen authority and a
+  typed authority decided by Shen's type checker. Select v2 with
+  `--pack-version 2`.
+- **`capcov system`.** Runs typed, compositional state models: simulation,
+  bounded workflow exploration, adapter-driven conformance checks and
+  case-scoped claim evidence.
+- **`capcov reason`.** Adds source-linked evidence, proof obligations,
+  independently checked Shen sequent derivations, typed relational modes,
+  Prolog-generated scenarios, stateful replay and counterexample minimization.
+- **Typed behavior IR.** Under construction (R02). Outcomes, effect identity and
+  named assumptions have landed; operations, outbox delivery, histories and
+  observations follow the specification.
+
+| Document | What it is |
+| --- | --- |
+| [Typed behavior architecture](docs/typed-behavior-architecture.md) | The design: legacy, intended and migration contracts as typed Shen behaviors |
+| [Production roadmap](docs/production-roadmap.md) and [`roadmap-deps.json`](docs/roadmap-deps.json) | The R-series, its dependency graph (one source; tables generated), current status and issue homes |
+| [IR specification](docs/ir-specification.md) | The R02 grammar, semantics, rules, fixtures and gates; decided and open questions |
+| [Typed claim authority](docs/typed-claim-authority.md) | Claim packs decided by the Shen type checker, and the recorded checker disagreements |
+| [System specifications](docs/system-specifications.md), [operation specifications](docs/operation-specifications.md) | `capcov system` models and their evidence |
+| [Reasoning workbench](docs/reasoning-workbench.md) | `capcov reason`: interfaces, the verification loop, proof and execution boundaries |
+| [Adapters and induction](docs/adapters-and-induction.md), [loop induction](docs/loop-induction.md), [snapshot completion](docs/snapshot-completion.md) | The proof rules behind the workbench |
+| [Validation reports](docs/validation/) | Pinned full-gate runs, one file per revision run |
+| [Architecture critique response](docs/architecture-critique-response.md) | Review findings and how the plan answers them |
+
 ## Documentation
 
 - [Entity coverage](https://github.com/millstonehq/capcov/blob/main/docs/entity-coverage.md): exemptions, the SCIP resolver, SQLite declarations

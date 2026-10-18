@@ -91,6 +91,74 @@ def _mutate(name: str) -> Path:
     return target
 
 
+TOY_PROFILE = modelcheck.CheckerProfile(
+    name="toy",
+    directory_env="CAPCOV_TOY_CHECKER_DIR",
+    default_directory=("shen", "toy"),
+    prelude="toy-prelude.shen",
+    datatypes=("beh", "evidence"),
+    judges=("judge-toy",),
+    judge_for=lambda unit_id: "mc.judge-toy",
+)
+
+
+class CheckerProfileTest(unittest.TestCase):
+    """No runtime needed: a profile only decides what the shared runner loads."""
+
+    def test_model_wf_profile_is_the_historical_checker(self) -> None:
+        self.assertEqual(modelcheck.MODEL_WF.datatypes, modelcheck.DATATYPES)
+        self.assertEqual(modelcheck.MODEL_WF.judges, modelcheck.JUDGES)
+        self.assertEqual(modelcheck._source_files(), [
+            "prelude.shen",
+            *(f"types/{name}.shen" for name in (
+                "table-list", "wf-writes", "cell", "cell-list", "wf-matrix", "wf-atlas", "wf-registry",
+                "id-list", "judge-writes", "judge-matrix", "judge-atlas", "judge-registry", "judge-ids")),
+        ])
+        self.assertEqual(modelcheck.modelcheck_dir(), modelcheck.MODEL_WF.directory())
+
+    def test_model_wf_routes_each_unit_to_its_judge(self) -> None:
+        judge = modelcheck.MODEL_WF.judge_for
+        self.assertEqual(judge("writes:delete-issue"), "mc.judge-writes")
+        self.assertEqual(judge("matrix:delete-issue"), "mc.judge-matrix")
+        self.assertEqual(judge("atlas:add-comment"), "mc.judge-atlas")
+        self.assertEqual(judge("registry:1:d-01"), "mc.judge-registry")
+        self.assertEqual(judge("registry-ids"), "mc.judge-ids")
+
+    def test_profile_directory_honours_its_own_override(self) -> None:
+        with patch.dict(os.environ, {"CAPCOV_TOY_CHECKER_DIR": "/somewhere/toy"}):
+            self.assertEqual(TOY_PROFILE.directory(), Path("/somewhere/toy"))
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CAPCOV_TOY_CHECKER_DIR", None)
+            self.assertEqual(TOY_PROFILE.directory().parts[-2:], ("shen", "toy"))
+
+    def test_driver_loads_exactly_the_profile_types_in_order(self) -> None:
+        checker = Path("/checker")
+        driver = modelcheck.render_driver(Path("/model"), Path("/work"), checker, "0" * 48, TOY_PROFILE)
+        loads = re.findall(r'^\(load "([^"]+)"\)$', driver, re.MULTILINE)
+        self.assertEqual(loads, ["/checker/toy-prelude.shen", "/checker/toy-prelude.shen",
+                                 "/checker/types/beh.shen", "/checker/types/evidence.shen",
+                                 "/checker/types/judge-toy.shen"])
+        self.assertNotIn("wf-writes", driver)
+
+    def test_transcript_must_load_the_profile_judges(self) -> None:
+        nonce = "1" * 48
+        transcript = "\n".join((f"MC {nonce} BEGIN", f"MC {nonce} JUDGE mc.judge-toy", f"MC {nonce} DONE 0", ""))
+        self.assertEqual(modelcheck._parse_transcript(transcript, nonce, TOY_PROFILE)["units"], {})
+        with self.assertRaises(modelcheck.ModelcheckFailure):
+            modelcheck._parse_transcript(transcript, nonce)
+
+    def test_isolated_judgement_refuses_a_unit_calling_another_profiles_judge(self) -> None:
+        nonce = "2" * 48
+        work = Path(tempfile.mkdtemp(prefix="capcov-profile-unit-"))
+        unit = work / "unit.shen"
+        unit.write_text(f'(output "MC {nonce} PASS writes:x ~A~%" (mc.judge-writes [x [] [] []]))\n',
+                        encoding="utf-8")
+        rt = modelcheck.Runtime("bifrost", "a" * 64, "shen-go", "b" * 64, str(work), ())
+        with patch.object(modelcheck, "_run") as run, self.assertRaises(modelcheck.ModelcheckFailure):
+            modelcheck._judge_unit(rt, work, unit, "writes:x", nonce, work, {}, 1.0, TOY_PROFILE)
+        run.assert_not_called()
+
+
 class RecipeTest(unittest.TestCase):
     """No runtime needed: the model's identity is a function of its sources."""
 

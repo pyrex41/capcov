@@ -1,0 +1,27 @@
+; Intended outbox (R10 probe). Legacy is outbox.ops, where every committed
+; send of a pending job publishes again. Here send is idempotent per job: the
+; first send publishes and marks the job "attempted"; a later send of an
+; attempted job publishes nothing. The guard is the "dedupe" choose.
+;
+; Current-IR assumption, stated not hidden: the publish and the "attempted"
+; mark commit together (atomic publish, system.shen:67 and :165), so an
+; unknown send has exactly two alternatives. Outbox-record vs delivery-attempt
+; is not split; see tests/claim_semantics/README.md, "R10 probe".
+[system "outbox-intended"
+ [[table "job" [[column "status" [enum ["pending" "attempted" "sent"]]] "payload"] [] []]]
+ [[command "enqueue" ["id" "payload"] [negate [exists "job" [argument "id"]]]
+   [[named "enqueue" [insert "job" [argument "id"]
+      [["status" [literal "pending"]] ["payload" [argument "payload"]]]]]]
+   [exists "job" [argument "id"]]]
+  [command "send" ["id"]
+   [both [exists "job" [argument "id"]]
+         [negate [equal [lookup "job" [argument "id"] "status"] [literal "sent"]]]]
+   [[named "dedupe" [choose [equal [lookup "job" [argument "id"] "status"] [literal "attempted"]]
+     []
+     [[named "send" [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]
+      [named "mark" [update "job" [argument "id"] "status" [literal "attempted"]]]]]]]
+   [equal [lookup "job" [argument "id"] "status"] [literal "attempted"]]]
+  [command "ack" ["id"] [exists "job" [argument "id"]]
+   [[named "ack" [update "job" [argument "id"] "status" [literal "sent"]]]]
+   [equal [lookup "job" [argument "id"] "status"] [literal "sent"]]]]
+ []]

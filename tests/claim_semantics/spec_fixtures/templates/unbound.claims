@@ -1,0 +1,9 @@
+.claims 2.
+// Refused: $Other is not a parameter of the template (template-unbound-parameter).
+.pack "template-test-v2" schema 2.
+.decl a_seen(run: symbol ctx, item: symbol) primitive observation runtime.
+.decl a_ok(run: symbol ctx, item: symbol) derived derived runtime.
+.template side(Side) {
+    $Side_ok: $Side_ok(R, X) :- $Other_seen(R, X).
+}
+.instantiate side(a).

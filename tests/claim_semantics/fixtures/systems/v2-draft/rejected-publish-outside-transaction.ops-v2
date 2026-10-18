@@ -1,0 +1,16 @@
+; rejected-by: T-step
+; docs/ir-specification.md section 6. publish as a step, after the
+; transaction. A step is a transaction or a delivery; publish types only as
+; an action, inside a transaction, where atomic-publish-v1 makes it commit
+; with the transaction. Outside one it would be an external effect with
+; neither atomicity nor an intent id: that is [outbox ...] plus [deliver ...].
+[system "publish-outside-transaction"
+ []
+ [[table "job" [[column "status" [enum ["pending" "sent"]]] "payload"] [] []]]
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [exists "job" [argument "id"]]
+   [[transaction "mark"
+     [[named "mark" [update "job" [argument "id"] "status" [literal "sent"]]]]]
+    [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]
+   [yes]]]
+ []]

@@ -13,7 +13,11 @@ from typing import Any, Mapping, Sequence
 import math
 
 
+from .contracts import (CompatibilityCapability, RequiredBridge, CompletenessScope,
+                        CONTRACT_FIELDS, decode_contracts, DerivedCompletenessPolicy)
+
 SCHEMA_VERSION = 1
+SUPPORTED_SCHEMA_VERSIONS = (1, 2)
 
 
 class _TextEnum(str, Enum):
@@ -561,6 +565,10 @@ class Bundle:
     diagnostic_policy: DiagnosticPolicy = field(default_factory=DiagnosticPolicy)
     diagnostics: tuple[DiagnosticRule, ...] = ()
     outputs: tuple[OutputTemplate, ...] = ()
+    compatibility_capabilities: tuple[CompatibilityCapability, ...] = ()
+    required_bridges: tuple[RequiredBridge, ...] = ()
+    completeness_scopes: tuple[CompletenessScope, ...] = ()
+    derived_completeness_policies: tuple[DerivedCompletenessPolicy, ...] = ()
 
     def __post_init__(self) -> None:
         # ``compare`` and canonical replay accept Bundle values, not arbitrary
@@ -593,6 +601,17 @@ class Bundle:
         _assert_bundle_ir_shape(
             self.diagnostic_policy, "Bundle.diagnostic_policy")
 
+        for name, cls in CONTRACT_FIELDS.items():
+            records = tuple(getattr(self, name))
+            if any(not isinstance(record, cls) for record in records):
+                raise TypeError(f"Bundle.{name} must contain {cls.__name__} values")
+            # Reconstruct to check frozen instances mutated outside the API.
+            for record in records:
+                cls(**{f.name: getattr(record, f.name) for f in fields(cls)})
+            if self.schema_version == 1 and records:
+                raise ValueError("schema-v1 bundles cannot carry v2 evidence contracts")
+            object.__setattr__(self, name, tuple(sorted(records, key=_sort_key)))
+
         # These collections denote sets in the language.  Normalize their
         # order at construction time so independently assembled bundles hash
         # identically even when their producers enumerate inputs differently.
@@ -603,7 +622,7 @@ class Bundle:
         if len(metadata_keys) != len(set(metadata_keys)): raise ValueError("duplicate metadata keys")
         object.__setattr__(self, "metadata", tuple((k, _freeze_value(v)) for k, v in sorted(self.metadata)))
         if (type(self.schema_version) is not int
-                or self.schema_version != SCHEMA_VERSION):
+                or self.schema_version not in SUPPORTED_SCHEMA_VERSIONS):
             raise ValueError(f"unsupported claim schema version: {self.schema_version}")
 
 
@@ -618,6 +637,9 @@ def _plain(value: Any) -> Any:
         return {key: _plain(item) for key, item in value.values}
     if isinstance(value, Mapping): raise TypeError("mapping must be recursively frozen before canonicalisation")
     if isinstance(value, (tuple, list, set, frozenset)): return [_plain(v) for v in value]
+    if isinstance(value, Bundle) and value.schema_version == 1:
+        return {f.name: _plain(getattr(value, f.name)) for f in fields(value)
+                if f.name not in CONTRACT_FIELDS}
     if is_dataclass(value):
         return {f.name: _plain(getattr(value, f.name)) for f in fields(value)}
     raise TypeError(f"not canonicalisable: {type(value).__name__}")
@@ -785,9 +807,11 @@ def _bundle_from_json(source: str | bytes | Mapping[str, Any], *, validate: bool
             result[key] = value
         return result
     raw = json.loads(source, parse_constant=reject_constant, object_pairs_hook=reject_duplicate) if isinstance(source, (str, bytes)) else source
-    _strict_object(raw, {"schema_version", "relations", "facts", "evidence", "mappings", "diagnostic_policy", "diagnostics", "outputs", "rules", "claims", "metadata"}, "bundle")
+    version = raw.get("schema_version") if isinstance(raw, Mapping) else None
+    extras = set(CONTRACT_FIELDS) if type(version) is int and version == 2 else set()
+    _strict_object(raw, extras | {"schema_version", "relations", "facts", "evidence", "mappings", "diagnostic_policy", "diagnostics", "outputs", "rules", "claims", "metadata"}, "bundle")
     if (type(raw.get("schema_version")) is not int
-            or raw["schema_version"] != SCHEMA_VERSION):
+            or raw["schema_version"] not in SUPPORTED_SCHEMA_VERSIONS):
         raise ValueError("unsupported claim schema version")
     def column(x):
         x = _strict_object(x, {"name", "type", "context"}, "column")
@@ -881,7 +905,7 @@ def _bundle_from_json(source: str | bytes | Mapping[str, Any], *, validate: bool
     metadata_raw = raw["metadata"] if "metadata" in raw else {}
     metadata_items = (tuple(metadata_raw.items()) if isinstance(metadata_raw, Mapping)
                       else _strict_pairs(metadata_raw, "metadata"))
-    bundle = Bundle(tuple(relation(x) for x in _sequence_field(raw, "relations", "bundle")), tuple(atom(x) for x in _sequence_field(raw, "facts", "bundle")), tuple(rule(x) for x in _sequence_field(raw, "rules", "bundle")), tuple(claim(x) for x in _sequence_field(raw, "claims", "bundle")), tuple(sorted(metadata_items)), SCHEMA_VERSION, tuple(evidence(x) for x in _sequence_field(raw, "evidence", "bundle")), tuple(mapping(x) for x in _sequence_field(raw, "mappings", "bundle")), policy, tuple(diagnostic(x) for x in _sequence_field(raw, "diagnostics", "bundle")), tuple(output(x) for x in _sequence_field(raw, "outputs", "bundle")))
+    bundle = Bundle(tuple(relation(x) for x in _sequence_field(raw, "relations", "bundle")), tuple(atom(x) for x in _sequence_field(raw, "facts", "bundle")), tuple(rule(x) for x in _sequence_field(raw, "rules", "bundle")), tuple(claim(x) for x in _sequence_field(raw, "claims", "bundle")), tuple(sorted(metadata_items)), raw["schema_version"], tuple(evidence(x) for x in _sequence_field(raw, "evidence", "bundle")), tuple(mapping(x) for x in _sequence_field(raw, "mappings", "bundle")), policy, tuple(diagnostic(x) for x in _sequence_field(raw, "diagnostics", "bundle")), tuple(output(x) for x in _sequence_field(raw, "outputs", "bundle")), **(decode_contracts(raw) if version == 2 else {}))
     if validate:
         from .validation import assert_valid
         assert_valid(bundle)
@@ -906,3 +930,19 @@ def bundle_from_json(source: str | bytes | Mapping[str, Any], *,
 
 
 def from_json(source): return bundle_from_json(source)
+
+
+def bundle_from_json_v1(source, *, validate=True):
+    """Decode only v1; never reinterpret a certificate's existing identity."""
+    bundle = bundle_from_json(source, validate=validate)
+    if bundle.schema_version != 1:
+        raise BundleIngestionError("expected Bundle schema 1")
+    return bundle
+
+
+def bundle_from_json_v2(source, *, validate=True):
+    """Decode only v2 with explicit evidence-composition declarations."""
+    bundle = bundle_from_json(source, validate=validate)
+    if bundle.schema_version != 2:
+        raise BundleIngestionError("expected Bundle schema 2")
+    return bundle

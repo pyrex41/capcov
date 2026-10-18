@@ -1,0 +1,103 @@
+{
+  "format": "capcov-migration-report-v1",
+  "release_ready": false,
+  "preserved": [
+    "All 154 rules are authored in readable finite logic. Native replay v2, static v2 and observation v2 elaboration reconstruct all 71, 27 and 56 frozen v1 rules exactly, in their original premise order, and the two shared bridges reconstruct the frozen runtime-shared-v1 rules.",
+    "Bundle v1 canonical bytes omit v2 fields; old evidence and fact records retain their shapes.",
+    "model_min remains unchanged and is hashed in baseline-v1.json.",
+    "Static and replay exporter stubs now load exact declarations from installed packs.",
+    "Static/runtime bridge constants load generated installed JSON with a checked artifact digest; runtime-shared-v1.json is now frozen v1 data, since shared.claims is schema 2.",
+    "Installed static, replay, and observation packs evaluate without a source checkout or Shen.",
+    "Replay declares 37 completeness scopes and 17 named exact-rule closure policies. Shen regenerates 24 required premises; independent Python reconstruction verifies each insertion.",
+    "All 28 frozen replay cases and individual completeness/assumption withdrawals retain identical relation closures under v1 and v2.",
+    "Replay v2 runs through installed profile selection, receipt export, exact declaration combination, evaluation, reporting, and evaluation-bound v2 certificates. Receipt format versions are unchanged.",
+    "Static declares 7 completeness scopes and 1 named exact-rule closure policy. Shen regenerates 3 required premises; independent Python reconstruction verifies each insertion. index_describes_run is an unscoped v2 witness with one directional capability and the index-run bridge.",
+    "All 14 frozen static cases and individual completeness/assumption withdrawals retain identical relation closures under v1 and v2.",
+    "Static v2 runs through installed profile selection, SCIP export, exact declaration combination, evaluation, and evaluation-bound v2 certificates over the go_app golden; the exported index identity is unchanged.",
+    "Observation declares 28 completeness scopes and 14 named exact-rule closure policies, and no compatibility capabilities or bridges. Shen regenerates 21 required premises; independent Python reconstruction verifies each insertion. masked_admitted remains a single-premise assumption projection and passes native v2 authority.",
+    "The four committed observation receipts (agree, disagree, gap, masked), the admitted-mask control, and individual completeness/assumption withdrawals retain identical relation closures and claim verdicts under v1 and v2.",
+    "Observation v2 runs through installed profile selection, receipt export, exact declaration combination, Python and three-kernel evaluation, the judge CLI (--pack-version 2), and evaluation-bound v2 certificates. Exported rows, evidence ids and the observation identity are profile-independent; receipt format versions are unchanged.",
+    "Experimental typed operation specifications derive transitions, ordered effect intents, outcome alternatives, traces and access summaries in Shen. Native Prolog checks observations and searches supplied finite state domains; the synthetic delete-issue corpus has hand-authored expectations. Existing model_min and evidence admission remain unchanged.",
+    "Compositional finite systems now support schemas, scoped operation judgments, arithmetic, predicates, CRUD, branches, bounded iteration, before/after properties, invariants, workflows, adapter-driven observation checks, certificate reproduction, independent patch/trace/frame checking and case-scoped capcov claim export. Synthetic workspace, ledger and outbox regressions exercise distinct operation families.",
+    "Rule declaration templates (.template/.instantiate) expand once at decode; native Shen re-expands from the raw template data and any disagreement refuses compilation. Replay's 13 php/go rule families are one template instantiated twice; the templated source decodes to canonical IR byte-identical to the pre-template file and still reconstructs the frozen v1 replay digest."
+  ],
+  "pending": [
+    "Declarative reporting policies, and default selection of the v2 profiles after the full release gate.",
+    "V2 mapping, aggregation, universal-domain, and native derivation admission.",
+    "Static invariant-preservation proofs beyond runtime checks, unbounded/non-serial concurrency reasoning, and reviewed application-specific model/receipt adapters.",
+    "Automatic application-domain inference and richer Prolog explanations; system campaigns enumerate only explicit bounded argument, state and schedule domains.",
+    "Complete pinned release CI gates; the operation milestone has native tests and a synthetic independent transition corpus, not a release-readiness claim.",
+    "Typed claim authority (W2 first increment): schema-1 typed-rule, an aggregation sort, typing or checking of the reifier and prelude predicates, the five recorded typed_authority_disagreements, and replacing an admission path with the typed authority.",
+    "Replay's exporter identity hashes the selected profile's relation names (55 under v1, 116 under v2), so one receipt gets a different replay_digest per profile; static and observation hash the frozen v1 name set. Align replay or justify the difference before default selection."
+  ],
+  "native_authority_disagreements": [
+    {
+      "pack": "replay",
+      "rule": "learn_consistent",
+      "native_id": "declaration-promoted-to-effect",
+      "status": "resolved: scoped absence from explicit completeness evidence"
+    },
+    {
+      "pack": "replay",
+      "rule": "model_scope_excluded",
+      "native_id": "declaration-promoted-to-effect",
+      "status": "resolved: single-premise assumption projection to a derived relation retains its assumption dependency; direct assumption-to-claim promotion remains rejected"
+    },
+    {
+      "pack": "observation",
+      "rule": "masked_admitted",
+      "native_id": "declaration-promoted-to-effect",
+      "status": "resolved: single-premise assumption projection to a derived relation retains its assumption dependency; direct assumption-to-claim promotion remains rejected"
+    },
+    {
+      "pack": "(authored fixture) typed_authority/negation-before-its-binder",
+      "rule": "absence",
+      "native_id": "ungrounded-side-condition-variable",
+      "status": "resolved: rule-authority.shen now grounds a side condition only from the positive premises preceding it, as Python validation, the typed judgement and both evaluators do; the untyped authority had bound over the whole body"
+    },
+    {
+      "pack": "(no installed pack aggregates)",
+      "rule": "*",
+      "native_id": "ungrounded-conclusion-variable",
+      "status": "resolved: rule-authority.shen treated an aggregation's name as a bound variable; an aggregation binds no rule variable (its value_variable names a column), matching Python validation"
+    }
+  ],
+  "typed_authority_disagreements": [
+    {
+      "case": "planted/context-index-loss",
+      "rule": "bad",
+      "id": "typed-rule",
+      "python": true,
+      "untyped": false,
+      "typed": false,
+      "analysis": "Schema-1 pack: head derived(X, X) puts a symbol variable in a digest column. Python validation reports type-mismatch. Neither Shen authority runs typed-rule under schema 1, because rule-authority.shen emits it only for schema 2 and the typed authority keeps the same id set. Python is stricter here. Schema-1 packs are retained as installed defaults; their v2 profiles are typed."
+    },
+    {
+      "case": "planted/context-index-loss",
+      "rule": "bad",
+      "id": "context-index-loss",
+      "python": false,
+      "untyped": true,
+      "typed": true,
+      "analysis": "The head drops the index context. Both Shen authorities refuse under schema-1 semantics (no carrier of index binds the head term). Python validation reports only the type-mismatch above for this rule, and its schema-1 head-context check is not separately raised. Python is not more permissive about the rule as a whole: it rejects it."
+    },
+    {
+      "case": "planted/declaration-promoted-to-effect",
+      "rule": "bad",
+      "id": "declaration-promoted-to-effect",
+      "python": false,
+      "untyped": true,
+      "typed": true,
+      "analysis": "Schema-1 pack: a static assumption concludes a runtime claim. Python's promotion judgement exists only in authority.judge (schema 2). Schema-1 validation does not check promotion, so Python admits the rule. Both Shen authorities refuse it. The refusal stands."
+    },
+    {
+      "case": "planted/non-linear-recursion",
+      "rule": "bad",
+      "id": "non-linear-recursion",
+      "python": false,
+      "untyped": true,
+      "typed": true,
+      "analysis": "Python validation and the Python evaluator accept non-linear recursion. The refusal is a limitation of the Shen bounded derivation search (rule-authority.shen), which both Shen authorities report. It is an engine-capability refusal, not a semantic disagreement about the rule."
+    }
+  ]
+}

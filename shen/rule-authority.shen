@@ -73,11 +73,29 @@
                     (@p "recursive_premises" (capcov.arr (capcov.rule-recursive-atoms R)))
                     (@p "stratum" (capcov.rule-stratum R))]))
 
-(define capcov.elaborated-json
+(define capcov.elaborated-v1-json
   -> (capcov.obj [(@p "elaboration" "capcov-shen-elaborated-v1")
                   (@p "relations" (capcov.arr (map (/. N (capcov.decl-json (capcov.decl N))) (value capcov.*relation-names*))))
                   (@p "rules" (capcov.arr (map (function capcov.elaborated-rule-json) (value capcov.*rules*))))
                   (@p "stratified" (not (value capcov.*unstratifiable*)))]))
+
+\\ Contract tuples are typed data from the strict v2 transport. Nesting uses
+\\ JSON arrays explicitly; no contract can disappear from the frozen identity.
+(define capcov.contract-json
+  [] -> (capcov.arr [])
+  [X | Xs] -> (capcov.arr (map (function capcov.contract-json) [X | Xs]))
+  X -> X)
+
+(define capcov.elaborated-json
+  -> (if (= (value capcov.*schema-version*) 1)
+         (capcov.elaborated-v1-json)
+         (capcov.obj [(@p "elaboration" "capcov-shen-elaborated-v2")
+                      (@p "schema_version" 2)
+                      (@p "program" (capcov.elaborated-v1-json))
+                      (@p "compatibility_capabilities" (capcov.contract-json (value capcov.*capabilities*)))
+                      (@p "required_bridges" (capcov.contract-json (value capcov.*bridges*)))
+                      (@p "completeness_scopes" (capcov.contract-json (value capcov.*scopes*)))
+                      (@p "derived_completeness_policies" (capcov.contract-json (value capcov.*derived-policies*)))])))
 
 (define capcov.freeze-pack
   \\ render the elaborated representation once, fingerprint it, and refuse to
@@ -157,10 +175,13 @@
                 (capcov.check "undeclared-relation" true "every relation in the rule is declared")
                 (capcov.check "undeclared-relation" false (cn "undeclared (unapproved effectful side condition): " (capcov.names-text Missing))))))
 
+\* Variables a rule binds positively: every positive premise's variables.  An
+   aggregation binds none: its [Name Rel GroupBy ValueVar Op Domain Closure]
+   names a relation column in ValueVar, not a rule variable, and its Name is a
+   label.  (Treating Name as a bound variable let a head variable sharing the
+   aggregation's name pass as grounded.)  The Python validator agrees. *\
 (define capcov.positive-vars
-  Rule -> (let Vars (capcov.dedupe (capcov.sort-strings (capcov.join-vars (capcov.positive-atoms (capcov.rule-body Rule)))))
-               Agg (capcov.rule-aggregation Rule)
-            (if (= Agg capcov.null) Vars [(nth 1 Agg) | Vars])))
+  Rule -> (capcov.dedupe (capcov.sort-strings (capcov.join-vars (capcov.positive-atoms (capcov.rule-body Rule))))))
 
 (define capcov.join-vars
   [] -> []
@@ -173,10 +194,22 @@
                 (capcov.check "ungrounded-conclusion-variable" true "every head variable is bound by a positive premise")
                 (capcov.check "ungrounded-conclusion-variable" false (cn "head variables without a positive premise: " (capcov.names-text Missing))))))
 
+\* A side condition (negated premise or comparison) is grounded only by the
+   positive premises that PRECEDE it in the body, which is the order every
+   kernel evaluates in (capcov.inst refuses a non-ground negation at check
+   time; the Python validator walks the body left to right; the spec
+   elaborator requires negated variables bound first).  Binding over the whole
+   body admitted a negation placed before its binder; that is a defect, not a
+   permissive variant. *\
+(define capcov.side-unbound
+  [] _ -> []
+  [[capcov.pos Rel Terms] | Rest] Bound -> (capcov.side-unbound Rest (append (capcov.term-vars Terms) Bound))
+  [[capcov.neg Rel Terms] | Rest] Bound -> (append (capcov.minus (capcov.term-vars Terms) Bound) (capcov.side-unbound Rest Bound))
+  [[capcov.cmp L Op R] | Rest] Bound -> (append (capcov.minus (capcov.term-vars [L R]) Bound) (capcov.side-unbound Rest Bound))
+  [_ | Rest] Bound -> (capcov.side-unbound Rest Bound))
+
 (define capcov.check-side-grounding
-  Rule -> (let Bound (capcov.positive-vars Rule)
-               Side (append (capcov.join-vars (capcov.negative-atoms (capcov.rule-body Rule))) (capcov.comparison-vars (capcov.rule-body Rule)))
-               Missing (capcov.dedupe (capcov.sort-strings (capcov.minus Side Bound)))
+  Rule -> (let Missing (capcov.dedupe (capcov.sort-strings (capcov.side-unbound (capcov.rule-body Rule) [])))
             (if (empty? Missing)
                 (capcov.check "ungrounded-side-condition-variable" true "negation and comparison variables are positively bound")
                 (capcov.check "ungrounded-side-condition-variable" false (cn "side-condition variables without a positive premise: " (capcov.names-text Missing))))))
@@ -261,9 +294,51 @@
                   (true (capcov.check "negative-conclusion-without-completeness" false
                                       (cn "negated premises without an exact scoped completeness witness: " (capcov.names-text (map (/. N (nth 1 N)) Bad))))))))
 
+(define capcov.projection-from?
+  Rule Names ->
+    (let Pos (capcov.declared-atoms (capcov.positive-atoms (capcov.rule-body Rule)))
+      (and (= (length (capcov.rule-body Rule)) 1)
+       (and (= (length Pos) 1) (element? (nth 1 (hd Pos)) Names)))))
+
+(define capcov.assumption-projection-closure
+  Names -> (let More (map (function capcov.rule-head-rel)
+                      (capcov.filter (/. R (let D (capcov.decl (capcov.rule-head-rel R))
+                        (and (not (= D capcov.none))
+                         (and (= (capcov.decl-modality D) "derived")
+                              (capcov.projection-from? R Names))))) (value capcov.*rules*)))
+                Next (capcov.dedupe (capcov.sort-strings (append Names More)))
+             (if (= Next Names) Names (capcov.assumption-projection-closure Next))))
+
+(define capcov.assumption-relations
+  -> (capcov.assumption-projection-closure
+       (capcov.dedupe (capcov.sort-strings (capcov.filter
+         (/. N (= (capcov.decl-modality (capcov.decl N)) "assumption"))
+         (value capcov.*relation-names*))))))
+
 (define capcov.effective-premise?
   A -> (and (= (capcov.atom-binding A) "runtime")
-            (not (element? (capcov.atom-modality A) ["compatibility" "completeness" "assumption"]))))
+         (and (not (element? (nth 1 A) (capcov.assumption-relations)))
+              (not (element? (capcov.atom-modality A) ["compatibility" "completeness" "assumption"])))))
+
+\\ Assumption projection is a derivation, not direct effect admission. Absence
+\\ claims require actual scoped closure evidence and a matching negative atom.
+(define capcov.assumption-projection?
+  Rule -> (let Pos (capcov.declared-atoms (capcov.positive-atoms (capcov.rule-body Rule)))
+            (and (= (capcov.decl-modality (capcov.decl (capcov.rule-head-rel Rule))) "derived")
+             (and (= (length (capcov.rule-body Rule)) 1)
+              (and (= (length Pos) 1) (element? (nth 1 (hd Pos)) (capcov.assumption-relations)))))))
+
+(define capcov.scoped-absence?
+  Rule -> (let Pos (capcov.declared-atoms (capcov.positive-atoms (capcov.rule-body Rule)))
+               Neg (capcov.declared-atoms (capcov.negative-atoms (capcov.rule-body Rule)))
+             (and (not (empty? Neg))
+              (and (not (empty? Pos))
+               (and (capcov.all? (/. A (and (= (capcov.atom-modality A) "completeness")
+                                      (= (capcov.atom-binding A) "runtime"))) Pos)
+                (capcov.all? (/. N (capcov.any? (/. W
+                  (if (= (value capcov.*schema-version*) 2)
+                      (capcov.v2-closure-matches? N W)
+                      (capcov.completeness-witness? N W))) Pos)) Neg))))))
 
 (define capcov.check-promotion
   Rule -> (let HD (capcov.decl (capcov.rule-head-rel Rule))
@@ -272,6 +347,10 @@
                    (capcov.check "declaration-promoted-to-effect" true "conclusion is not a runtime effect"))
                   ((capcov.any? (function capcov.effective-premise?) (capcov.declared-atoms (capcov.positive-atoms (capcov.rule-body Rule))))
                    (capcov.check "declaration-promoted-to-effect" true "a runtime observation or derivation supports the runtime conclusion"))
+                  ((capcov.assumption-projection? Rule)
+                   (capcov.check "declaration-promoted-to-effect" true "single assumption projection retains its evidence dependency"))
+                  ((capcov.scoped-absence? Rule)
+                   (capcov.check "declaration-promoted-to-effect" true "scoped absence is supported by positive completeness evidence"))
                   (true (capcov.check "declaration-promoted-to-effect" false "runtime effect concluded from static declarations or assumptions only")))))
 
 (define capcov.check-linear
@@ -280,14 +359,23 @@
               (capcov.check "non-linear-recursion" true (cn "rule kind " (capcov.kind-name (capcov.rule-kind Rule))))))
 
 (define capcov.rule-verdict
-  Rule -> (let Checks [(capcov.check-undeclared Rule)
+  Rule -> (let Checks (append
+                      (if (= (value capcov.*schema-version*) 2)
+                          [(capcov.check "typed-rule" (capcov.v2-rule-types? Rule) "rule terms agree with declaration types")] [])
+                      [(capcov.check-undeclared Rule)
                        (capcov.check-head-grounding Rule)
                        (capcov.check-side-grounding Rule)
-                       (capcov.check-context-loss Rule)
-                       (capcov.check-widening Rule)
-                       (capcov.check-completeness Rule)
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "context-index-loss" (function capcov.v2-head?) Rule)
+                           (capcov.check-context-loss Rule))
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "unsupported-context-widening" (function capcov.v2-widening?) Rule)
+                           (capcov.check-widening Rule))
+                       (if (= (value capcov.*schema-version*) 2)
+                           (capcov.v2-check "negative-conclusion-without-completeness" (function capcov.v2-completeness?) Rule)
+                           (capcov.check-completeness Rule))
                        (capcov.check-promotion Rule)
-                       (capcov.check-linear Rule)]
+                       (capcov.check-linear Rule)])
             (capcov.obj [(@p "rule" (capcov.rule-name Rule))
                          (@p "rule_digest" (capcov.rule-digest Rule))
                          (@p "ok" (capcov.all? (function capcov.check-ok?) Checks))
@@ -299,13 +387,15 @@
 \\ ---------------------------------------------------------------- pack-level checks and output
 
 (define capcov.pack-checks
-  -> [(if (value capcov.*unstratifiable*)
+  -> (append (if (= (value capcov.*schema-version*) 2)
+                 [(capcov.check "evidence-contracts" (capcov.v2-contracts-ok?) "versioned evidence contracts")] [])
+      [(if (value capcov.*unstratifiable*)
           (capcov.check "stratified-negation" false "negation through recursion has no stratification")
           (capcov.check "stratified-negation" true "negation is stratified"))
       (capcov.check "frozen-pack-mismatch" true
                     (if (= (value capcov.*in-frozen*) capcov.null)
                         "no frozen checksum supplied; this run establishes one"
-                        "elaborated pack checksum equals the frozen checksum"))])
+                        "elaborated pack checksum equals the frozen checksum"))]))
 
 (define capcov.authority-json
   -> (let Verdicts (map (function capcov.rule-verdict) (value capcov.*rules*))

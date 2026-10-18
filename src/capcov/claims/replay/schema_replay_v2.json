@@ -1,0 +1,2490 @@
+{
+  "compatibility_capabilities": [
+    {
+      "left_column": "index",
+      "left_dimension": "index",
+      "left_targets": [
+        "op_declared",
+        "op_qualified",
+        "op_qualified_rt"
+      ],
+      "name": "index_describes_replay-endpoints",
+      "right_column": "run",
+      "right_dimension": "run",
+      "right_targets": [
+        "corpus_constrains",
+        "delete_target",
+        "earlier_delete",
+        "effect_order_any",
+        "effect_order_exercised",
+        "effect_order_respected",
+        "effect_order_violation",
+        "exclusion_applied",
+        "first_delete_committed",
+        "go_disagree_any",
+        "go_effect",
+        "go_effect_seq",
+        "go_model_agree",
+        "go_model_disagree",
+        "go_observed",
+        "go_post_state",
+        "go_response",
+        "kill_closure_gap",
+        "kill_closure_gap_any",
+        "learn_consistent",
+        "learn_counterexample",
+        "learn_counterexample_any",
+        "learn_observation",
+        "learn_predicted",
+        "learn_prediction",
+        "learn_run",
+        "learn_unmodeled_any",
+        "model_admissible",
+        "model_effect",
+        "model_effect_seq",
+        "mutant_killed",
+        "mutant_killed_in",
+        "op_exercised",
+        "op_has_surviving_mutant",
+        "op_qualified",
+        "op_qualified_rt",
+        "oracle_stable",
+        "oracle_unstable",
+        "php_disagree_any",
+        "php_effect",
+        "php_effect_seq",
+        "php_model_agree",
+        "php_model_disagree",
+        "php_observed",
+        "php_post_state",
+        "php_response",
+        "post_state_any",
+        "post_state_gap",
+        "repeat_delete",
+        "repeat_delete_any",
+        "repeat_delete_has_effect",
+        "repeat_delete_not_found",
+        "repeat_delete_violation",
+        "replay_request",
+        "replay_request_seq",
+        "replay_run",
+        "replay_run_current",
+        "replay_run_stale",
+        "replay_stability",
+        "replayed",
+        "requested",
+        "surviving_mutant",
+        "undeclared_any",
+        "undeclared_write"
+      ],
+      "symmetric": false,
+      "witness": "index_describes_replay"
+    },
+    {
+      "left_column": "model",
+      "left_dimension": "model",
+      "left_targets": [
+        "learn_unmodeled",
+        "model_checker_admitted",
+        "model_operation_checked",
+        "model_scope_excluded",
+        "model_scope_exclusion",
+        "model_well_formed",
+        "model_writes",
+        "mutant"
+      ],
+      "name": "model_describes_run-endpoints",
+      "right_column": "run",
+      "right_dimension": "run",
+      "right_targets": [
+        "corpus_constrains",
+        "delete_target",
+        "earlier_delete",
+        "effect_order_any",
+        "effect_order_exercised",
+        "effect_order_respected",
+        "effect_order_violation",
+        "exclusion_applied",
+        "first_delete_committed",
+        "go_disagree_any",
+        "go_effect",
+        "go_effect_seq",
+        "go_model_agree",
+        "go_model_disagree",
+        "go_observed",
+        "go_post_state",
+        "go_response",
+        "kill_closure_gap",
+        "kill_closure_gap_any",
+        "learn_consistent",
+        "learn_counterexample",
+        "learn_counterexample_any",
+        "learn_observation",
+        "learn_predicted",
+        "learn_prediction",
+        "learn_run",
+        "learn_unmodeled_any",
+        "model_admissible",
+        "model_effect",
+        "model_effect_seq",
+        "mutant_killed",
+        "mutant_killed_in",
+        "op_exercised",
+        "op_has_surviving_mutant",
+        "op_qualified",
+        "op_qualified_rt",
+        "oracle_stable",
+        "oracle_unstable",
+        "php_disagree_any",
+        "php_effect",
+        "php_effect_seq",
+        "php_model_agree",
+        "php_model_disagree",
+        "php_observed",
+        "php_post_state",
+        "php_response",
+        "post_state_any",
+        "post_state_gap",
+        "repeat_delete",
+        "repeat_delete_any",
+        "repeat_delete_has_effect",
+        "repeat_delete_not_found",
+        "repeat_delete_violation",
+        "replay_request",
+        "replay_request_seq",
+        "replay_run",
+        "replay_run_current",
+        "replay_run_stale",
+        "replay_stability",
+        "replayed",
+        "requested",
+        "surviving_mutant",
+        "undeclared_any",
+        "undeclared_write"
+      ],
+      "symmetric": false,
+      "witness": "model_describes_run"
+    }
+  ],
+  "completeness_scopes": [
+    {
+      "mapping": [
+        [
+          "learn",
+          "learn"
+        ],
+        [
+          "model",
+          "model"
+        ]
+      ],
+      "relation": "learn_unmodeled_closed",
+      "target": "learn_unmodeled"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ],
+        [
+          "op",
+          "op"
+        ]
+      ],
+      "relation": "model_writes_closed",
+      "target": "model_writes"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ],
+        [
+          "op",
+          "op"
+        ]
+      ],
+      "relation": "mutants_closed",
+      "target": "mutant"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "learn_predictions_closed",
+      "target": "learn_prediction"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "model_admissible_closed",
+      "target": "model_admissible"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "model_effect_seqs_closed",
+      "target": "model_effect_seq"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ]
+      ],
+      "relation": "model_scope_excluded_closed",
+      "target": "model_scope_excluded"
+    },
+    {
+      "mapping": [
+        [
+          "model",
+          "model"
+        ]
+      ],
+      "relation": "model_scope_exclusions_closed",
+      "target": "model_scope_exclusion"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "effect_order_closed",
+      "target": "effect_order_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_disagreement_closed",
+      "target": "go_disagree_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "learn_counterexample_closed",
+      "target": "learn_counterexample_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "learn_unmodeled_gate_closed",
+      "target": "learn_unmodeled_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "op_surviving_closed",
+      "target": "op_has_surviving_mutant"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_disagreement_closed",
+      "target": "php_disagree_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "post_state_gap_closed",
+      "target": "post_state_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "repeat_delete_closed",
+      "target": "repeat_delete_any"
+    },
+    {
+      "mapping": [
+        [
+          "op",
+          "op"
+        ],
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "undeclared_writes_closed",
+      "target": "undeclared_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "earlier_delete_closed",
+      "target": "earlier_delete"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_effect_seqs_closed",
+      "target": "go_effect_seq"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_effects_closed",
+      "target": "go_effect"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_observed_closed",
+      "target": "go_observed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_post_states_closed",
+      "target": "go_post_state"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "go_responses_closed",
+      "target": "go_response"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "kill_gap_closed",
+      "target": "kill_closure_gap_any"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "learn_observations_closed",
+      "target": "learn_observation"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "mutant_kills_closed",
+      "target": "mutant_killed_in"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "oracle_unstable_closed",
+      "target": "oracle_unstable"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_effect_seqs_closed",
+      "target": "php_effect_seq"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_effects_closed",
+      "target": "php_effect"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_observed_closed",
+      "target": "php_observed"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_post_states_closed",
+      "target": "php_post_state"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "php_responses_closed",
+      "target": "php_response"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "repeat_delete_effects_closed",
+      "target": "repeat_delete_has_effect"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "replay_request_seqs_closed",
+      "target": "replay_request_seq"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "replay_requests_closed",
+      "target": "replay_request"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "replay_stability_closed",
+      "target": "replay_stability"
+    },
+    {
+      "mapping": [
+        [
+          "run",
+          "run"
+        ]
+      ],
+      "relation": "requested_closed",
+      "target": "requested"
+    }
+  ],
+  "relations": [
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "nonce",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "php_commit",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "go_commit",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "snapshot",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": true,
+      "modality": "observation",
+      "name": "replay_run",
+      "nonempty": true,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "tenant",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "route",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "replay_request",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "state_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "php_post_state",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "state_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "go_post_state",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "go"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "cols_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "php_effect",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "cols_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "go_effect",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "go"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "cols_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_effect",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "state_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_admissible",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_writes",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "mutant",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "mutant",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "mut"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "mutant",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "mutant_killed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "mut"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "seq",
+          "type": "unsigned"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "php_effect_seq",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "seq",
+          "type": "unsigned"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "go_effect_seq",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "go"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "seq",
+          "type": "unsigned"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "kind",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "pk",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_effect_seq",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "seq",
+          "type": "unsigned"
+        },
+        {
+          "context": false,
+          "name": "target",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "replay_request_seq",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "status",
+          "type": "unsigned"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "php_response",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "status",
+          "type": "unsigned"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "go_response",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "go"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "run_a",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "run_b",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "side",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "stable",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "replay_stability",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "checker",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_version",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_binary",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "certificate",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_well_formed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "modelcheck"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": true,
+          "name": "operation",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_version",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_binary",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "certificate",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model",
+        "operation"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_operation_checked",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "modelcheck"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "table",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "reason",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "assumption",
+      "name": "model_scope_exclusion",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "nonce",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "run_nonce_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "snapshot",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "snapshot_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_observed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": true,
+          "name": "operation",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_version",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "checker_binary",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "certificate",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model",
+        "operation"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "model_checker_admitted",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "campaign",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "learn",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "php_commit",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "snapshot",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "learn_run",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "learn",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "tape",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "predicted",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "state_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "learn_prediction",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "tape",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "req",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "observed",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "state_digest",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "learn_observation",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "learn",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "learn_unmodeled",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "static",
+      "columns": [
+        {
+          "context": true,
+          "name": "index",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [
+        "index"
+      ],
+      "finite": false,
+      "modality": "observation",
+      "name": "op_declared",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "php-census"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "replay_request",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "replay_requests_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "php_effect",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "php_effects_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "go_effect",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "go_effects_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "php_post_state",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "php_post_states_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "go_post_state",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "go_post_states_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "model_admissible",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "model_admissible_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "model_writes",
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "model_writes_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "op",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "mutant",
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "mutants_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "mut"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "model_scope_exclusion",
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "model_scope_exclusions_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "mutant_killed_in",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "mutant_kills_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "php_effect_seq",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "php_effect_seqs_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "go_effect_seq",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "go_effect_seqs_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "model_effect_seq",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "model_effect_seqs_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "replay_request_seq",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "replay_request_seqs_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "php_response",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "php_responses_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "go_response",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "go_responses_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "replay_stability",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "replay_stability_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "learn_prediction",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "learn_predictions_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "learn_observation",
+      "context_indices": [
+        "run"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "learn_observations_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "replay"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": true,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "learn",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": "learn_unmodeled",
+      "context_indices": [
+        "model"
+      ],
+      "finite": false,
+      "modality": "completeness",
+      "name": "learn_unmodeled_closed",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "compatibility",
+      "name": "model_describes_run",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "index",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "run",
+          "type": "symbol"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "compatibility",
+      "name": "index_describes_replay",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "reviewer"
+      ]
+    },
+    {
+      "binding": "runtime",
+      "columns": [
+        {
+          "context": false,
+          "name": "learn",
+          "type": "digest"
+        },
+        {
+          "context": false,
+          "name": "model",
+          "type": "digest"
+        }
+      ],
+      "compatibility_context_indices": [],
+      "compatibility_targets": [],
+      "completes": null,
+      "context_indices": [],
+      "finite": false,
+      "modality": "compatibility",
+      "name": "learn_describes_model",
+      "nonempty": false,
+      "polarity": "positive",
+      "primitive": true,
+      "producer_classes": [
+        "shen"
+      ]
+    }
+  ],
+  "required_bridges": [
+    {
+      "left_dimension": "index",
+      "left_targets": [],
+      "name": "index-run",
+      "right_dimension": "run",
+      "right_targets": []
+    },
+    {
+      "left_dimension": "model",
+      "left_targets": [],
+      "name": "model-run",
+      "right_dimension": "run",
+      "right_targets": []
+    }
+  ],
+  "schema_version": 2
+}

@@ -1,0 +1,308 @@
+{
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "observation",
+        "primitive": true
+      },
+      {
+        "name": "closed",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "completeness",
+        "completes": "seen",
+        "primitive": true
+      },
+      {
+        "name": "assumed",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "assumption",
+        "primitive": true
+      },
+      {
+        "name": "clear",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "claim",
+        "primitive": false
+      }
+    ],
+    "completeness_scopes": [
+      {
+        "relation": "closed",
+        "target": "seen",
+        "mapping": [
+          [
+            "run",
+            "run"
+          ]
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "name": "clear",
+        "head": {
+          "relation": "clear",
+          "terms": [
+            {
+              "variable": "R"
+            }
+          ]
+        },
+        "body": [
+          {
+            "relation": "closed",
+            "terms": [
+              {
+                "variable": "R"
+              }
+            ]
+          },
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "R"
+              }
+            ],
+            "negated": true
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "runtime-scoped-absence-is-supported",
+      "changes": [],
+      "categories": []
+    },
+    {
+      "name": "assumption-cannot-directly-establish-runtime-claim",
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "assumed",
+              "terms": [
+                {
+                  "variable": "R"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "categories": [
+        "promotion"
+      ]
+    },
+    {
+      "name": "assumption-projection-retains-dependency",
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "assumed",
+              "terms": [
+                {
+                  "variable": "R"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "/relations/3/modality",
+          "value": "derived"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "name": "assumption-projection-cannot-launder-effect-authority",
+      "categories": [
+        "promotion"
+      ],
+      "changes": [
+        {
+          "path": "/relations",
+          "value": [
+            {
+              "name": "seen",
+              "columns": [
+                {
+                  "name": "run",
+                  "type": "symbol",
+                  "context": true
+                }
+              ],
+              "context_indices": [
+                "run"
+              ],
+              "binding": "runtime",
+              "modality": "observation",
+              "primitive": true
+            },
+            {
+              "name": "closed",
+              "columns": [
+                {
+                  "name": "run",
+                  "type": "symbol",
+                  "context": true
+                }
+              ],
+              "context_indices": [
+                "run"
+              ],
+              "binding": "runtime",
+              "modality": "completeness",
+              "completes": "seen",
+              "primitive": true
+            },
+            {
+              "name": "assumed",
+              "columns": [
+                {
+                  "name": "run",
+                  "type": "symbol",
+                  "context": true
+                }
+              ],
+              "context_indices": [
+                "run"
+              ],
+              "binding": "runtime",
+              "modality": "assumption",
+              "primitive": true
+            },
+            {
+              "name": "clear",
+              "columns": [
+                {
+                  "name": "run",
+                  "type": "symbol",
+                  "context": true
+                }
+              ],
+              "context_indices": [
+                "run"
+              ],
+              "binding": "runtime",
+              "modality": "claim",
+              "primitive": false
+            },
+            {
+              "name": "wrapped",
+              "columns": [
+                {
+                  "name": "run",
+                  "type": "symbol",
+                  "context": true
+                }
+              ],
+              "context_indices": [
+                "run"
+              ],
+              "binding": "runtime",
+              "modality": "derived",
+              "primitive": false
+            }
+          ]
+        },
+        {
+          "path": "/rules",
+          "value": [
+            {
+              "name": "project",
+              "head": {
+                "relation": "wrapped",
+                "terms": [
+                  {
+                    "variable": "R"
+                  }
+                ]
+              },
+              "body": [
+                {
+                  "relation": "assumed",
+                  "terms": [
+                    {
+                      "variable": "R"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "launder",
+              "head": {
+                "relation": "clear",
+                "terms": [
+                  {
+                    "variable": "R"
+                  }
+                ]
+              },
+              "body": [
+                {
+                  "relation": "wrapped",
+                  "terms": [
+                    {
+                      "variable": "R"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "_note": "Gate G5 goldens (docs/ir-specification.md section 7). Written by --regenerate at the base commit below, before any R02 code; libraries are that commit's engine digests.",
+  "base": "7f41822",
+  "cases": {
+    "ledger.evaluate": {
+      "exit": 1
+    },
+    "ledger.explore": {
+      "exit": 0
+    },
+    "ledger.ledger-requests": {
+      "exit": 0
+    },
+    "loop-completion.evaluate": {
+      "exit": 1
+    },
+    "loop-completion.explore": {
+      "exit": 0
+    },
+    "loop-induction.evaluate": {
+      "exit": 1
+    },
+    "loop-induction.explore": {
+      "exit": 0
+    },
+    "outbox-intended.evaluate": {
+      "exit": 1
+    },
+    "outbox-intended.explore": {
+      "exit": 0
+    },
+    "outbox-intended.outbox-campaign": {
+      "exit": 0
+    },
+    "outbox.evaluate": {
+      "exit": 1
+    },
+    "outbox.explore": {
+      "exit": 0
+    },
+    "outbox.outbox-campaign": {
+      "exit": 0
+    },
+    "workspace.evaluate": {
+      "exit": 1
+    },
+    "workspace.explore": {
+      "exit": 0
+    }
+  },
+  "libraries": {
+    "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+    "system-types.shen": "4ee4317089b40a5a0b4abbf9c4ebe59d4075f99f3c9519aa6483a39adea4eac6",
+    "system.shen": "ded4508d579c588c6a1e7a25ec15fbabf1ac0e3e5868f50e2855aac3c298ac05"
+  }
+}

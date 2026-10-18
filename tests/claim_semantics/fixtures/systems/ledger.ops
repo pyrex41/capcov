@@ -1,0 +1,25 @@
+[system "ledger"
+ [[table "wallet" [[column "balance" [int32]]] [] []]
+  [table "transfer" ["from" "to" "amount"] [] [[foreign "from" "wallet"] [foreign "to" "wallet"]]]]
+ [[command "transfer" ["from" "to" "amount" "request"]
+   [both [exists "wallet" [argument "from"]]
+    [both [exists "wallet" [argument "to"]]
+     [both [negate [equal [argument "from"] [argument "to"]]]
+           [less-than [literal "0"] [argument "amount"]]]]]
+   [[named "deduplicate" [choose [exists "transfer" [argument "request"]]
+     [[named "same-request" [require "idempotency-conflict"
+       [both [equal [lookup "transfer" [argument "request"] "from"] [argument "from"]]
+        [both [equal [lookup "transfer" [argument "request"] "to"] [argument "to"]]
+              [equal [lookup "transfer" [argument "request"] "amount"] [argument "amount"]]]]]]]
+     [[named "funds" [require "insufficient-funds"
+       [negate [less-than [lookup "wallet" [argument "from"] "balance"] [argument "amount"]]]]]
+      [named "debit" [update "wallet" [argument "from"] "balance"
+       [int-sub [lookup "wallet" [argument "from"] "balance"] [argument "amount"]]]]
+      [named "credit" [update "wallet" [argument "to"] "balance"
+       [int-add [lookup "wallet" [argument "to"] "balance"] [argument "amount"]]]]
+      [named "record" [insert "transfer" [argument "request"]
+       [["from" [argument "from"]] ["to" [argument "to"]] ["amount" [argument "amount"]]]]]
+      [named "notify" [publish "transfer-completed" [argument "request"]]]]]]]
+   [both [exists "transfer" [argument "request"]]
+         [equal [sum-field "wallet" "balance"] [before [sum-field "wallet" "balance"]]]]]]
+ [["nonnegative" [every-row "wallet" [negate [less-than [row-field "balance"] [literal "0"]]]]]]]

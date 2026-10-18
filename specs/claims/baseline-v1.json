@@ -1,0 +1,31 @@
+{
+  "packs": [
+    {
+      "domain": "static",
+      "path": "experiments/claim-semantics/static/rules-static-v1.json",
+      "file_sha256": "4645f57cf254c47faa074383d45b9cea87b4cec02a46bdefddec232ca70993c9",
+      "bundle_digest": "c11d628951a8dfc1eae622d43f224b6523af28a5f08966ae99efceb2418175e2",
+      "rule_count": 27
+    },
+    {
+      "domain": "replay",
+      "path": "experiments/claim-semantics/replay/rules-replay-v1.json",
+      "file_sha256": "34c41e2834b3ed91f3121f4101aae2fcf2854de28d6951b815796fa2e430dce5",
+      "bundle_digest": "ead0853d0aaee4e2863d678bd41b320b823e86fb769e55ebdf0155fcc1bef894",
+      "rule_count": 71
+    },
+    {
+      "domain": "observation",
+      "path": "src/capcov/claims/observation/rules-observation-v1.json",
+      "file_sha256": "ad14789c8d8c76e63a52f41c2ffc4611fa626c424f7ffdbb01039bc35cbd807e",
+      "bundle_digest": "003f70887d626a6938353f3af45684839e4277552c82037838b308e37764e969",
+      "rule_count": 56
+    }
+  ],
+  "model_min": {
+    "README.md": "dca84a53488239d5d479a15e708046f97f7fa135b9151ba5f15c1328a7f50795",
+    "shen/base.shen": "630b33baaa60459d0875f22bdbe053fa57b999511187771a2d7b1918c697cb09",
+    "shen/load.shen": "5251a47e46979def2b7076e0a7c278013050ef847502280bc458a3bc98da84a9",
+    "shen/model.shen": "d7673ec6208f65af31e07781561846326f52dbd0079c3359f3fec72affe22e99"
+  }
+}

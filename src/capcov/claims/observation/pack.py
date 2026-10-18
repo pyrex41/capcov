@@ -13,66 +13,55 @@ is the reviewed file.
 
 The pack is kept in raw IR JSON wire form and merged verbatim: every relation
 declaration and rule comes from the file, nothing is evaluated here.
+
+Installed profiles: v1 (``rules-observation-v1.json``) remains the frozen
+default. V2 (``rules-observation-v2.json`` with its schema, stubs and manifest)
+is generated from ``specs/claims/observation.claims`` by native Shen
+elaboration and reconstructs the frozen v1 rules exactly; it declares
+completeness scopes and closure policies only -- no compatibility capability or
+bridge, because every relation is runtime-bound. Installed evaluation loads
+JSON and needs neither the checkout nor Shen. Select a version once at
+``join.build`` and carry that profile through export and evaluation.
 """
 from __future__ import annotations
 
-from importlib import resources
 import json
 from pathlib import Path
 from typing import Any
 
-from ..ir import Bundle, bundle_from_json
+from ..ir import Bundle
+from .. import pack_resources as _resources
 
 PACK_ID = "rules-observation-v1"
 PACK_NAME = "rules-observation-v1.json"
 #: The shipped pack: package data, present in a source checkout and in a wheel.
 PACK_PATH = Path(__file__).resolve().parent / PACK_NAME
 
-DIAGNOSTIC_POLICY = {"missing_premises": "unresolved", "inconsistent_premises": "inconsistent-premises",
-                     "out_of_scope": "out-of-scope", "forbidden_evidence": "invalid-input",
-                     "revocation": "refutation", "completeness": "required"}
-RELATION_FIELDS = {"name", "columns", "modality", "polarity", "binding", "primitive", "producer_classes",
-                   "context_indices", "completes", "finite", "nonempty", "compatibility_targets",
-                   "compatibility_context_indices"}
+DIAGNOSTIC_POLICY = _resources.DIAGNOSTIC_POLICY
+RELATION_FIELDS = _resources.RELATION_FIELDS
 
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def read_pack_text() -> str:
+def read_pack_text(version: int = 1) -> str:
     """The shipped pack's bytes, as ``importlib.resources`` hands them over."""
-    return resources.files(__package__).joinpath(PACK_NAME).read_text(encoding="utf-8")
+    return _resources.read_pack_text("observation", version)
 
 
-def load_pack(path: Path | None = None) -> dict[str, Any]:
+def load_pack(path: Path | None = None, *, version: int = 1) -> dict[str, Any]:
     """The rule pack document.  ``path=None`` reads the shipped package data."""
-    pack = read_json(path) if path is not None else json.loads(read_pack_text())
-    if pack.get("schema_version") != 1 or pack.get("id") != PACK_ID:
-        raise ValueError("unsupported observation rule pack")
-    for section in ("primitives", "supplementary_primitives", "derived", "rules"):
-        if not isinstance(pack.get(section), list):
-            raise ValueError(f"rule pack section {section!r} must be a list")
-    return pack
+    return _resources.load_pack("observation", version, path=path)
 
 
 def pack_relations(pack: dict[str, Any]) -> list[dict[str, Any]]:
-    relations = [*pack["primitives"], *pack["supplementary_primitives"], *pack["derived"]]
-    names = [relation["name"] for relation in relations]
-    if len(names) != len(set(names)):
-        raise ValueError("rule pack declares a relation twice")
-    for relation in relations:
-        if set(relation) != RELATION_FIELDS:
-            raise ValueError(f"relation {relation.get('name')!r} has unknown or missing fields")
-    return relations
+    return _resources.pack_relations(pack)
 
 
-def pack_bundle(pack: dict[str, Any] | None = None) -> Bundle:
+def pack_bundle(pack: dict[str, Any] | None = None, *, version: int = 1) -> Bundle:
     """The rule pack alone (declarations and rules, no facts) as a validated Bundle."""
-    pack = pack or load_pack()
-    return bundle_from_json({"schema_version": 1, "relations": pack_relations(pack),
-                             "rules": [dict(rule) for rule in pack["rules"]],
-                             "diagnostic_policy": dict(DIAGNOSTIC_POLICY)}, validate=True)
+    return _resources.pack_bundle(load_pack(version=version) if pack is None else pack)
 
 
 __all__ = ["PACK_PATH", "PACK_NAME", "PACK_ID", "DIAGNOSTIC_POLICY", "RELATION_FIELDS",

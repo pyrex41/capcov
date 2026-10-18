@@ -89,6 +89,147 @@
         "tests.test_faults_checker.EngineTest.test_python_and_souffle_agree_on_the_pack",
         "tests.test_faults_checker.EngineTest.test_souffle_reports_the_same_closure_and_claims"
       ]
+    },
+    {
+      "reason": "Needs the native Shen runtime and bifrost. The plain Python image does not carry them; these tests run in the Shen CI family and are not accepted skips in the full toolchain.",
+      "tests": [
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_cli_uses_exit_code_for_disagreement",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_independent_transition_and_outcome_corpus",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_may_write_is_an_upper_bound_not_observed_coverage",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_new_fields_keep_canonical_order",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_order_extra_effect_and_wrong_state_rejected",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_prolog_finds_first_observable_disagreement",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_real_typechecker_and_invalid_data",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_trace_rechecks_and_binds_named_actions",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_transport_unicode_quotes_and_determinism",
+        "tests.claim_semantics.test_operations.NativeOperationTests.test_variant_does_not_authorize_intended_behavior"
+      ]
+    },
+    {
+      "reason": "Needs native Shen and bifrost. These system semantics tests run without skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_certificate_recheck_and_claim_judge",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_cli_returns_nonzero_on_disagreement",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_contextual_type_judgments_and_fuel",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_create_update_authorization_delete_and_preservation",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_external_adapter_passes_and_mutant_fails",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_idempotency_outcomes_and_retry",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_ledger_atomic_arithmetic_and_idempotency_conflicts",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_model_comparison_and_trace_tampering",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_postcondition_conservation_and_integer_overflow",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_schema_constraints_and_invariant_rollback",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_split_workflow_exposes_duplicate_send_after_missing_ack",
+        "tests.claim_semantics.test_systems.NativeSystemTests.test_unknown_workflow_exhausts_declared_choices"
+      ]
+    },
+    {
+      "reason": "Needs native Shen or Souffle; these tests run without accepted skips in the corresponding CI family.",
+      "tests": [
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_safety_reachability_and_antithesis_catalog_emission",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_cli_exit_codes_preserve_open_and_operational_results",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_typed_relation_generates_campaign_calls",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_replay_detects_uncontrolled_state_and_adapter_receives_no_oracle",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_sequent_proofs_and_mutation_rejection",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_search_agrees_with_independent_boolean_truth_tables",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_compiler_proves_updates_but_preserves_open_obligations",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_modes_cardinality_generation_and_capability_consumption",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_mode_branch_outputs_resources_and_numeric_sorts",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_relational_search_reachability_history_and_budget",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_stateful_execution_replay_minimization_and_unknown_choice",
+        "tests.claim_semantics.test_reasoning.NativeReasoningTests.test_full_evidence_to_counterexample_pipeline"
+      ]
+    },
+    {
+      "reason": "Needs native Shen or Souffle; these tests run without accepted skips in the corresponding CI family.",
+      "tests": [
+        "tests.claim_semantics.test_reasoning.SouffleSourceTests.test_transitive_invalidation_agrees_with_python"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_http_model_conformance",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_induction_and_forgery",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_missing_frame_is_not_assumed",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_base_and_safety_fail_independently",
+        "tests.claim_semantics.test_adapters_induction.NativeInductionTests.test_protocol_with_cycles"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_proof_recheck_serialization_and_execution",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_invalid_body_and_unestablished_invariant_stay_open",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_nested_loops",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_forged_missing_and_substituted_obligations",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_snapshot_execution_and_unproved_continuation",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_verification_pipeline_retains_provenance",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_contract_scope_and_names_checked_by_shen",
+        "tests.claim_semantics.test_loop_induction.NativeLoopTests.test_entry_snapshot_and_conjunctive_invariant"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family.",
+      "tests": [
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_completes_all_rows_and_executes",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_filtered_snapshot_and_mutated_selector",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_unselected_rows_need_entry_coverage",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_missing_work_and_stale_restore_rejected",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_cross_row_mutation_and_stateful_selector_open",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_shen_datatype_and_frame_judgments",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_forged_completion_and_frame_rejected",
+        "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_completion_reaches_claim_pipeline"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, gate G1).",
+      "tests": [
+        "tests.test_ir_specification.DraftTypecheckTest.test_an_untagged_effect_is_what_rejects_its_fixture",
+        "tests.test_ir_specification.DraftTypecheckTest.test_draft_fixtures_type_as_specified",
+        "tests.test_ir_specification.DraftTypecheckTest.test_one_result_per_case",
+        "tests.test_ir_specification.DraftTypecheckTest.test_v1_fixtures_still_type_with_the_overlay_loaded"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, gate G5).",
+      "tests": [
+        "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_evaluate_and_explore_output_is_byte_identical",
+        "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_every_golden_comes_from_the_base_libraries",
+        "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_the_cases_are_exactly_the_manifest_and_cover_every_v1_fixture",
+        "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_the_goldens_pin_their_inputs"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, R02 PR 1).",
+      "tests": [
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_bridge_mutants_are_caught",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_claim_export_is_conditional_on_assumptions",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_a_declaring_system_answers_as_its_v1_form",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_every_rejection_label_binds",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_explore_with_r02_outcomes_matches_v1_and_carries_assumptions",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_outcomes_identity_and_assumptions",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_r_assume_refuses_unknown_and_repeated_names",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_r_assume_rejects_the_fixture_and_accepts_its_repair",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_the_bridge_reproduces_every_v1_answer_and_names_its_assumptions"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (derivation pins, declaration templates, typed claim authority).",
+      "tests": [
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_pins_cover_every_case",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_pins_exercise_the_intended_paths",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_search_is_stated_as_horn_clauses",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_search_output_is_byte_identical_to_the_pins",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_compile_records_and_checks_expansion",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_native_disagreement_is_refused",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_native_expander_refuses_independently",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_templated_replay_obligations_trace_every_expansion",
+        "tests.claim_semantics.test_typed_authority.ForgedTypedIRTest.test_mutated_units_are_refused",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_disagreements_are_exactly_the_recorded_set",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_every_supported_pack_is_admitted_by_all_three",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_negative_gates_are_rejected",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_verdicts_have_the_untyped_shape"
+      ]
     }
   ]
 }

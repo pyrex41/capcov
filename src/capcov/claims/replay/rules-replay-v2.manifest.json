@@ -1,0 +1,83 @@
+{
+  "artifacts": {
+    "authority.json": "a6e9aeb5d590ad5c1756465d81b706417f3cbcf1ab1f94bdbc60a32b5a9b2e7c",
+    "bundle.json": "3d97c41115a168d4022bd29f033a89a7bd2d97b3e5f474d8ba83cd020d00f0ae",
+    "obligations.json": "19d319f70c346cc2865d538f6129e7f229f2a4c4287cadd362f8169e17497c5c",
+    "pack.json": "64e6a8eaa2adea7ad17a0077d5fc2f5c391a8332cbac0893e19728f1c6b00202",
+    "rules.dl": "e6db142d80817ff404ca41f5558b550b0d7ab5cacf0325d2a22e04f7b8964c04",
+    "schema.json": "872f963a48609a7c78e12127437072baa3282f82c52f8a13bddcff3e32a968d6",
+    "source-map.json": "1d7a614054d9165ea75ecfe3035431e810de700a5147e7d3865c2c3cf1aba7cd",
+    "stubs.json": "2c03ab47ee0eb36caef3349a5c198c8325debaf0130d969343eaa3a514b5f117"
+  },
+  "bundle_digest": "9f030fda51d02f6297ecf16b08e3cd2ed0a4305c297b8d776d66b07e70f1af47",
+  "bundle_schema_version": 2,
+  "compiler": {
+    "__init__.py": "776b345bb45e10ad4ae0621a482f2f3470156556e55c3c45415742955a878d06",
+    "assumptions.py": "1ba4a3dd23a6fbfc14dd3c10522981dafd4ebb04ee66120fe72048ea87485f65",
+    "authority.py": "f120833f0a4cc8a90dc4c2cf5d32fe50998d2dee569f00b573f8c554bf02b248",
+    "cli.py": "827de5856944dee938a3e95ffc6b0677a8fcfabd62f691b633464655e60382e6",
+    "contracts.py": "5cc4fea418bb3aea8a31dc0ab78667ca35b5594cb52534f4f515637272c7b79a",
+    "differential.py": "98cff639d0e7a4592c627ad43c8fcda5f83b024882beaaee9d04542470c1c9eb",
+    "evaluation_basis.py": "1b21340bc324384450031d346030c971f441c3563c7bb20ec9f6553d004f1d29",
+    "evaluator.py": "a3cc6b5f8719be146613f47b211d3c463b6dd48dcb177b6d8055a3a897855cc8",
+    "ir.py": "2d33f21fbce3cb6f8941564926fd70456530c8acc785e95fb5dfccd53f2dc473",
+    "migration.py": "b1cc51115e9682f88ee797f273b23c4e1a658b96ccdd6dbfea8c15bea649c0ee",
+    "modelcheck.py": "e7f91d3870120affc913c48163d81dea738a3f0f703e1dac93b9f54f5b795c91",
+    "observation/__init__.py": "2d9c057bd189856bad7e6b9fb16952bebc29a6a9dd29ba79fac0b2590c961ad1",
+    "observation/join.py": "fdf975f41d59feeadb22cd19e29a029716528a51d6b136835d33ddd77c6c8acf",
+    "observation/judge.py": "581305c5029da03622bb9ec6c543fc3127cbc22a4898951db09045babf0ad63b",
+    "observation/observation_facts.py": "5e86812d1b459119fb491e197083eff99e23ee3cf2bda77aa192ab7bc8d36fae",
+    "observation/pack.py": "ef1dd98fb7d1d8d128673004933621eca6a97eca4528d6ced722f925dd43365c",
+    "output.py": "f34ccf3d23103bf78a2aafa92d2e4adec0dce23f9bf16a23dac1befc3778be4f",
+    "pack_resources.py": "e1b4b1c3f725d28a30607da06cce2a87e8ed3885915f6cd51371c31db4b378a3",
+    "replay/__init__.py": "3c993ed02908fd8a186cc3f20953808ddf57fcff968029f8d014151b0699a12a",
+    "replay/join.py": "39d962d0dab499876c1ab0c37ff43ae5cf4e9830c10c6e00eae8051030691200",
+    "replay/judge.py": "d48370b70c845ee9095f6a13edc160e9bff01d368b2e2e8e04293141e38d8a7c",
+    "replay/pack.py": "0b4338aaceab5930f7efb2c21de3f74d281c8d0240634ca5823e8e4c66f5ddc6",
+    "replay/replay_facts.py": "d5db44999b71f9c9ac69da3fb38840e75d0bcc3f9cd9ae610801d812b7ff5cf2",
+    "shen.py": "50e3e65a2b53b03ae6999ed3f86095e9aa9cd055959290cd7e5389c463a87f81",
+    "shrinker.py": "f38d4e2526790fdc33cf20e718b4e1b0ae08c7296dc223c0cfbd0dc155fd7ecf",
+    "souffle/__init__.py": "0112ebd8a3a102a09489e5d8d45c59cc994849561863e96a47b19b5dcf120be4",
+    "souffle/compile.py": "ecad961f19c8a696dff26c0c02968a01a501874b21fe94c66fc3b87e162c859b",
+    "spec/__init__.py": "dd09d88fcfa82ee0932de5cc7989789142161d7d44157c9cc0071bc6d9a09ef0",
+    "spec/logic.py": "a91c1db57230e6622fbec1b3b9027e799ad730b28ee0f2f17cd4f136061c49f3",
+    "spec/parser.py": "0163d26fe47015acec8a939aad38464f6b8da6116897cd9ab86d3a39fa5793c9",
+    "spec/templates.py": "9b55031bfa539035c2cd58a1b0f92a3ddda979f991de276c4f0320cb7f6fc0cc",
+    "static/__init__.py": "71066ed580489cb8f6714ef9938244f41277a5708eb05622a21016a20d92850f",
+    "static/certificate.py": "81aedd9bf7dfa01b2fb3167e269a3a2dfaf8332eb7b55875ce31b446a49bd2aa",
+    "static/combine.py": "7709dd55f6ef234ee184c8cc54db6882d26e0957f19acebb29a8a041c36b4e93",
+    "static/ground.py": "20bfef1082174c69a1d52d7c524b29b2cf8c7802e18de4829aa55f02eb056414",
+    "static/pack.py": "470cdd3e8098e02c940f44d980909da8f414648db671f140e2a5493bf4633f67",
+    "static/runtime_relations.py": "e0bf4ad65dfd5ec42d5695e9ea693c50b38a3adb2c4731c47c2b8aa9b3b035c6",
+    "static/scip_facts.py": "17afe94eb54501864a2b1b9321a38bdad950574149e2019abb2d9dd137e75aa9",
+    "validation.py": "29c5513a4b9c4182dc36a58902ef1b0922aad37cc3223ddcd31159d0db64ad65",
+    "verdicts.py": "ec02985fe4bba1d9fb27ea5a9a6f37490e6558fe39bad028be23d0a9919d6c1b"
+  },
+  "format": "capcov-spec-manifest-v1",
+  "language_version": 2,
+  "pack_id": "rules-replay-v2",
+  "runtime": {
+    "implementation": "shen-go",
+    "launcher_sha256": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5",
+    "libraries": {
+      "certificate-output.shen": "b6dbb0c33d73478d431f79ad40833c93ef7ee9f9684141a2b8ddd4d14e0c7f29",
+      "claim-workbench.shen": "ec165e31d9a52fcca92c17e13cfd0aae4afefd52dfa4766c710b898b763e677c",
+      "evidence-authority-v2.shen": "cefee4629c8abb02ce7062b24f4b690ba1aa0f5b0494ed69db98ebfc580a0a2b",
+      "rule-authority.shen": "d57aa87abc03b035f5ae33621a4356ee29cb69089eff94c1a62bd873f2ed4653",
+      "spec-elaborator.shen": "1f03f0c6c5f507790c6d9be5b24a9f6fc46efef8b2c893a566ad8642875d96d3",
+      "spec-templates.shen": "db3a65e88dcf644ceb1cc4dd466468569281822589683fda8f52588deaf6ebb8"
+    },
+    "python": {
+      "implementation": "cpython",
+      "version": [
+        3,
+        14,
+        7
+      ]
+    },
+    "sha256": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba"
+  },
+  "sources": {
+    "replay.claims": "b181fd179bf3520ad6e77b1336a5b988753d65a203267e7892ec56c5ee631061"
+  }
+}

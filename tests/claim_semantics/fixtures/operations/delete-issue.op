@@ -1,0 +1,7 @@
+; Synthetic delete-issue, expressed once as data, never executable source.
+[operation "delete-issue" [live "issue" "state" "active"]
+  [[named "cascade-comments" [delete-related "comment" "issue_id"]]
+   [named "cascade-files" [delete-related "file" "issue_id"]]
+   [named "mark-deleted" [set-target "issue" "state" "deleted"]]
+   [named "statistics" [emit-related "issue_equipment" "issue_id" "equipment_id" "stats-recompute"]]
+   [named "audit" [emit-target "audit:issue-deleted"]]]]

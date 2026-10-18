@@ -1,0 +1,2213 @@
+{
+  "basis": "explicit-bounded-domain",
+  "calls": [
+    {
+      "args": {
+        "amount": "3",
+        "from": "a",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "a",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "a",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "a",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "b",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "b",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "b",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "3",
+        "from": "b",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "a",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "a",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "a",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "a",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "b",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "b",
+        "request": "r",
+        "to": "a"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "b",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "amount": "20",
+        "from": "b",
+        "request": "r",
+        "to": "b"
+      },
+      "command": "transfer",
+      "outcome": "unknown"
+    }
+  ],
+  "depth": 2,
+  "edges": [
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        2
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ],
+        [
+          [
+            "action",
+            "funds",
+            []
+          ],
+          [
+            "action",
+            "debit",
+            [
+              [
+                "put",
+                "wallet",
+                "a",
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "credit",
+            [
+              [
+                "put",
+                "wallet",
+                "b",
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "record",
+            [
+              [
+                "create",
+                "transfer",
+                "r",
+                [
+                  [
+                    "amount",
+                    "3"
+                  ],
+                  [
+                    "from",
+                    "a"
+                  ],
+                  [
+                    "to",
+                    "b"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "action",
+            "notify",
+            [
+              [
+                "emit",
+                "transfer-completed",
+                "r"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        1,
+        2
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ],
+        [
+          [
+            "action",
+            "funds",
+            []
+          ],
+          [
+            "action",
+            "debit",
+            [
+              [
+                "put",
+                "wallet",
+                "a",
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "credit",
+            [
+              [
+                "put",
+                "wallet",
+                "b",
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "record",
+            [
+              [
+                "create",
+                "transfer",
+                "r",
+                [
+                  [
+                    "amount",
+                    "3"
+                  ],
+                  [
+                    "from",
+                    "a"
+                  ],
+                  [
+                    "to",
+                    "b"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "action",
+            "notify",
+            [
+              [
+                "emit",
+                "transfer-completed",
+                "r"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ],
+        [
+          [
+            "action",
+            "funds",
+            []
+          ],
+          [
+            "action",
+            "debit",
+            [
+              [
+                "put",
+                "wallet",
+                "a",
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "credit",
+            [
+              [
+                "put",
+                "wallet",
+                "b",
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "record",
+            [
+              [
+                "create",
+                "transfer",
+                "r",
+                [
+                  [
+                    "amount",
+                    "3"
+                  ],
+                  [
+                    "from",
+                    "a"
+                  ],
+                  [
+                    "to",
+                    "b"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "action",
+            "notify",
+            [
+              [
+                "emit",
+                "transfer-completed",
+                "r"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        3,
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "wallet",
+            "a",
+            "balance",
+            "7"
+          ],
+          [
+            "put",
+            "wallet",
+            "b",
+            "balance",
+            "5"
+          ],
+          [
+            "create",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ],
+          [
+            "emit",
+            "transfer-completed",
+            "r"
+          ]
+        ],
+        [
+          [
+            "action",
+            "funds",
+            []
+          ],
+          [
+            "action",
+            "debit",
+            [
+              [
+                "put",
+                "wallet",
+                "a",
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "credit",
+            [
+              [
+                "put",
+                "wallet",
+                "b",
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "record",
+            [
+              [
+                "create",
+                "transfer",
+                "r",
+                [
+                  [
+                    "amount",
+                    "3"
+                  ],
+                  [
+                    "from",
+                    "a"
+                  ],
+                  [
+                    "to",
+                    "b"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "action",
+            "notify",
+            [
+              [
+                "emit",
+                "transfer-completed",
+                "r"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "insufficient-funds"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [],
+        [
+          [
+            "action",
+            "same-request",
+            []
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        []
+      ],
+      "from": 2,
+      "to": [
+        4,
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "wallet",
+            "a",
+            [
+              [
+                "balance",
+                "7"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "wallet",
+            "b",
+            [
+              [
+                "balance",
+                "5"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "transfer",
+            "r",
+            [
+              [
+                "amount",
+                "3"
+              ],
+              [
+                "from",
+                "a"
+              ],
+              [
+                "to",
+                "b"
+              ]
+            ]
+          ]
+        ],
+        [],
+        [
+          [
+            "action",
+            "same-request",
+            []
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "3",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "a",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "a"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "idempotency-conflict"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "amount": "20",
+          "from": "b",
+          "request": "r",
+          "to": "b"
+        },
+        "command": "transfer",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        4
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    }
+  ],
+  "format": "capcov-system-campaign-v1",
+  "identity": {
+    "fuel": 1024,
+    "libraries": {
+      "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+      "system-types.shen": "4ee4317089b40a5a0b4abbf9c4ebe59d4075f99f3c9519aa6483a39adea4eac6",
+      "system.shen": "ded4508d579c588c6a1e7a25ec15fbabf1ac0e3e5868f50e2855aac3c298ac05"
+    },
+    "model": "7a82ff839e28e8ef7ae932732d820a595006414400bedcc04f200e722dc828e6",
+    "runtime": {
+      "bifrost": "47cd56c8ce537ff4455e665a9b09b71f7d408ee595dccff8111e0bd62d8362dc",
+      "shen": "6382265c8f081de91d92c1ffa5d7806e6205f99fbc01099c6015286f8cd7a4b8"
+    }
+  },
+  "initial": [
+    {
+      "fields": {
+        "balance": "10"
+      },
+      "key": "a",
+      "table": "wallet"
+    },
+    {
+      "fields": {
+        "balance": "2"
+      },
+      "key": "b",
+      "table": "wallet"
+    }
+  ],
+  "invariant_violations": [],
+  "nodes": [
+    {
+      "depth": 0,
+      "id": 0,
+      "state": [
+        {
+          "fields": {
+            "balance": "10"
+          },
+          "key": "a",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "balance": "2"
+          },
+          "key": "b",
+          "table": "wallet"
+        }
+      ],
+      "via": null
+    },
+    {
+      "depth": 1,
+      "id": 1,
+      "state": [
+        {
+          "fields": {
+            "balance": "10"
+          },
+          "key": "a",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "balance": "2"
+          },
+          "key": "b",
+          "table": "wallet"
+        }
+      ],
+      "via": 1
+    },
+    {
+      "depth": 1,
+      "id": 2,
+      "state": [
+        {
+          "fields": {
+            "balance": "7"
+          },
+          "key": "a",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "balance": "5"
+          },
+          "key": "b",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "amount": "3",
+            "from": "a",
+            "to": "b"
+          },
+          "key": "r",
+          "table": "transfer"
+        }
+      ],
+      "via": 2
+    },
+    {
+      "depth": 2,
+      "id": 3,
+      "state": [
+        {
+          "fields": {
+            "balance": "10"
+          },
+          "key": "a",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "balance": "2"
+          },
+          "key": "b",
+          "table": "wallet"
+        }
+      ],
+      "via": 17
+    },
+    {
+      "depth": 2,
+      "id": 4,
+      "state": [
+        {
+          "fields": {
+            "balance": "7"
+          },
+          "key": "a",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "balance": "5"
+          },
+          "key": "b",
+          "table": "wallet"
+        },
+        {
+          "fields": {
+            "amount": "3",
+            "from": "a",
+            "to": "b"
+          },
+          "key": "r",
+          "table": "transfer"
+        }
+      ],
+      "via": 18
+    }
+  ],
+  "rejections": 42,
+  "schedule": null,
+  "shortest_invariant_witness": []
+}

@@ -1,0 +1,11 @@
+// Monotone change-impact closure over explicitly inventoried dependencies.
+.decl cited(claim:symbol, source:symbol)
+.input cited
+.decl depends(child:symbol, parent:symbol)
+.input depends
+.decl changed(source:symbol)
+.input changed
+.decl stale(claim:symbol)
+stale(C) :- cited(C, S), changed(S).
+stale(C) :- depends(C, P), stale(P).
+.output stale
