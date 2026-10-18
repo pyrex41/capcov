@@ -1,0 +1,114 @@
+; R02 draft histories for transfer-outbox.ops-v2: docs/ir-specification.md,
+; section 5, gives each one's admissible sets and verdicts. Grammar: the
+; overlay system-types.shen beside this file. Effect records are
+; [effect Intent Attempt Logical-effect]; an attempt id is the invocation id
+; joined with the step name, and a command's step is "body" (section 4.2).
+; An observation reads stores: [rows Table Drained Rows] for a table,
+; [journal Store Drained From To Parts] for a store's change journal or a
+; channel's delivery journal (a channel has no rows). The first flag of an
+; observation says the reads form one cut (barrier). Positions are the
+; source's own dense sequence.
+; Initial state for H1-H4: job "j" pending with payload "hello", no outbox row.
+
+; H1: send->info; send->ok; ack->ok. Truth: two delivered records for intent
+; j, the second after i2 claimed the in-flight row.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "sent"]]]]]
+    [rows "outbox" true [[row "j" [["payload" "hello"] ["state" "delivered"]]]]]
+    [journal "outbox" true "1" "4"
+     [[entry "1" [effect "j" "i1/record" [create "outbox" "j" [["payload" "hello"] ["state" "pending"]]]]]
+      [entry "2" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "3" [effect "j" "i2/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "4" [effect "j" "i2/settle" [put "outbox" "j" "state" "delivered"]]]]]
+    [journal "delivery-attempt" true "1" "2"
+     [[entry "1" [effect "j" "i1/publish" [emit "delivery-attempt" "hello"]]]
+      [entry "2" [effect "j" "i2/publish" [emit "delivery-attempt" "hello"]]]]]]]
+  [close]]]
+
+; H2: same calls. Truth: one delivered record, attempt i1/publish; i1's
+; response was lost to the client, not to the server.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "sent"]]]]]
+    [rows "outbox" true [[row "j" [["payload" "hello"] ["state" "delivered"]]]]]
+    [journal "outbox" true "1" "3"
+     [[entry "1" [effect "j" "i1/record" [create "outbox" "j" [["payload" "hello"] ["state" "pending"]]]]]
+      [entry "2" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "3" [effect "j" "i1/settle" [put "outbox" "j" "state" "delivered"]]]]]
+    [journal "delivery-attempt" true "1" "1"
+     [[entry "1" [effect "j" "i1/publish" [emit "delivery-attempt" "hello"]]]]]]]
+  [close]]]
+
+; H3: send->info; ack->ok; final read with the outbox and the channel not
+; drained. Attempt i1/publish was claimed (row in-flight) and is not in the
+; channel journal: it may land after the read.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "ack" [["id" "j"]]] [complete "i2" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "sent"]]]]]
+    [rows "outbox" false [[row "j" [["payload" "hello"] ["state" "in-flight"]]]]]
+    [journal "outbox" false "1" "2"
+     [[entry "1" [effect "j" "i1/record" [create "outbox" "j" [["payload" "hello"] ["state" "pending"]]]]]
+      [entry "2" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]]]
+    [journal "delivery-attempt" false "1" "0" []]]]
+  [close]]]
+
+; H3-drained: H3 with every store drained. The attempt is established not
+; landed and nothing of i1 is pending.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "ack" [["id" "j"]]] [complete "i2" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "sent"]]]]]
+    [rows "outbox" true [[row "j" [["payload" "hello"] ["state" "in-flight"]]]]]
+    [journal "outbox" true "1" "2"
+     [[entry "1" [effect "j" "i1/record" [create "outbox" "j" [["payload" "hello"] ["state" "pending"]]]]]
+      [entry "2" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]]]
+    [journal "delivery-attempt" true "1" "0" []]]]
+  [close]]]
+
+; H4: H2 on a shared channel: its journal covers 1-3, entry 1 is i1/publish,
+; and positions 2-3 were not observed.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [invoke "i3" "ack" [["id" "j"]]] [complete "i3" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "sent"]]]]]
+    [rows "outbox" true [[row "j" [["payload" "hello"] ["state" "delivered"]]]]]
+    [journal "outbox" true "1" "3"
+     [[entry "1" [effect "j" "i1/record" [create "outbox" "j" [["payload" "hello"] ["state" "pending"]]]]]
+      [entry "2" [effect "j" "i1/publish" [put "outbox" "j" "state" "in-flight"]]]
+      [entry "3" [effect "j" "i1/settle" [put "outbox" "j" "state" "delivered"]]]]]
+    [journal "delivery-attempt" true "1" "3"
+     [[entry "1" [effect "j" "i1/publish" [emit "delivery-attempt" "hello"]]]
+      [gap "2" "3"]]]]]
+  [close]]]
+
+; H5: transfer a->b 5 under request r1, then the same key with amount 7.
+; Initial state: wallet a balance 10, wallet b balance 0.
+[history
+ [[open]
+  [invoke "i1" "transfer" [["amount" "5"] ["from" "a"] ["request" "r1"] ["to" "b"]]] [complete "i1" [ok]]
+  [invoke "i2" "transfer" [["amount" "7"] ["from" "a"] ["request" "r1"] ["to" "b"]]]
+  [complete "i2" [fail [rejected "idempotency-conflict"]]]
+  [observation true
+   [[rows "wallet" true [[row "a" [["balance" "5"]]] [row "b" [["balance" "5"]]]]]
+    [rows "transfer" true [[row "r1" [["amount" "5"] ["from" "a"] ["to" "b"]]]]]
+    [rows "transfer-outbox" true [[row "r1" [["payload" "r1"] ["state" "delivered"]]]]]
+    [journal "transfer-completed" true "1" "1"
+     [[entry "1" [effect "r1" "i1/notify-deliver" [emit "transfer-completed" "r1"]]]]]]]
+  [close]]]
