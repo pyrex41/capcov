@@ -1,0 +1,3539 @@
+{
+  "basis": "explicit-bounded-domain",
+  "calls": [
+    {
+      "args": {
+        "id": "j",
+        "payload": "hello"
+      },
+      "command": "enqueue",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "j",
+        "payload": "hello"
+      },
+      "command": "enqueue",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "id": "k",
+        "payload": "hello"
+      },
+      "command": "enqueue",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "k",
+        "payload": "hello"
+      },
+      "command": "enqueue",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "id": "j"
+      },
+      "command": "send",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "j"
+      },
+      "command": "send",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "id": "k"
+      },
+      "command": "send",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "k"
+      },
+      "command": "send",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "id": "j"
+      },
+      "command": "ack",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "j"
+      },
+      "command": "ack",
+      "outcome": "unknown"
+    },
+    {
+      "args": {
+        "id": "k"
+      },
+      "command": "ack",
+      "outcome": "committed"
+    },
+    {
+      "args": {
+        "id": "k"
+      },
+      "command": "ack",
+      "outcome": "unknown"
+    }
+  ],
+  "depth": 2,
+  "edges": [
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        2
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        1,
+        2
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        1,
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        1,
+        4
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 0,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        5
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        6
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        5,
+        6
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        7
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        5,
+        7
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        5
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        5,
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 1,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 1,
+      "to": [
+        5
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        6
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 2,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 2,
+      "to": [
+        6
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        9
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        6,
+        9
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        10
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "k",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "attempted"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        6,
+        10
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "attempted"
+          ]
+        ],
+        [
+          [
+            "action",
+            "send",
+            [
+              [
+                "emit",
+                "delivery-attempt",
+                "hello"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "mark",
+            [
+              [
+                "put",
+                "job",
+                "k",
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        11
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        6,
+        11
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        12
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "k",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        6,
+        12
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "k",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "k",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 3,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 3,
+      "to": [
+        7
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 3,
+      "to": [
+        9
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 3,
+      "to": [
+        7,
+        9
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [
+        []
+      ],
+      "from": 3,
+      "to": [
+        7
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [],
+        []
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        []
+      ],
+      "from": 3,
+      "to": [
+        7,
+        7
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "attempted"
+              ]
+            ]
+          ]
+        ],
+        [],
+        []
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 3,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 3,
+      "to": [
+        7
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 3,
+      "to": [
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 3,
+      "to": [
+        7,
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 3,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 3,
+      "to": [
+        7
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 4,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 4,
+      "to": [
+        8
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 4,
+      "to": [
+        11
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k",
+          "payload": "hello"
+        },
+        "command": "enqueue",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ]
+      ],
+      "from": 4,
+      "to": [
+        8,
+        11
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "create",
+            "job",
+            "k",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "pending"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "action",
+            "enqueue",
+            [
+              [
+                "create",
+                "job",
+                "k",
+                [
+                  [
+                    "payload",
+                    "hello"
+                  ],
+                  [
+                    "status",
+                    "pending"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 4,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 4,
+      "to": [
+        8
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 4,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "send",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 4,
+      "to": [
+        8
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 4,
+      "to": [
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "j"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ]
+      ],
+      "from": 4,
+      "to": [
+        8,
+        8
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "job",
+            "j",
+            [
+              [
+                "payload",
+                "hello"
+              ],
+              [
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "job",
+            "j",
+            "status",
+            "sent"
+          ]
+        ],
+        [
+          [
+            "action",
+            "ack",
+            [
+              [
+                "put",
+                "job",
+                "j",
+                "status",
+                "sent"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "committed"
+      },
+      "effects": [],
+      "from": 4,
+      "to": [],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    },
+    {
+      "call": {
+        "args": {
+          "id": "k"
+        },
+        "command": "ack",
+        "outcome": "unknown"
+      },
+      "effects": [
+        []
+      ],
+      "from": 4,
+      "to": [
+        8
+      ],
+      "transition": [
+        "rejected",
+        "precondition"
+      ]
+    }
+  ],
+  "format": "capcov-system-campaign-v1",
+  "identity": {
+    "fuel": 1024,
+    "libraries": {
+      "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+      "system-types.shen": "4ee4317089b40a5a0b4abbf9c4ebe59d4075f99f3c9519aa6483a39adea4eac6",
+      "system.shen": "ded4508d579c588c6a1e7a25ec15fbabf1ac0e3e5868f50e2855aac3c298ac05"
+    },
+    "model": "d16ace4dc893963020f0336b902c7bafde34b87bc56fd3b33e63c20693bd1f78",
+    "runtime": {
+      "bifrost": "47cd56c8ce537ff4455e665a9b09b71f7d408ee595dccff8111e0bd62d8362dc",
+      "shen": "6382265c8f081de91d92c1ffa5d7806e6205f99fbc01099c6015286f8cd7a4b8"
+    }
+  },
+  "initial": [
+    {
+      "fields": {
+        "payload": "hello",
+        "status": "pending"
+      },
+      "key": "j",
+      "table": "job"
+    }
+  ],
+  "invariant_violations": [],
+  "nodes": [
+    {
+      "depth": 0,
+      "id": 0,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": null
+    },
+    {
+      "depth": 1,
+      "id": 1,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 1
+    },
+    {
+      "depth": 1,
+      "id": 2,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 2
+    },
+    {
+      "depth": 1,
+      "id": 3,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "attempted"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 4
+    },
+    {
+      "depth": 1,
+      "id": 4,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "sent"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 8
+    },
+    {
+      "depth": 2,
+      "id": 5,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 13
+    },
+    {
+      "depth": 2,
+      "id": 6,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 14
+    },
+    {
+      "depth": 2,
+      "id": 7,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "attempted"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 16
+    },
+    {
+      "depth": 2,
+      "id": 8,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "sent"
+          },
+          "key": "j",
+          "table": "job"
+        }
+      ],
+      "via": 20
+    },
+    {
+      "depth": 2,
+      "id": 9,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "attempted"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 28
+    },
+    {
+      "depth": 2,
+      "id": 10,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "attempted"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 30
+    },
+    {
+      "depth": 2,
+      "id": 11,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "sent"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 32
+    },
+    {
+      "depth": 2,
+      "id": 12,
+      "state": [
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "pending"
+          },
+          "key": "j",
+          "table": "job"
+        },
+        {
+          "fields": {
+            "payload": "hello",
+            "status": "sent"
+          },
+          "key": "k",
+          "table": "job"
+        }
+      ],
+      "via": 34
+    }
+  ],
+  "rejections": 30,
+  "schedule": null,
+  "shortest_invariant_witness": []
+}

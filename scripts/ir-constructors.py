@@ -10,7 +10,7 @@ Each generated region of the document names the .shen file it is generated from:
 Every typing rule of every (datatype ...) in that file becomes one table row:
 the datatype, the conclusion, the premises, the side condition, the source line,
 and whether capcov.operations.system accepts the conclusion's head tag today
-(its SYSTEM_TAGS). Nothing in a region is written by hand.
+(its SYSTEM_TAGS or REQUEST_TAGS). Nothing in a region is written by hand.
 
 Usage: python scripts/ir-constructors.py [--check] [--doc FILE]
 
@@ -152,16 +152,24 @@ def tags(source: str) -> set[str]:
 
 
 def system_tags(path: Path = SYSTEM_PY) -> frozenset[str]:
-    """SYSTEM_TAGS of capcov.operations.system, read from its source without importing it."""
+    """Tags capcov.operations.system accepts, read from its source without importing it.
+
+    SYSTEM_TAGS (model syntax) and, when present, REQUEST_TAGS (the outcome
+    and effect-record tags a request carries, R02 PR 1).
+    """
     tree = ast.parse(path.read_text(encoding="utf-8"))
+    found: dict[str, frozenset[str]] = {}
     for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(t, ast.Name) and t.id == "SYSTEM_TAGS" for t in node.targets
-        ):
-            for inner in ast.walk(node.value):
-                if isinstance(inner, ast.Constant) and isinstance(inner.value, str):
-                    return frozenset(inner.value.split())
-    raise DatatypeError(f"{path}: SYSTEM_TAGS not found")
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in ("SYSTEM_TAGS", "REQUEST_TAGS"):
+                    for inner in ast.walk(node.value):
+                        if isinstance(inner, ast.Constant) and isinstance(inner.value, str):
+                            found[target.id] = frozenset(inner.value.split())
+                            break
+    if "SYSTEM_TAGS" not in found:
+        raise DatatypeError(f"{path}: SYSTEM_TAGS not found")
+    return found["SYSTEM_TAGS"] | found.get("REQUEST_TAGS", frozenset())
 
 
 def _cell(text: str) -> str:

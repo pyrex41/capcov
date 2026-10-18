@@ -37,7 +37,7 @@ import tempfile
 import unittest
 
 from capcov.faults.history import Result
-from capcov.operations import OperationError
+from capcov.operations import OperationError, _string
 from capcov.operations.scenarios import _payload
 from capcov.operations.system import _effect_terms, _request, _term, digest
 
@@ -533,21 +533,30 @@ class InexpressibleFrontEndTests(IRGapCase):
             _request(dict(call("send", Result.INFO), state=INITIAL, observed=gap), 1024)
 
     def given_effects_carry_intent_and_attempt_identity(self):
-        return _effect_terms([EMIT])
+        return _effect_terms([EMIT], identified=False)
 
-    @unittest.expectedFailure
     def test_effects_carry_intent_and_attempt_identity(self):
         """Effects must carry (intent-id, attempt-id, logical-effect).
 
-        Missing: effect identity. An effect is [emit Kind Value] /
-        [put T K F V] / [create ...] / [delete T K] with fixed arity
-        (system.py:100-104; produced by system.shen:67 for publish). So a
-        duplicate can only be "two equal payloads" (plan §2.2), not "two
-        delivered attempts of one intent". Flips when _effect_terms accepts an
-        emit carrying intent and attempt ids.
+        Was missing: effect identity. An effect was [emit Kind Value] /
+        [put T K F V] / [create ...] / [delete T K] with fixed arity, so a
+        duplicate could only be "two equal payloads" (plan §2.2), not "two
+        delivered attempts of one intent". Flipped by R02 PR 1: the effect
+        record [effect I A L] (docs/ir-specification.md section 4.2, in the
+        spec's shape, not a fourth emit element). The ids survive into the
+        Shen term; two records of one logical effect under different attempts
+        stay distinct, and a record without its ids is refused.
         """
+        record = ["effect", "j", "i1/publish", EMIT]
         with self.ir_gap("no intent/attempt identity on effects"):
-            _effect_terms([EMIT + [{"intent": "j", "attempt": "1"}]])
+            term = _effect_terms([record], identified=True)
+            other = _effect_terms([["effect", "j", "i2/publish", EMIT]], identified=True)
+        intent, attempt = _string("j"), _string("i1/publish")
+        self.assertEqual(term, f"[[effect {intent} {attempt} {self.given[1:-1]}]]")
+        self.assertNotEqual(term, other)
+        self.assertNotEqual(term, self.given)
+        with self.assertRaises(OperationError):
+            _effect_terms([["effect", "j", EMIT]], identified=True)
 
     def given_outbox_record_and_delivery_attempt_are_separate_constructors(self):
         return _term(INTENDED)
@@ -1026,8 +1035,12 @@ class InexpressibleModelTests(ModelMixin, IRGapCase):
         job k never, and at_most_once can only count by the payload fallback
         (identity()). The payload-dedupe mutant that drops a delivery IS
         caught (test_m2_payload_dedupe_leaves_an_unsettled_effect) only
-        because the count falls. Flips when the intended model's two delivery
-        effects differ by an intent id; at_most_once then counts per intent.
+        because the count falls. Flips with R02 PR 2 on the R02 model
+        (docs/ir-specification.md section 8): its two delivery effects carry
+        intents equal to the job ids j and k; at_most_once then counts per
+        intent. Through the PR 1 bridge, outbox-intended.ops effects would
+        differ by intent = invocation id, which is not intent identity, so the
+        flipping PR asserts the intents equal the job ids.
         """
         first, second = self.given
         self.assertNotEqual(
@@ -1051,12 +1064,14 @@ class InexpressibleModelTests(ModelMixin, IRGapCase):
     def test_m4_adapter_that_normalizes_effects_to_a_set_is_rejected(self):
         """M4: an adapter that reports effects as a set hides M1.
 
-        Missing: attempt identity. Two delivery attempts are equal tuples
-        [emit delivery-attempt hello] (system.py:100-104), so set
-        normalization collapses them and the observation matches the model
-        (caps.accepts?, system.shen:168-169). With per-attempt ids they would
-        stay distinct and the normalized report would be refused. Flips when
-        the set-normalized report of the double delivery mismatches.
+        Missing: journal positions. Two delivery landings are equal tuples
+        [emit delivery-attempt hello], so set normalization collapses them and
+        the observation matches the model (caps.accepts?). Attempt identity
+        does not separate them: both landings of the fake mutant are one
+        attempt (i1/body). Per docs/ir-specification.md section 4.5 O4 they
+        stay distinct by journal position, and only when the harness takes
+        the range from the source. Flips with R02 PR 5, when the
+        set-normalized report of the double delivery is not judged a match.
         """
         from capcov.operations.scenarios import run_scenario
 

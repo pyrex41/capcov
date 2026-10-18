@@ -1,0 +1,765 @@
+{
+  "basis": "explicit-bounded-domain",
+  "calls": [
+    {
+      "args": {},
+      "command": "close-all",
+      "outcome": "committed"
+    },
+    {
+      "args": {},
+      "command": "close-all",
+      "outcome": "unknown"
+    }
+  ],
+  "depth": 2,
+  "edges": [
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        1
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 0,
+      "to": [
+        2,
+        1
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 1,
+      "to": [
+        3,
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "committed"
+      },
+      "effects": [
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "call": {
+        "args": {},
+        "command": "close-all",
+        "outcome": "unknown"
+      },
+      "effects": [
+        [],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ]
+      ],
+      "from": 2,
+      "to": [
+        4,
+        3
+      ],
+      "transition": [
+        "result",
+        [
+          [
+            "row",
+            "item",
+            "x",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "row",
+            "item",
+            "y",
+            [
+              [
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "put",
+            "item",
+            "x",
+            "status",
+            "closed"
+          ],
+          [
+            "put",
+            "item",
+            "y",
+            "status",
+            "closed"
+          ]
+        ],
+        [
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "x",
+                "status",
+                "closed"
+              ]
+            ]
+          ],
+          [
+            "action",
+            "close",
+            [
+              [
+                "put",
+                "item",
+                "y",
+                "status",
+                "closed"
+              ]
+            ]
+          ]
+        ]
+      ]
+    }
+  ],
+  "format": "capcov-system-campaign-v1",
+  "identity": {
+    "fuel": 1024,
+    "libraries": {
+      "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+      "system-types.shen": "4ee4317089b40a5a0b4abbf9c4ebe59d4075f99f3c9519aa6483a39adea4eac6",
+      "system.shen": "ded4508d579c588c6a1e7a25ec15fbabf1ac0e3e5868f50e2855aac3c298ac05"
+    },
+    "model": "9365004ed55befe28bf5e7d87f3555bc0243377fec270b9823bd55528a4dcdc4",
+    "runtime": {
+      "bifrost": "47cd56c8ce537ff4455e665a9b09b71f7d408ee595dccff8111e0bd62d8362dc",
+      "shen": "6382265c8f081de91d92c1ffa5d7806e6205f99fbc01099c6015286f8cd7a4b8"
+    }
+  },
+  "initial": [
+    {
+      "fields": {
+        "status": "open"
+      },
+      "key": "x",
+      "table": "item"
+    },
+    {
+      "fields": {
+        "status": "closed"
+      },
+      "key": "y",
+      "table": "item"
+    }
+  ],
+  "invariant_violations": [],
+  "nodes": [
+    {
+      "depth": 0,
+      "id": 0,
+      "state": [
+        {
+          "fields": {
+            "status": "open"
+          },
+          "key": "x",
+          "table": "item"
+        },
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "y",
+          "table": "item"
+        }
+      ],
+      "via": null
+    },
+    {
+      "depth": 1,
+      "id": 1,
+      "state": [
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "x",
+          "table": "item"
+        },
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "y",
+          "table": "item"
+        }
+      ],
+      "via": 0
+    },
+    {
+      "depth": 1,
+      "id": 2,
+      "state": [
+        {
+          "fields": {
+            "status": "open"
+          },
+          "key": "x",
+          "table": "item"
+        },
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "y",
+          "table": "item"
+        }
+      ],
+      "via": 1
+    },
+    {
+      "depth": 2,
+      "id": 3,
+      "state": [
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "x",
+          "table": "item"
+        },
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "y",
+          "table": "item"
+        }
+      ],
+      "via": 2
+    },
+    {
+      "depth": 2,
+      "id": 4,
+      "state": [
+        {
+          "fields": {
+            "status": "open"
+          },
+          "key": "x",
+          "table": "item"
+        },
+        {
+          "fields": {
+            "status": "closed"
+          },
+          "key": "y",
+          "table": "item"
+        }
+      ],
+      "via": 5
+    }
+  ],
+  "rejections": 0,
+  "schedule": null,
+  "shortest_invariant_witness": []
+}
