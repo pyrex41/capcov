@@ -55,6 +55,8 @@
     "tests.claim_semantics.test_loop_completion.NativeCompletionTests",
     "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest",
     "tests.claim_semantics.test_spec_templates.NativeTemplateTests",
+    "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest",
+    "tests.claim_semantics.test_typed_authority.ForgedTypedIRTest",
     "tests.claim_semantics.test_migration_probe.MigrationProbeModelTests",
     "tests.claim_semantics.test_migration_probe.InexpressibleModelTests",
     "tests.test_ir_specification.DraftTypecheckTest",

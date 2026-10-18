@@ -212,6 +212,24 @@
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_r_assume_rejects_the_fixture_and_accepts_its_repair",
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_the_bridge_reproduces_every_v1_answer_and_names_its_assumptions"
       ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (derivation pins, declaration templates, typed claim authority).",
+      "tests": [
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_pins_cover_every_case",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_pins_exercise_the_intended_paths",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_search_is_stated_as_horn_clauses",
+        "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest.test_search_output_is_byte_identical_to_the_pins",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_compile_records_and_checks_expansion",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_native_disagreement_is_refused",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_native_expander_refuses_independently",
+        "tests.claim_semantics.test_spec_templates.NativeTemplateTests.test_templated_replay_obligations_trace_every_expansion",
+        "tests.claim_semantics.test_typed_authority.ForgedTypedIRTest.test_mutated_units_are_refused",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_disagreements_are_exactly_the_recorded_set",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_every_supported_pack_is_admitted_by_all_three",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_negative_gates_are_rejected",
+        "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_verdicts_have_the_untyped_shape"
+      ]
     }
   ]
 }
