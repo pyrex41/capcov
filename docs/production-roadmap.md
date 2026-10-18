@@ -42,7 +42,9 @@ repository. The existing specifications are valuable input, not presumed truth.
 | History induction | Explicit Boolean transition systems | pending R01 | Derive/check abstraction from concrete operations; wider state theories |
 | Loop invariants | Initiation, preservation, continuation; nested invariant loops | pending R01 | Stronger relational invariants and compiler-refinement evidence |
 | Loop completion | Processed/remaining partition rule for row-local, current-key updates | pending R01 | Cross-key writes, insert/delete, nested completion and global selectors |
-| Typing | Operation/model datatypes; completion formula/context/judgment datatypes | pending R01 | Typed claim elaboration and authority judgments; checker-function typing is separate |
+| Typing | Operation/model datatypes; completion formula/context/judgment datatypes; typed claim authority deciding v2 packs with `shen.typecheck`, differential against the Python and untyped Shen checkers, disagreements recorded | pending R01 | Typed claim elaboration over checked contract rules (R04/R06); checker-function typing is separate |
+| Behavior IR | R02 PR 1: outcomes `ok`/`fail`/`info`, effect records with intent and attempt identity, named assumptions with R-ASSUME, the v1 bridge with byte-identical v1 output (gate G5), assumption-conditional claim export; draft overlay and fixtures for PRs 2 to 5 | pending R01 | Operations, outbox and delivery, channels with R-INTENT-DISJOINT, `info` alternatives, histories and observations (IR spec section 8) |
+| Migration probe | Worked outbox migration model and decision record on the v1 IR; IR gaps as expected failures mapped to the R02 PRs that flip them | pending R01 | Retarget each gap test to the R02 model as its PR lands |
 | Evidence | Source anchors, identities, dependency invalidation, claim distinctions; readable observation and static claim specifications elaborated to schema-2 bundles under v2 authority (v1 remains the default profile) | pending R01 | Full route inventory, richer producers, durable lineage and admission policy |
 | Soufflé | Existing translation, compiled cache and differential closure checks; `operations/evidence.dl` source-evidence invalidation closure | pending R01 | Current full validation, extended relation schemas and dependency maintenance |
 | Relational search | Finite Shen Prolog DSL with modes, cardinalities and affine capabilities | pending R01 | Better model integration, scoped symbolic generation and search guidance |
@@ -710,19 +712,52 @@ Executors name what an exit artifact executes:
 
 <!-- end generated: roadmap-deps -->
 
-**Immediate next work**, in order:
+**Where the sequence stands.** Status as of the merge of this branch into `main`:
 
-1. Documentation correction: this dependency data, the glossary and the
-   provenance columns of section 2.
-2. R01 validation report: the pinned flake matrix on the current head, reported
-   per family. An unexecuted family is an unresolved gate, not a pass.
-3. Worked migration model on the current IR: the R10 histories as fixtures with
-   `model`/`fake` executors. Cases the current IR cannot express are checked in
-   as expected failures with a written reason.
-4. Concrete IR specification, driven by those fixtures: indeterminate outcomes,
-   intent/attempt identity, outbox record versus delivery, and the `.ops`
-   compatibility mapping. It is the review gate for R02.
-5. R02, with R03 as a coordinated schema increment, then the table's order.
+1. Done: documentation correction. This dependency data, the glossary and the
+   provenance columns of section 2 (PR #2).
+2. Done: R01 validation report. [`docs/validation/7b18a97.md`](validation/7b18a97.md)
+   records the first baseline and its failures F1 to F3. F1 and F2 are fixed.
+   The rerun at the head merged into `main` is the R01 report named in
+   section 2.
+3. Done: worked migration model on the current IR (PR #3,
+   `tests/claim_semantics/test_migration_probe.py`). Cases the current IR cannot
+   express are expected failures; each flips with the R02 PR named in
+   [ir-specification.md](ir-specification.md) section 8.
+4. Done: concrete IR specification (PR #4, [ir-specification.md](ir-specification.md)),
+   the review gate for R02. Gate G1 is met. Open question 6, the intent
+   namespace, is decided (PR #14, R-INTENT-DISJOINT).
+5. In progress: R02. PR 1 is merged (PR #6): outcomes, effect records, named
+   assumptions, R-ASSUME and the v1 bridge. Exported claims are conditional on
+   their assumptions. PRs 2 to 5 follow the specification's section 8. PR 2
+   must also stop a v1-shape system from carrying channels or operations.
+
+Two attributions follow from what has landed:
+
+* **R02 and R03 split the outcomes.** R02 PR 1 put the outcome terms
+  (`ok`, `fail`, `info`) and effect records into the IR. R03's
+  `cap.outcome-vocabulary` is the shared vocabulary across artifacts
+  (envelopes, mappings, decision records) built on those terms. It is not a
+  second definition.
+* **R06 started ahead of R04.** The typed claim authority (`75c51d8`, with
+  [typed-claim-authority.md](typed-claim-authority.md)) is a first increment
+  of R06. It decides existing claim packs with the Shen type checker. Its
+  remaining gate, differential admission over checked contract rules, still
+  needs R04.
+
+R08 and the R19 inventory have no unmet dependency and nobody on them yet.
+
+**Open issues and where they land:**
+
+| Issue | Lands in | Note |
+| --- | --- | --- |
+| [#7](https://github.com/pyrex41/capcov/issues/7) Converge the shenlogic behavioral calculus | R02, R04, R06 | Cross-cutting; ideas are absorbed per change, not ported wholesale |
+| [#8](https://github.com/pyrex41/capcov/issues/8) Typed retry safety | R04, retry syntax per IR spec section 12 | Keyed by the intent namespace decided in PR #14 |
+| [#9](https://github.com/pyrex41/capcov/issues/9) Affine preservation | Precursor to R12 | Does not by itself remove R10q's dependency on R12 |
+| [#10](https://github.com/pyrex41/capcov/issues/10) Decision-record schema | R03 (`cap.decision-identity`), consumed by R10 | Starts from the probe's `outbox-migration-decision.json` |
+| [#11](https://github.com/pyrex41/capcov/issues/11) Outbox sender as first R10q target | R10q gate | R19 qualification conditions stay separate |
+| [#12](https://github.com/pyrex41/capcov/issues/12) Refuse evidence pins not in history | R03, applied to R01 reports | Merge with merge commits until it lands |
+| [#13](https://github.com/pyrex41/capcov/issues/13) Runtime identity by derivation | R01 (cross-platform reruns), R03 | Manifests pin a Linux-Nix `runtime.sha256` today |
 
 Changes outside each other's dependency closure proceed alongside. R10 is the
 first complete behavioral migration loop on model/fake executors; R10q
