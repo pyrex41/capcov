@@ -51,8 +51,9 @@ jobs:
           - { family: souffle, shard: 1/3 }
           - { family: souffle, shard: 2/3 }
           - { family: souffle, shard: 3/3 }
-          - { family: shen, shard: 1/2 }
-          - { family: shen, shard: 2/2 }
+          - { family: shen, shard: 1/3 }
+          - { family: shen, shard: 2/3 }
+          - { family: shen, shard: 3/3 }
           - { family: indexers, shard: 1/1 }
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
