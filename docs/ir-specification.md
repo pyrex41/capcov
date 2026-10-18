@@ -163,35 +163,36 @@ transaction, and an unknown outcome resolves in place (section 7 names them).
 | Datatype | Conclusion | Premises | Side condition | Line | `system.py` accepts tag |
 |---|---|---|---|---|---|
 | `caps-intent` | `[intent X] : caps-intent` | `X : caps-expr` | — | 23 | no |
-| `caps-action-outbox` | `[outbox T I V] : caps-action` | `T : string`; `I : caps-intent`; `V : caps-expr` | — | 29 | no |
-| `caps-contract` | `[at-most-once] : caps-contract` | — | — | 35 | no |
-| `caps-contract` | `[at-least-once] : caps-contract` | — | — | 37 | no |
-| `caps-table-channel` | `[channel Kind C T] : caps-table` | `Kind : string`; `C : caps-contract`; `T : string` | — | 42 | no |
-| `caps-step` | `[transaction N As] : caps-step` | `N : string`; `As : caps-actions` | — | 49 | no |
-| `caps-step` | `[deliver N T I [on-ok Ok] [on-fail Fail] [on-info Info]] : caps-step` | `N : string`; `T : string`; `I : caps-intent`; `Ok : caps-steps`; `Fail : caps-steps`; `Info : caps-steps` | — | 52 | no |
-| `caps-steps` | `[] : caps-steps` | — | — | 56 | — |
-| `caps-steps` | `(cons X Xs) : caps-steps` | `X : caps-step`; `Xs : caps-steps` | — | 59 | — |
-| `caps-operation` | `[operation N Args I Pre Ss Post] : caps-operation` | `N : string`; `Args : (list string)`; `I : caps-intent`; `Pre : caps-pred`; `Ss : caps-steps`; `Post : caps-pred` | — | 66 | no |
-| `caps-commands-operation` | `(cons X Xs) : caps-commands` | `X : caps-operation`; `Xs : caps-commands` | — | 71 | — |
-| `caps-event` | `[open] : caps-event` | — | — | 76 | no |
-| `caps-event` | `[invoke Inv Op Args] : caps-event` | `Inv : string`; `Op : string`; `Args : caps-values` | — | 79 | no |
-| `caps-event` | `[complete Inv O] : caps-event` | `Inv : string`; `O : caps-outcome` | — | 82 | no |
-| `caps-event` | `[close] : caps-event` | — | — | 84 | no |
-| `caps-history` | `[history Es] : caps-history` | `Es : caps-events` | — | 89 | no |
-| `caps-event-observation` | `[observation B Rs] : caps-event` | `B : boolean`; `Rs : caps-reads` | — | 96 | no |
-| `caps-read` | `[rows T D Rows] : caps-read` | `T : string`; `D : boolean`; `Rows : caps-rows` | — | 101 | no |
-| `caps-read` | `[journal S D From To Ps] : caps-read` | `S : string`; `D : boolean`; `From : string`; `To : string`; `Ps : caps-journal-parts` | — | 104 | no |
-| `caps-row` | `[row K Fs] : caps-row` | `K : string`; `Fs : caps-values` | — | 109 | no |
-| `caps-journal-part` | `[entry Seq E] : caps-journal-part` | `Seq : string`; `E : caps-effect` | — | 114 | no |
-| `caps-journal-part` | `[gap From To] : caps-journal-part` | `From : string`; `To : string` | — | 117 | no |
-| `caps-events` | `[] : caps-events` | — | — | 121 | — |
-| `caps-events` | `(cons X Xs) : caps-events` | `X : caps-event`; `Xs : caps-events` | — | 124 | — |
-| `caps-reads` | `[] : caps-reads` | — | — | 128 | — |
-| `caps-reads` | `(cons X Xs) : caps-reads` | `X : caps-read`; `Xs : caps-reads` | — | 131 | — |
-| `caps-rows` | `[] : caps-rows` | — | — | 135 | — |
-| `caps-rows` | `(cons X Xs) : caps-rows` | `X : caps-row`; `Xs : caps-rows` | — | 138 | — |
-| `caps-journal-parts` | `[] : caps-journal-parts` | — | — | 142 | — |
-| `caps-journal-parts` | `(cons X Xs) : caps-journal-parts` | `X : caps-journal-part`; `Xs : caps-journal-parts` | — | 145 | — |
+| `caps-intent-key` | `[intent [key X \| Xs]] : caps-intent` | `X : caps-expr`; `Xs : (list caps-expr)` | — | 31 | no |
+| `caps-action-outbox` | `[outbox T I V] : caps-action` | `T : string`; `I : caps-intent`; `V : caps-expr` | — | 37 | no |
+| `caps-contract` | `[at-most-once] : caps-contract` | — | — | 43 | no |
+| `caps-contract` | `[at-least-once] : caps-contract` | — | — | 45 | no |
+| `caps-table-channel` | `[channel Kind C T] : caps-table` | `Kind : string`; `C : caps-contract`; `T : string` | — | 50 | no |
+| `caps-step` | `[transaction N As] : caps-step` | `N : string`; `As : caps-actions` | — | 57 | no |
+| `caps-step` | `[deliver N T I [on-ok Ok] [on-fail Fail] [on-info Info]] : caps-step` | `N : string`; `T : string`; `I : caps-intent`; `Ok : caps-steps`; `Fail : caps-steps`; `Info : caps-steps` | — | 60 | no |
+| `caps-steps` | `[] : caps-steps` | — | — | 64 | — |
+| `caps-steps` | `(cons X Xs) : caps-steps` | `X : caps-step`; `Xs : caps-steps` | — | 67 | — |
+| `caps-operation` | `[operation N Args I Pre Ss Post] : caps-operation` | `N : string`; `Args : (list string)`; `I : caps-intent`; `Pre : caps-pred`; `Ss : caps-steps`; `Post : caps-pred` | — | 74 | no |
+| `caps-commands-operation` | `(cons X Xs) : caps-commands` | `X : caps-operation`; `Xs : caps-commands` | — | 79 | — |
+| `caps-event` | `[open] : caps-event` | — | — | 84 | no |
+| `caps-event` | `[invoke Inv Op Args] : caps-event` | `Inv : string`; `Op : string`; `Args : caps-values` | — | 87 | no |
+| `caps-event` | `[complete Inv O] : caps-event` | `Inv : string`; `O : caps-outcome` | — | 90 | no |
+| `caps-event` | `[close] : caps-event` | — | — | 92 | no |
+| `caps-history` | `[history Es] : caps-history` | `Es : caps-events` | — | 97 | no |
+| `caps-event-observation` | `[observation B Rs] : caps-event` | `B : boolean`; `Rs : caps-reads` | — | 104 | no |
+| `caps-read` | `[rows T D Rows] : caps-read` | `T : string`; `D : boolean`; `Rows : caps-rows` | — | 109 | no |
+| `caps-read` | `[journal S D From To Ps] : caps-read` | `S : string`; `D : boolean`; `From : string`; `To : string`; `Ps : caps-journal-parts` | — | 112 | no |
+| `caps-row` | `[row K Fs] : caps-row` | `K : string`; `Fs : caps-values` | — | 117 | no |
+| `caps-journal-part` | `[entry Seq E] : caps-journal-part` | `Seq : string`; `E : caps-effect` | — | 122 | no |
+| `caps-journal-part` | `[gap From To] : caps-journal-part` | `From : string`; `To : string` | — | 125 | no |
+| `caps-events` | `[] : caps-events` | — | — | 129 | — |
+| `caps-events` | `(cons X Xs) : caps-events` | `X : caps-event`; `Xs : caps-events` | — | 132 | — |
+| `caps-reads` | `[] : caps-reads` | — | — | 136 | — |
+| `caps-reads` | `(cons X Xs) : caps-reads` | `X : caps-read`; `Xs : caps-reads` | — | 139 | — |
+| `caps-rows` | `[] : caps-rows` | — | — | 143 | — |
+| `caps-rows` | `(cons X Xs) : caps-rows` | `X : caps-row`; `Xs : caps-rows` | — | 146 | — |
+| `caps-journal-parts` | `[] : caps-journal-parts` | — | — | 150 | — |
+| `caps-journal-parts` | `(cons X Xs) : caps-journal-parts` | `X : caps-journal-part`; `Xs : caps-journal-parts` | — | 153 | — |
 <!-- END GENERATED ir-constructors -->
 
 A system is v1's `[system N Ts Cs Ps]` or `[system N As Ts Cs Ps]`, where
@@ -246,11 +247,14 @@ reported for an `info` send that did not land: `Adm(ok)` excludes it).
 
 ### 4.2 Intent and attempt identity
 
-- **Intent.** `[intent X]` on an operation, an outbox record or a delivery.
-  `X` uses only `literal`, `argument`, and `row-key` inside `for-each`
-  (R-INTENT-SCOPE), so a retry with the same arguments has the same intent and
-  no intent depends on state. A v1 `command` has no intent: its intent id is
-  its invocation id.
+- **Intent.** `[intent X]` or `[intent [key X1 ... Xn]]` on an operation, an
+  outbox record or a delivery. Each `X` uses only `literal`, `argument`, and
+  `row-key` inside `for-each` (R-INTENT-SCOPE), so a retry with the same
+  arguments has the same intent. Within one `for-each`, the set of intents
+  depends on which rows exist, but each row's intent does not. The id of
+  `[intent X]` is `⟦X⟧`. The id of `[intent [key X1 ... Xn]]` is the compact
+  JSON array text of `⟦X1⟧ ... ⟦Xn⟧`, for example `["transfer","42"]`. A v1
+  `command` has no intent: its intent id is its invocation id.
 - **Attempt.** Not syntax. A step's attempt id is the invocation id joined
   with the step name, `Inv/step`; a command's single step is `body`. Step
   names are unique per operation, action names likewise, in separate
@@ -268,6 +272,38 @@ reported for an `info` send that did not land: `Adm(ok)` excludes it).
   different payloads under one intent are. Under `[at-least-once]`, repeated
   deliveries are not a violation.
 
+**Namespace.** Intent ids are compared per channel: `(Kind, i)`, never across
+channels. On one channel, the intent namespace is the key space of its outbox
+table, since every `outbox` into the table creates row `i` and every `deliver`
+reads it. The operations that write that key space are the ones with an
+`outbox` action into the table. Deliveries only read it, so `send` and `relay`
+in section 5 deliver one intent by design. When two or more operations write
+one channel's table, R-INTENT-DISJOINT requires each of their `outbox` intents
+to be `[intent [key [literal P] ...]]`:
+
+- Distinct leading literals `P` are disjoint namespaces.
+- Equal leading literals declare one shared namespace: the same logical intent
+  may arrive through either operation. For example, a legacy and a replacement
+  endpoint during a migration both write `[key [literal "transfer"] ...]`, and
+  a delivery from each under one id is a duplicate.
+- An intent without a leading literal is refused. It may be any string, so it
+  is not disjoint from the others, and two of its emits could be reported as
+  `effect_applied_twice` though they are two intents.
+
+The alternatives were weighed and refused:
+
+- **Global namespace.** It adds false duplicates across channels.
+- **Per operation.** It hides a real duplicate sent through two operations.
+  That is exactly the cross-endpoint double delivery R10 and R10q must find.
+
+A channel with one writing operation needs no leading literal: its intents
+cannot collide with another writer's.
+
+**Adapter.** An intent id is the idempotency key the real system puts on the
+wire, the key its receiver deduplicates on. An adapter maps that key to the
+id above, for example `transfer:42` to `["transfer","42"]`. It never derives an
+id from the payload.
+
 A checker may count observed `emit` entries per `(Kind, i)` as a lower bound
 and conclude a duplicate from two of them. It may not identify intents by
 payload, and may not conclude "at most one" from a journal that has a gap or
@@ -275,6 +311,7 @@ is not drained (4.5).
 
 Negative: `rejected-effect-without-intent.ops-v2` (T-outbox),
 `rejected-intent-reads-state.ops-v2` (R-INTENT-SCOPE),
+`rejected-shared-channel-without-namespace.ops-v2` (R-INTENT-DISJOINT),
 `rejected-untagged-effect.ops-v2` (T-effect). At the engine's front end
 (PR 1), a request that names its invocation must report every observed effect
 as a record; an untagged one is refused (`test_r02_bridge`).
@@ -449,7 +486,8 @@ implemented by their PR.
 | `T-outbox` | `caps-action-outbox` | an outbox record whose key is not `[intent X]` |
 | `T-step` | `caps-step` | a step that is neither a transaction nor a delivery |
 | `T-deliver` | `caps-step` | a delivery without all three arms `on-ok`, `on-fail`, `on-info` |
-| `R-INTENT-SCOPE` | `caps.scoped?` | an intent expression using anything but `literal`, `argument`, `row-key` |
+| `R-INTENT-SCOPE` | `caps.scoped?` | an intent expression, or a part of a `key`, using anything but `literal`, `argument`, `row-key` |
+| `R-INTENT-DISJOINT` | `caps.scoped?` | on a channel whose table two or more operations write with `outbox`, an `outbox` intent that is not `[intent [key [literal P] ...]]` (4.2, Namespace) |
 | `R-NAMES` | `caps.scoped?` | duplicate step names, or duplicate action names, in one operation |
 | `R-CHANNEL` | `caps.scoped?` | `outbox`/`deliver` not naming a channel's table; two channels on one table; a channel table also declared plain; `insert`/`remove`/non-`state` `update` of a channel table |
 | `R-EFFECT-PLACEMENT` | `caps.scoped?` | `publish` in an operation; `outbox` in a command |
@@ -594,6 +632,7 @@ the rejecting rule. `T-*` fixtures must fail typing in `DraftTypecheckTest`;
 | `rejected-outbox-into-plain-table.ops-v2` | `R-CHANNEL` | an outbox record with no state and no contract |
 | `rejected-insert-into-channel-table.ops-v2` | `R-CHANNEL` | an outbox row not keyed by intent, with undefined eligibility |
 | `rejected-intent-reads-state.ops-v2` | `R-INTENT-SCOPE` | an intent that changes between retries, or merges two requests |
+| `rejected-shared-channel-without-namespace.ops-v2` | `R-INTENT-DISJOINT` | two intents counted as one duplicate because two operations share a channel's key space without naming their namespaces |
 | `rejected-command-without-assumption.ops-v2` | `R-ASSUME` | v1 info semantics without the assumption that justifies it |
 | `rejected-history-without-close.ops-v2` | `R-HISTORY` | a verdict while an `info` invocation can still act |
 | `rejected-history-overlapping-invocations.ops-v2` | `R-HISTORY` | concurrent invocations before R17 defines them |
@@ -710,11 +749,12 @@ the G5 byte-identity gate holds for every PR.
   The access summary is
    unchanged: PR 1 adds no action. `T-outcome`'s fixture is a history, typed
    by `DraftTypecheckTest` until PR 4.
-2. **Operations**: `caps-intent`, `caps-operation`, `caps-step`
+2. **Operations**: `caps-intent`, `caps-intent-key`, `caps-operation`, `caps-step`
    (transaction, deliver with all three arms typed; the environment answers
    only `ok` or `fail`, so `on-info` is typed but unreachable), outbox,
-   channels; R-INTENT-SCOPE, R-NAMES, R-CHANNEL, R-EFFECT-PLACEMENT,
-   R-LATE-REJECT.
+   channels; R-INTENT-SCOPE, R-INTENT-DISJOINT, R-NAMES, R-CHANNEL,
+   R-EFFECT-PLACEMENT, R-LATE-REJECT. No PR reports `effect_applied_twice`
+   `violated` on a channel before R-INTENT-DISJOINT runs on its system.
 3. **`info` alternatives**: the `info` response and `on-info` arm, `Adm(info)`
    as prefixes at commit points in `explore`, `single-landing-v1`.
 4. **Histories**: `caps-event`, `caps-history`, open-until-close, late
@@ -745,7 +785,7 @@ least one rejected fixture listed in its row.
 |---|---|---|
 | `ok` `fail` `info` `rejected` `aborted` | 4.1 | `rejected-history-unknown-outcome.ops-v2`; M3 |
 | `effect` `create` `put` `delete` `emit` | 4.2 | `rejected-journal-merged-entries.ops-v2`, `rejected-untagged-effect.ops-v2`; M2 |
-| `intent` | 4.2 | `rejected-effect-without-intent.ops-v2`, `rejected-intent-reads-state.ops-v2` |
+| `intent` `key` | 4.2 | `rejected-effect-without-intent.ops-v2`, `rejected-intent-reads-state.ops-v2`, `rejected-shared-channel-without-namespace.ops-v2` |
 | `outbox` | 4.3 | `rejected-effect-without-intent.ops-v2`, `rejected-outbox-into-plain-table.ops-v2` |
 | `channel` `at-most-once` `at-least-once` | 4.3 | `rejected-insert-into-channel-table.ops-v2`, `rejected-outbox-into-plain-table.ops-v2`; H1 against H5's replay |
 | `operation` `transaction` | 4.2, 4.3 | `rejected-publish-in-operation.ops-v2`, `rejected-publish-outside-transaction.ops-v2` |
@@ -786,6 +826,12 @@ Decided by the owner (via the coordinator) and recorded here:
 - **Retry after `ok`** is a legal history. Rationale: histories record what
   happened; retry policy only shapes exploration.
 - **`single-landing-v1`** named now, semantics in PR 3.
+- **Intent namespace** (was open question 6): per channel. Every operation
+  that writes a shared channel's table names its namespace with a leading
+  literal in `[intent [key ...]]`, and equal literals declare one namespace
+  (4.2, R-INTENT-DISJOINT). Rationale: a global namespace makes false
+  duplicates, and a per-operation one hides a duplicate sent through two
+  operations, the case migration work exists to catch.
 - **Drain is per store.** Rationale: matches the faults completeness flags
   (`applied_closed`, `changes_closed`, `finals_closed`) and real deployments,
   where one store can be quiescent while another is not.
@@ -829,8 +875,7 @@ Still open:
    ("effectively once"): a third contract, or a clause on a receiver model?
 5. **Late linearization bound.** Interleaving `info` commit points multiplies
    worlds. Its bound and reporting overlap R17.
-6. **Intent namespace.** Duplicates count per `(channel, intent)`. Global, per
-   channel, or per operation family?
+6. **Intent namespace.** Decided; see above.
 7. **Classifier identity.** What a `<classifier-id>` names (code digest,
    configuration, version), and who reviews a classifier before its `fail`s
    are trusted.

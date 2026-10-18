@@ -1,0 +1,23 @@
+; rejected-by: R-INTENT-DISJOINT
+; docs/ir-specification.md section 4.2. Two operations create records in the
+; outbox of one at-most-once channel. "transfer" scopes its intent under the
+; literal "transfer"; "refund" uses the bare request id, which may be any
+; string, so no rule shows the two namespaces disjoint, and two emits under one
+; id would be counted as effect_applied_twice although they are two intents.
+; The repair: [intent [key [literal "refund"] [argument "request"]]]. A shared
+; leading literal would instead declare the two one namespace.
+[system "shared-channel-without-namespace"
+ ["single-landing-v1"]
+ [[table "account" ["balance"] [] []]
+  [channel "money-moved" [at-most-once] "notices"]]
+ [[operation "transfer" ["request"] [intent [key [literal "transfer"] [argument "request"]]]
+   [yes]
+   [[transaction "record"
+     [[named "notify" [outbox "notices" [intent [key [literal "transfer"] [argument "request"]]] [argument "request"]]]]]]
+   [yes]]
+  [operation "refund" ["request"] [intent [argument "request"]]
+   [yes]
+   [[transaction "record"
+     [[named "notify" [outbox "notices" [intent [argument "request"]] [argument "request"]]]]]]
+   [yes]]]
+ []]

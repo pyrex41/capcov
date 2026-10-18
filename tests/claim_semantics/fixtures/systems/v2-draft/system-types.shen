@@ -22,6 +22,14 @@
   ______________________
   [intent X] : caps-intent;)
 
+\\ PR 2. A composite intent, one id from its parts. A leading literal names
+\\ the intent's namespace on a channel more than one operation writes
+\\ (R-INTENT-DISJOINT); equal leading literals declare one shared namespace.
+(datatype caps-intent-key
+  X : caps-expr; Xs : (list caps-expr);
+  ______________________
+  [intent [key X | Xs]] : caps-intent;)
+
 \\ PR 2. A transactional outbox record, a v1 action.
 (datatype caps-action-outbox
   T : string; I : caps-intent; V : caps-expr;
