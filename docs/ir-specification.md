@@ -573,7 +573,7 @@ side conditions are checked on computed write sets; effects compose by
 concatenation, keeping order and multiplicity (a set union would be M4); one
 transaction gives every record one intent and one attempt. What it rests on:
 the access summary that `outbox` writes its table. Summarized like v1
-`publish` (empty write set, `system.shen:258`), step 3 would still hold, but
+`publish` (empty write set, `system.shen:260`), step 3 would still hold, but
 any later frame or commutation claim involving `transfer-outbox` would be
 unsound (section 12). The `deliver` step after `apply` is not part of the
 composition: it is past a commit point, and the `info` prefixes of 4.1 are
@@ -621,8 +621,9 @@ lacks one its commands or channels need. Splitting the old single
 the second is about histories, not publish.
 
 **Bridge.** A v1 system `[system N Ts Cs Ps]` is read as
-`[system N As Ts Cs Ps]` with `As` = `info-in-place-v1`, plus
-`atomic-publish-v1` if a command publishes. A command is an operation without
+`[system N As Ts Cs Ps]` with `As` = `info-in-place-v1` if it has a command,
+plus `atomic-publish-v1` if a command publishes: exactly what R-ASSUME
+requires of a system that declares its assumptions. A command is an operation without
 intent, with the single step `[transaction "body" As]`. Request outcomes:
 `committed` ⇒ `[ok]`; `rejected` ⇒ `[fail [rejected L]]` with `L` bound to the
 model's own rejection label, so any label is accepted as v1 does
@@ -636,16 +637,20 @@ for a command) applied to `caps.bridge-outcome` of the request's outcome, so
 every v1 request is answered through the bridge. A request may name its
 outcome in the R02 alphabet, as the JSON array of its S-expression (`["ok"]`,
 `["fail", ["rejected", L]]`, `["fail", ["aborted"]]`, `["info"]`), and may name
-an `invocation` id. Only such a request's result carries `assumptions`: the
-model's declared list, or for a v1 system `info-in-place-v1` plus
-`atomic-publish-v1` when a command publishes (`caps.assumptions`). The request
-API forces outcomes, so `definite-fail-v1` is not added there. With an
+an `invocation` id; an invocation id must not contain `/`, the attempt-id
+separator, and a rejection label is nonempty (the bridge's empty label is
+internal). Only such a request's result carries `assumptions`: the model's
+declared list, or for a v1 system the bridge's (`caps.assumptions`), plus
+`definite-fail-v1:request` when the outcome is `fail`. The request API forces
+its outcome, so the request is the classifier; the name says so instead of
+leaving the assumption implicit. With an
 `invocation`, the admissible effects are records `[effect Inv Inv/body L]`
 (`caps.identify`), an observation must report records (an untagged effect is
 refused), an observed record with another intent or attempt id does not match,
 and the independent checker (`verify_effects`) checks each record's ids and
-replays the projections. `explore` with an R02 outcome carries the
-assumptions at the top of the campaign. The v1 adapter protocols
+replays the projections. `explore` with an R02 outcome carries, at the top
+of the campaign, the union of its results' assumptions: the model's, plus
+`definite-fail-v1:request` when some call fails. The v1 adapter protocols
 (`capcov-system-adapter-v1`, `capcov-scenario-adapter-v1`) carry v1 requests
 only; R02 outcomes reach adapters with `capcov-scenario-adapter-v2` (PR 4).
 A system `[system N As Ts Cs Ps]` is evaluated like its v1 form, with
@@ -666,7 +671,7 @@ R02 PR. The v1 request API's output therefore gains no assumption field;
 `capcov-system-evaluation-v1` implies the bridge's assumptions, and only R02
 requests and history verdicts carry them. Enforced by
 `tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest` against
-goldens written at the R02 base commit (`g5/manifest.json`). Two values are
+goldens written at the R02 base commit, whose engine digests are a constant of the test (`BASE_LIBRARIES`); regeneration is refused on any other engine. Two values are
 outside the comparison: `libraries`, the digests of the engine's own Shen
 sources, which an R02 PR changes by definition, and `runtime`, the digests of
 the host's binaries. Every other byte, and the exit code, is compared. The
@@ -700,7 +705,9 @@ the G5 byte-identity gate holds for every PR.
    `caps.assumptions`; rejected fixtures wired: R-ASSUME
    (`rejected-command-without-assumption.ops-v2` refused by the engine, its
    repair accepted), T-effect (`rejected-untagged-effect.ops-v2`, a new
-   fixture, with a tagged control that types). The access summary is
+   fixture, with a tagged control that types). Rejecting mutant: a bridge
+  that maps `unknown` to `[ok]` alone fails `test_bridge_mutants_are_caught`, as does `Adm(info)` without the "nothing" alternative.
+  The access summary is
    unchanged: PR 1 adds no action. `T-outcome`'s fixture is a history, typed
    by `DraftTypecheckTest` until PR 4.
 2. **Operations**: `caps-intent`, `caps-operation`, `caps-step`
@@ -792,8 +799,10 @@ Spec deviations in PR 1, each the minimal correct reading:
 - **Results carrying assumptions.** Section 4.6 says every verdict carries the
   assumption list; section 7 says the v1 request API gains no assumption
   field. Both hold: a v1 request's result is unchanged, a request using an R02
-  outcome or an invocation id carries `assumptions`. The request API forces
-  its outcome, so `definite-fail-v1` is not added to it.
+  outcome or an invocation id carries `assumptions`. A `fail` outcome adds
+  `definite-fail-v1:request`: the request API forces outcomes, so the
+  classifier is the request itself, and the result names it (section 4.1:
+  every result that uses a `fail` outcome carries the assumption).
 - **Assumption names a system may declare.** R-ASSUME's "unknown name" is read
   as anything but `info-in-place-v1`, `atomic-publish-v1`,
   `single-landing-v1`; `definite-fail-v1:<id>` is the adapter's, not the
@@ -840,7 +849,7 @@ have a home; they land with R04/R17, not R02.
   a retry only of an operation with `[intent X]`.
 - **Frame claims**, `[disjoint A B]`: holds when `W(A) ∩ (R(B) ∪ W(B)) = ∅`,
   symmetrically, and no invariant reads both a table in `W(A)` and one in
-  `W(B)`, with `R`/`W` from `caps.analyze` (`system.shen:231-275`) extended:
+  `W(B)`, with `R`/`W` from `caps.analyze` (`system.shen:233-277`) extended:
   `outbox T` writes `T`, `deliver N T` reads and writes `T`. Rejected example,
   *frame claiming disjointness while writing the outbox table*:
   `[disjoint "transfer" "relay-transfer"]` on the worked model, refuted by

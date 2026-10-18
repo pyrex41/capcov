@@ -26,11 +26,15 @@ SYSTEM_TAGS = frozenset(
 )
 # R02 PR 1: tags a request carries outside the model, in its outcome (the
 # capcov.faults alphabet) and in observed effect records
-# (docs/ir-specification.md, sections 4.1, 4.2 and 7).
+# (docs/ir-specification.md, sections 4.1, 4.2 and 7). The front end refuses
+# any other head tag there, as _term does with SYSTEM_TAGS.
 REQUEST_TAGS = frozenset(
     "ok fail info rejected aborted effect create put delete emit".split()
 )
-V1_OUTCOMES = ("committed", "aborted", "unknown", "rejected")
+V1_OUTCOMES = ("committed", "rejected", "aborted", "unknown")
+# The assumption a result carries when its request names a fail outcome: the
+# request API forces outcomes, so the request itself is the classifier.
+DEFINITE_FAIL = "definite-fail-v1:request"
 
 
 def canonical(value):
@@ -84,6 +88,8 @@ def _pairs(values):
 def _logical_effect(e):
     if not isinstance(e, list) or not e:
         raise OperationError("malformed effect")
+    if e[0] not in REQUEST_TAGS - {"effect"}:
+        raise OperationError("unsupported effect")
     if e[0] == "create" and len(e) == 4:
         if not isinstance(e[3], list) or any(
             not isinstance(f, list) or len(f) != 2 for f in e[3]
@@ -113,33 +119,42 @@ def _identity_string(value, what):
     return _string(value)
 
 
+def _invocation(value):
+    """An invocation id. Attempt ids are Inv/step, so "/" would let two differ
+    only in where the step name starts; it is refused."""
+    term = _identity_string(value, "invocation id")
+    if "/" in value:
+        raise OperationError("invocation id must not contain '/'")
+    return term
+
+
 def _is_record(effect):
     return isinstance(effect, list) and bool(effect) and effect[0] == "effect"
 
 
-def _effect_terms(effects, identified=None):
+def _effect_terms(effects, identified):
     """Logical effects, or effect records [effect I A L] (R02 PR 1, section 4.2).
 
-    identified: True requires every effect to be a record, False refuses
-    records, None accepts either kind but never a mix of the two.
+    identified=True requires every effect to be a record (an observation of a
+    request that names its invocation); identified=False refuses records.
     """
+    if type(identified) is not bool:
+        raise TypeError("identified must be a bool")
     if not isinstance(effects, list) or len(effects) > 4096:
         raise OperationError("at most 4096 effects required")
     records = [_is_record(e) for e in effects]
-    if identified is None and any(records) and not all(records):
-        raise OperationError("effects mix effect records and untagged effects")
-    if identified is True and not all(records):
+    if identified and not all(records):
         raise OperationError(
             "untagged effect: an identified observation needs [effect I A L]"
         )
-    if identified is False and any(records):
+    if not identified and any(records):
         raise OperationError("effect records require the request's invocation id")
     result = []
     for e, record in zip(effects, records):
         if not record:
             result.append(_logical_effect(e))
             continue
-        if len(e) != 4 or _is_record(e[3]):
+        if len(e) != 4:
             raise OperationError("effect record requires intent, attempt and effect")
         result.append(
             "[effect "
@@ -154,9 +169,15 @@ def _effect_terms(effects, identified=None):
 
 
 def _outcome(out):
-    """A v1 outcome symbol, or an R02 outcome as its JSON array (section 11)."""
+    """A v1 outcome symbol, or an R02 outcome as its JSON array (section 11).
+
+    A rejection label is nonempty: the bridge binds the empty label internally
+    for a v1 `rejected` request the model commits, never from the wire.
+    """
     if isinstance(out, str) and out in V1_OUTCOMES:
         return out
+    if not isinstance(out, list) or not out or out[0] not in REQUEST_TAGS:
+        raise OperationError("invalid outcome")
     if out == ["ok"]:
         return "[ok]"
     if out == ["info"]:
@@ -171,6 +192,7 @@ def _outcome(out):
         and len(out[1]) == 2
         and out[1][0] == "rejected"
         and isinstance(out[1][1], str)
+        and out[1][1]
     ):
         return "[fail [rejected " + _string(out[1][1]) + "]]"
     raise OperationError("invalid outcome")
@@ -183,6 +205,11 @@ def bridged(request):
     (gate G5): capcov-system-evaluation-v1 implies the bridge's assumptions.
     """
     return "invocation" in request or not isinstance(request.get("outcome"), str)
+
+
+def _fails(request):
+    outcome = request.get("outcome")
+    return isinstance(outcome, list) and bool(outcome) and outcome[0] == "fail"
 
 
 def _request(request, fuel):
@@ -206,7 +233,7 @@ def _request(request, fuel):
     out = _outcome(request["outcome"])
     invocation = None
     if "invocation" in request:
-        invocation = _identity_string(request["invocation"], "invocation id")
+        invocation = _invocation(request["invocation"])
     observed = "not-requested"
     if "observed" in request:
         obs = request["observed"]
@@ -333,8 +360,11 @@ def evaluate(source, requests, *, fuel=1024, timeout=60):
                 )
                 for request, row in zip(requests, values)
             ]
-            if len(results) != len(requests):
-                raise ValueError("wrong result count")
+            for request, result in zip(requests, results):
+                if _fails(request):
+                    # A fail outcome means "nothing happened" only under
+                    # definite-fail-v1 (section 4.1); say so.
+                    result["assumptions"] = [*result["assumptions"], DEFINITE_FAIL]
         except (ValueError, TypeError) as exc:
             raise OperationError("malformed native system response") from exc
     for request, result in zip(requests, results):
@@ -384,6 +414,8 @@ def verify_effects(before, result, invocation=None):
         if len(transition) != 4 or transition[0] != "result":
             raise OperationError("invalid transition")
         _, after, effects, trace = transition
+        # Index 0 is the model's own run (caps.run), whose effects are always
+        # logical; only the admissible alternatives carry records.
         if invocation is not None and index > 0:
             identity = ["effect", invocation, invocation + "/body"]
             if any(
@@ -513,7 +545,13 @@ def explore(
                 raise OperationError("runtime changed during campaign")
             provenance = identity
             for (node, call), result in zip(part, evaluation["results"]):
-                assumptions = result.get("assumptions", assumptions)
+                # Every bridged result carries the model's list; a fail call
+                # adds definite-fail-v1. The campaign carries their union, in
+                # first-seen order, and none when every call is v1.
+                for name in result.get("assumptions", []):
+                    assumptions = [] if assumptions is None else assumptions
+                    if name not in assumptions:
+                        assumptions.append(name)
                 edge = {
                     "from": node["id"],
                     "call": copy.deepcopy(call),

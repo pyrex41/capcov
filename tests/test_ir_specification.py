@@ -286,7 +286,7 @@ class DraftTypecheckTest(unittest.TestCase):
         assert source.count(UNTAGGED_ENTRY) == 1
         (term,) = parse(source.replace(UNTAGGED_ENTRY, TAGGED_ENTRY), UNTAGGED.name)
         cases.append((f"{UNTAGGED.name}#tagged", "caps-history", True, shen_term(term)))
-        root =resources.files("capcov.operations").joinpath("shen")
+        root = resources.files("capcov.operations").joinpath("shen")
         with tempfile.TemporaryDirectory(prefix="capcov-draft-") as tmp:
             directory = Path(tmp)
             loads = []

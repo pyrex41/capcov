@@ -198,12 +198,14 @@
   Inv -> (cn Inv "/body"))
 
 (define caps.identify
-  _ [] -> []
-  Inv [[result S Es T] | Alts] ->
-    [[result S (map (/. L [effect Inv (caps.attempt Inv) L]) Es) T] | (caps.identify Inv Alts)])
+  Inv Alts -> (map (/. Alt (caps.identify-one Inv Alt)) Alts))
+
+(define caps.identify-one
+  Inv [result S Es T] -> [result S (map (/. L [effect Inv (caps.attempt Inv) L]) Es) T])
 
 \\ The assumptions a model's results carry (section 7). A system that names
-\\ its assumptions carries those; a v1 system is read with the bridge's.
+\\ its assumptions carries those; a v1 system is read with the bridge's, the
+\\ ones its commands need (the same list R-ASSUME requires of a declaration).
 (define caps.publishes?
   [command _ _ _ As _] -> (not (= [] (nth 3 (caps.summary As)))))
 
@@ -216,7 +218,7 @@
 
 (define caps.assumptions
   [system _ As _ _ _] -> As
-  [system _ _ Cs _] -> ["info-in-place-v1" | (caps.publishing Cs)])
+  [system _ _ Cs _] -> (caps.needed Cs))
 
 \\ R-ASSUME: known names, each once, and every one the commands need.
 (define caps.assumptions-ok?
