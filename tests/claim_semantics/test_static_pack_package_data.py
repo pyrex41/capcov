@@ -12,6 +12,7 @@ import unittest
 from capcov.claims.static import pack
 from capcov.claims.spec import decode_source
 from capcov.claims.ir import digest
+from tests.support import build_tree
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD_TOOLS = all(importlib.util.find_spec(n) is not None for n in ('pip','setuptools'))
@@ -49,7 +50,7 @@ class StaticPackPackageTests(unittest.TestCase):
             installed=Path(tmp)/'installed'; wheel=Path(tmp)/'wheel'; isolated=Path(tmp)/'work'
             isolated.mkdir()
             build=subprocess.run([sys.executable,'-m','pip','wheel','--no-deps','--no-build-isolation',
-                                  '--wheel-dir',str(wheel),str(ROOT)],capture_output=True,text=True,timeout=300)
+                                  '--wheel-dir',str(wheel),str(build_tree(ROOT,Path(tmp)/'source'))],capture_output=True,text=True,timeout=300)
             self.assertEqual(build.returncode,0,build.stderr)
             archive=next(wheel.glob('*.whl'))
             install=subprocess.run([sys.executable,'-m','pip','install','--no-deps','--target',str(installed),str(archive)],
