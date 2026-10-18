@@ -60,10 +60,12 @@ CONTRACT_CODES = {"duplicate-contract", "duplicate-rule", "derived-completeness-
 CONTRACT_DEPENDENT = {"context-index-loss", "unsupported-context-widening",
                       "negative-conclusion-without-completeness"}
 PACKS = {
-    "static": "src/capcov/claims/static/rules-static-v1.json",
+    "static-v1": "src/capcov/claims/static/rules-static-v1.json",
+    "static-v2": "src/capcov/claims/static/rules-static-v2.json",
     "replay-v1": "src/capcov/claims/replay/rules-replay-v1.json",
     "replay-v2": "src/capcov/claims/replay/rules-replay-v2.json",
-    "observation": "src/capcov/claims/observation/rules-observation-v1.json",
+    "observation-v1": "src/capcov/claims/observation/rules-observation-v1.json",
+    "observation-v2": "src/capcov/claims/observation/rules-observation-v2.json",
     "shared": "src/capcov/claims/static/runtime-shared-v1.json",
 }
 

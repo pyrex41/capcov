@@ -218,7 +218,8 @@ manifest. V1 remains the default and retains its canonical identities.
 `test_replay_spec.py` compares all 28 frozen cases and individual closure and
 assumption withdrawals, checks the receipt-to-certificate path, and compares
 Python, interpreted Souffle, and compiled Souffle. The installed-wheel test
-loads both replay and both observation versions without repository files or Shen.
+loads both versions of the static, replay and observation packs without repository
+files or Shen.
 
 Select observation v2 with `observation.join.build(..., version=2)` or
 `python -m capcov.claims.observation.judge ... --pack-version 2`; a v2 judge
@@ -241,10 +242,13 @@ withdrawals, checks the go_app export-to-certificate path, and compares
 Python, interpreted Souffle, and compiled Souffle. Claims are excluded there
 because v2 universal-domain admission is pending.
 
-The operation framework, Shen datatype judgments and Prolog search, templates,
-declarative reporting policy, the static pack migration, and full release gates
-are still outstanding. This milestone demonstrates real replay and observation closure
-elaboration; it does not claim the complete original architecture is delivered.
+Declarative reporting policies, templated `.decl` declarations, default
+selection of the v2 profiles, and full release gates are still outstanding (see
+`specs/claims/migration-preserved.json`). This milestone demonstrates static,
+replay and observation closure elaboration from readable logic, declaration
+templates checked on both sides, a `defprolog` derivation search pinned to the
+previous output, and a typed third authority; it does not claim the complete
+original architecture is delivered.
 
 ### Typed operation milestone
 

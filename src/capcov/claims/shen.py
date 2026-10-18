@@ -284,7 +284,7 @@ def _request_literal(request: Mapping[str, Any]) -> str:
         return "[capcov.authority]"
     if kind == "typed-authority":
         return "[capcov.typed-authority]"
-    tag ={"derive": "capcov.derive", "why-not": "capcov.why-not"}[kind]
+    tag = {"derive": "capcov.derive", "why-not": "capcov.why-not"}[kind]
     row = "[" + " ".join(_literal(v) for v in request["row"]) + "]"
     return f"[{tag} {_string(request['relation'])} {row}]"
 
@@ -737,9 +737,12 @@ def authority_batch(bundles: Sequence[Bundle], *, typed: bool = False, timeout: 
     """``authority`` (or, with ``typed``, ``typed_authority``) for several bundles
     in ONE runtime process, so the libraries load once.
 
-    capcov.load-bundle resets all workbench state per bundle, so each verdict
-    is the one a separate call returns; the checksum cross-check applies per
-    bundle.  A bundle whose run reports an error yields its ``ShenFailure`` in
+    capcov.load-bundle resets all workbench state per bundle and the checksum
+    cross-check applies per bundle.  Untyped verdicts equal a separate call's.
+    Typed verdicts can only be STRICTER than a separate call's: an error that
+    escapes a ``shen.typecheck`` unit poisons later units in the same process
+    (docs/typed-claim-authority.md), which surfaces as refusals, never as
+    admissions.  A bundle whose run reports an error yields its ``ShenFailure`` in
     place; an unusable process (timeout, exit, missing blocks) raises.  No
     frozen checksum is accepted: freezing is a per-pack identity decision.
     """
@@ -810,15 +813,21 @@ def authority_batch(bundles: Sequence[Bundle], *, typed: bool = False, timeout: 
             continue
         checksum = payload.get("elaborated_checksum")
         text = canonical_json(payload.get("elaborated"))
-        if payload.get("kind") != kind or not isinstance(payload.get("rules"), list) or pack_checksum(text) != checksum:
-            reports.append(ShenFailure("malformed-output", f"{kind} payload has the wrong shape or checksum",
+        if payload.get("kind") != kind or not isinstance(payload.get("rules"), list) \
+                or (typed and not isinstance(payload.get("units"), int)):
+            reports.append(ShenFailure("malformed-output", f"{kind} payload has the wrong shape",
+                                       provenance=provenance))
+            continue
+        if pack_checksum(text) != checksum:
+            # Same refusal id as the single-bundle path in run().
+            reports.append(ShenFailure("elaborated-pack-mismatch", f"{kind} elaborated pack checksum does not match",
                                        provenance=provenance))
             continue
         provenance = Provenance(**{**provenance.__dict__, "elaborated_sha256": _sha256_text(text),
                                    "elaborated_checksum": checksum})
         fields = (bool(payload.get("ok")), tuple(payload["rules"]), tuple(payload.get("pack", ())),
                   dict(payload.get("elaborated") or {}), str(checksum), provenance)
-        reports.append(TypedAuthorityReport(*fields, int(payload.get("units", 0))) if typed
+        reports.append(TypedAuthorityReport(*fields, payload["units"]) if typed
                        else AuthorityReport(*fields))
     return reports
 
