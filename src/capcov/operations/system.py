@@ -24,6 +24,13 @@ SYSTEM_LIBRARIES = ("kernel.shen", "system.shen", "system-types.shen")
 SYSTEM_TAGS = frozenset(
     "system table foreign command literal argument row-key row-field lookup yes no equal negate both either exists some-row every-row insert update remove publish require choose for-each named column text int32 enum int-add int-sub less-than before count-rows sum-field".split()
 )
+# R02 PR 1: tags a request carries outside the model, in its outcome (the
+# capcov.faults alphabet) and in observed effect records
+# (docs/ir-specification.md, sections 4.1, 4.2 and 7).
+REQUEST_TAGS = frozenset(
+    "ok fail info rejected aborted effect create put delete emit".split()
+)
+V1_OUTCOMES = ("committed", "aborted", "unknown", "rejected")
 
 
 def canonical(value):
@@ -74,36 +81,108 @@ def _pairs(values):
     )
 
 
-def _effect_terms(effects):
+def _logical_effect(e):
+    if not isinstance(e, list) or not e:
+        raise OperationError("malformed effect")
+    if e[0] == "create" and len(e) == 4:
+        if not isinstance(e[3], list) or any(
+            not isinstance(f, list) or len(f) != 2 for f in e[3]
+        ):
+            raise OperationError("create fields require pairs")
+        if len({f[0] for f in e[3]}) != len(e[3]):
+            raise OperationError("duplicate create field")
+        return (
+            "[create "
+            + _string(e[1])
+            + " "
+            + _string(e[2])
+            + " "
+            + _pairs(dict(e[3]))
+            + "]"
+        )
+    if isinstance(e[0], str) and len(e) == {"put": 5, "delete": 3, "emit": 3}.get(
+        e[0]
+    ):
+        return "[" + e[0] + " " + " ".join(_string(v) for v in e[1:]) + "]"
+    raise OperationError("unsupported effect")
+
+
+def _identity_string(value, what):
+    if not isinstance(value, str) or not value or len(value.encode()) > 256:
+        raise OperationError(f"{what} must be a nonempty string of at most 256 bytes")
+    return _string(value)
+
+
+def _is_record(effect):
+    return isinstance(effect, list) and bool(effect) and effect[0] == "effect"
+
+
+def _effect_terms(effects, identified=None):
+    """Logical effects, or effect records [effect I A L] (R02 PR 1, section 4.2).
+
+    identified: True requires every effect to be a record, False refuses
+    records, None accepts either kind but never a mix of the two.
+    """
     if not isinstance(effects, list) or len(effects) > 4096:
         raise OperationError("at most 4096 effects required")
+    records = [_is_record(e) for e in effects]
+    if identified is None and any(records) and not all(records):
+        raise OperationError("effects mix effect records and untagged effects")
+    if identified is True and not all(records):
+        raise OperationError(
+            "untagged effect: an identified observation needs [effect I A L]"
+        )
+    if identified is False and any(records):
+        raise OperationError("effect records require the request's invocation id")
     result = []
-    for e in effects:
-        if not isinstance(e, list) or not e:
-            raise OperationError("malformed effect")
-        if e[0] == "create" and len(e) == 4:
-            if not isinstance(e[3], list) or any(
-                not isinstance(f, list) or len(f) != 2 for f in e[3]
-            ):
-                raise OperationError("create fields require pairs")
-            if len({f[0] for f in e[3]}) != len(e[3]):
-                raise OperationError("duplicate create field")
-            result.append(
-                "[create "
-                + _string(e[1])
-                + " "
-                + _string(e[2])
-                + " "
-                + _pairs(dict(e[3]))
-                + "]"
-            )
-        elif isinstance(e[0], str) and len(e) == {"put": 5, "delete": 3, "emit": 3}.get(
-            e[0]
-        ):
-            result.append("[" + e[0] + " " + " ".join(_string(v) for v in e[1:]) + "]")
-        else:
-            raise OperationError("unsupported effect")
+    for e, record in zip(effects, records):
+        if not record:
+            result.append(_logical_effect(e))
+            continue
+        if len(e) != 4 or _is_record(e[3]):
+            raise OperationError("effect record requires intent, attempt and effect")
+        result.append(
+            "[effect "
+            + _identity_string(e[1], "intent id")
+            + " "
+            + _identity_string(e[2], "attempt id")
+            + " "
+            + _logical_effect(e[3])
+            + "]"
+        )
     return "[" + " ".join(result) + "]"
+
+
+def _outcome(out):
+    """A v1 outcome symbol, or an R02 outcome as its JSON array (section 11)."""
+    if isinstance(out, str) and out in V1_OUTCOMES:
+        return out
+    if out == ["ok"]:
+        return "[ok]"
+    if out == ["info"]:
+        return "[info]"
+    if out == ["fail", ["aborted"]]:
+        return "[fail [aborted]]"
+    if (
+        isinstance(out, list)
+        and len(out) == 2
+        and out[0] == "fail"
+        and isinstance(out[1], list)
+        and len(out[1]) == 2
+        and out[1][0] == "rejected"
+        and isinstance(out[1][1], str)
+    ):
+        return "[fail [rejected " + _string(out[1][1]) + "]]"
+    raise OperationError("invalid outcome")
+
+
+def bridged(request):
+    """True when a request uses R02 PR 1: an R02 outcome or an invocation id.
+
+    Only such results carry `assumptions`. A v1 request's result is unchanged
+    (gate G5): capcov-system-evaluation-v1 implies the bridge's assumptions.
+    """
+    return "invocation" in request or not isinstance(request.get("outcome"), str)
 
 
 def _request(request, fuel):
@@ -114,6 +193,7 @@ def _request(request, fuel):
         "outcome",
         "observed",
         "trace",
+        "invocation",
     }:
         raise OperationError("unknown system request fields")
     if not {"command", "args", "state", "outcome"} <= set(request):
@@ -123,9 +203,10 @@ def _request(request, fuel):
         _pairs(request["args"]),
         _state(request["state"]),
     )
-    out = request["outcome"]
-    if out not in ("committed", "aborted", "unknown", "rejected"):
-        raise OperationError("invalid outcome")
+    out = _outcome(request["outcome"])
+    invocation = None
+    if "invocation" in request:
+        invocation = _identity_string(request["invocation"], "invocation id")
     observed = "not-requested"
     if "observed" in request:
         obs = request["observed"]
@@ -135,7 +216,7 @@ def _request(request, fuel):
             "(caps.accepts? Alternatives "
             + _state(obs["state"])
             + " "
-            + _effect_terms(obs["effects"])
+            + _effect_terms(obs["effects"], identified=invocation is not None)
             + ")"
         )
     trace = "not-requested"
@@ -156,21 +237,25 @@ def _request(request, fuel):
                 "[action "
                 + _string(step["name"])
                 + " "
-                + _effect_terms(step["effects"])
+                + _effect_terms(step["effects"], identified=False)
                 + "]"
             )
         trace = (
             "(= R [result "
             + _state(t["state"])
             + " "
-            + _effect_terms(t["effects"])
+            + _effect_terms(t["effects"], identified=False)
             + " ["
             + " ".join(steps)
             + "]])"
         )
+    alternatives = f"(caps.admissible {s} R {out})"
+    if invocation is not None:
+        alternatives = f"(caps.identify {invocation} {alternatives})"
+    extra = " (caps.assumptions M)" if bridged(request) else ""
     return (
-        f"(let R (caps.run M {n} {e} {s} {fuel}) Alternatives (caps.admissible {s} R {out}) "
-        f"[(caps.analyze M {n}) R Alternatives {observed} {trace}])"
+        f"(let R (caps.run M {n} {e} {s} {fuel}) Alternatives {alternatives} "
+        f"[(caps.analyze M {n}) R Alternatives {observed} {trace}{extra}])"
     )
 
 
@@ -229,28 +314,31 @@ def evaluate(source, requests, *, fuel=1024, timeout=60):
             )
         try:
             values = json.loads(lines[0])
+            if len(values) != len(requests):
+                raise ValueError("wrong result count")
+            keys = (
+                "analysis",
+                "transition",
+                "admissible",
+                "observed_matches",
+                "trace_valid",
+            )
             results = [
                 dict(
                     zip(
-                        (
-                            "analysis",
-                            "transition",
-                            "admissible",
-                            "observed_matches",
-                            "trace_valid",
-                        ),
+                        keys + (("assumptions",) if bridged(request) else ()),
                         row,
                         strict=True,
                     )
                 )
-                for row in values
+                for request, row in zip(requests, values)
             ]
             if len(results) != len(requests):
                 raise ValueError("wrong result count")
         except (ValueError, TypeError) as exc:
             raise OperationError("malformed native system response") from exc
     for request, result in zip(requests, results):
-        verify_effects(request["state"], result)
+        verify_effects(request["state"], result, request.get("invocation"))
     return {
         "format": "capcov-system-evaluation-v1",
         "basis": "finite-system-model",
@@ -277,14 +365,33 @@ def json_state(rows):
     return [{"table": r[1], "key": r[2], "fields": dict(r[3])} for r in rows]
 
 
-def verify_effects(before, result):
-    """Independent patch/trace checker; does not claim to prove predicates."""
-    for transition in [result["transition"], *result["admissible"]]:
+def project(effect):
+    """pi([effect I A L]) = L; a logical effect is its own projection."""
+    return effect[3] if _is_record(effect) else effect
+
+
+def verify_effects(before, result, invocation=None):
+    """Independent patch/trace checker; does not claim to prove predicates.
+
+    With an invocation id every admissible effect must be the bridge's record
+    [effect Inv Inv/body L], and the patch is checked on the projections L.
+    """
+    for index, transition in enumerate(
+        [result["transition"], *result["admissible"]]
+    ):
         if transition[0] == "rejected":
             continue
         if len(transition) != 4 or transition[0] != "result":
             raise OperationError("invalid transition")
         _, after, effects, trace = transition
+        if invocation is not None and index > 0:
+            identity = ["effect", invocation, invocation + "/body"]
+            if any(
+                not isinstance(e, list) or len(e) != 4 or e[:3] != identity
+                for e in effects
+            ):
+                raise OperationError("effect record lacks the bridge identity")
+            effects = [project(e) for e in effects]
         if [e for step in trace for e in step[2]] != effects:
             raise OperationError("trace/effect disagreement")
         rows = copy.deepcopy(before)
@@ -382,6 +489,7 @@ def explore(
     for c in calls if schedule is None else [c for level in schedule for c in level]:
         if not isinstance(c, dict) or set(c) != {"command", "args", "outcome"}:
             raise OperationError("campaign calls require command, args and outcome")
+    assumptions = None
     nodes = [{"id": 0, "depth": 0, "state": copy.deepcopy(initial), "via": None}]
     graph_bytes = len(canonical(nodes).encode())
     frontier = [nodes[0]]
@@ -405,6 +513,7 @@ def explore(
                 raise OperationError("runtime changed during campaign")
             provenance = identity
             for (node, call), result in zip(part, evaluation["results"]):
+                assumptions = result.get("assumptions", assumptions)
                 edge = {
                     "from": node["id"],
                     "call": copy.deepcopy(call),
@@ -448,7 +557,7 @@ def explore(
             witness.append(edge_id)
             edge_id = nodes[edges[edge_id]["from"]]["via"]
         witness.reverse()
-    return {
+    campaign = {
         "format": "capcov-system-campaign-v1",
         "basis": "explicit-bounded-domain",
         "depth": depth,
@@ -462,6 +571,10 @@ def explore(
         "invariant_violations": violations,
         "shortest_invariant_witness": witness,
     }
+    if assumptions is not None:
+        # An R02 outcome was explored: the campaign carries the assumptions.
+        campaign["assumptions"] = assumptions
+    return campaign
 
 
 def certify(source, requests, *, fuel=1024, timeout=60):
@@ -621,6 +734,10 @@ def run_adapter(source, requests, command, *, fuel=1024, timeout=60):
         raise OperationError("adapter requires an executable argument vector")
     if any("observed" in r or "trace" in r for r in requests):
         raise OperationError("adapter requests cannot prepopulate observations")
+    if any(isinstance(r, dict) and bridged(r) for r in requests):
+        raise OperationError(
+            "capcov-system-adapter-v1 carries v1 requests only, no R02 outcome or invocation"
+        )
     evaluate(source, requests, fuel=fuel, timeout=timeout)
     executable = shutil.which(command[0])
     if executable is None:

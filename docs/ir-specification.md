@@ -1,14 +1,17 @@
 # Typed behavior IR: v1 constructors and the R02 additions
 
-Status: **proposal, review gate for R02.** Nothing from section 4 on is
-implemented. A reviewer should be able to reject the design from this page and
-its fixtures alone.
+Status: **proposal, review gate for R02; PR 1 implemented.** PR 1 of section
+8 (outcomes, effect records, the assumption list, R-ASSUME and the v1 bridge)
+runs in the engine; everything else from section 4 on is specified only. A
+reviewer should be able to reject the design from this page and its fixtures
+alone.
 
 - v1 is what runs: `src/capcov/operations/shen/system-types.shen` (datatypes),
   `system.shen` (semantics), `system.py` (front end, `SYSTEM_TAGS`).
 - R02 grows v1; there is no second grammar. The additions are a draft overlay,
   `tests/claim_semantics/fixtures/systems/v2-draft/system-types.shen`, loaded
-  after v1's file. Every overlay datatype has a new name and extends v1 types
+  after v1's file. A landed PR moves its blocks from the overlay into
+  `system-types.shen` (PR 1 has). Every overlay datatype has a new name and extends v1 types
   by adding rules (the pattern of v1's `caps-expr-arithmetic`); no v1
   datatype is redefined. A v1 `command` is sugar for an operation without
   intent identity (4.2). The overlay is under `tests/`: the engine never loads
@@ -25,11 +28,13 @@ family, not allowed to skip there) loads `kernel.shen`, `system.shen`,
 `system-types.shen` and the overlay under `(tc +)`; it requires every v1
 `.ops` fixture to still type as `caps-system`, the positive fixtures and every
 `R-*` rejected fixture to type structurally, and every `T-*` rejected fixture
-not to type. **It has not run yet**: Shen cannot be built in the sandbox this
-was written in, so its first run is in CI. Base-family tests run the table
-generator and cross-reference the hand-written tables against the fixtures and
-the probe; a cross-reference is not a semantic check. No semantics in
-sections 4–7 has been executed.
+not to type. It runs in the Shen dev shell and in CI. Base-family tests run
+the table generator and cross-reference the hand-written tables against the
+fixtures and the probe; a cross-reference is not a semantic check. The PR 1
+semantics (4.1 for commands, 4.2 effect records, 7) is executed by
+`tests.claim_semantics.test_r02_bridge` and gate G5 by
+`tests.claim_semantics.test_v1_compatibility`; the rest of sections 4–6 has not
+been executed.
 
 Vocabulary is `capcov.faults`' (`docs/faults.md`,
 `src/capcov/faults/README.md`): outcomes `ok`, `fail`, `info`; verdicts
@@ -104,17 +109,32 @@ accepts the conclusion's head tag today; `—` means the conclusion has no tag
 | `caps-expr-state` | `[before X] : caps-expr` | `X : caps-expr` | — | 187 | yes |
 | `caps-expr-state` | `[count-rows T] : caps-expr` | `T : string` | — | 190 | yes |
 | `caps-expr-state` | `[sum-field T F] : caps-expr` | `T : string`; `F : string` | — | 193 | yes |
+| `caps-outcome` | `[ok] : caps-outcome` | — | — | 201 | yes |
+| `caps-outcome` | `[fail R] : caps-outcome` | `R : caps-fail-reason` | — | 204 | yes |
+| `caps-outcome` | `[info] : caps-outcome` | — | — | 206 | yes |
+| `caps-fail-reason` | `[rejected L] : caps-fail-reason` | `L : string` | — | 211 | yes |
+| `caps-fail-reason` | `[aborted] : caps-fail-reason` | — | — | 213 | yes |
+| `caps-effect` | `[effect I A L] : caps-effect` | `I : string`; `A : string`; `L : caps-logical-effect` | — | 221 | yes |
+| `caps-logical-effect` | `[create T K Fs] : caps-logical-effect` | `T : string`; `K : string`; `Fs : caps-values` | — | 226 | yes |
+| `caps-logical-effect` | `[put T K F V] : caps-logical-effect` | `T : string`; `K : string`; `F : string`; `V : string` | — | 229 | yes |
+| `caps-logical-effect` | `[delete T K] : caps-logical-effect` | `T : string`; `K : string` | — | 232 | yes |
+| `caps-logical-effect` | `[emit Kind V] : caps-logical-effect` | `Kind : string`; `V : string` | — | 235 | yes |
+| `caps-value` | `[F V] : caps-value` | `F : string`; `V : string` | — | 240 | — |
+| `caps-values` | `[] : caps-values` | — | — | 244 | — |
+| `caps-values` | `(cons X Xs) : caps-values` | `X : caps-value`; `Xs : caps-values` | — | 247 | — |
+| `caps-system-assuming` | `[system N As Ts Cs Ps] : caps-system-shape` | `N : string`; `As : (list string)`; `Ts : caps-tables`; `Cs : caps-commands`; `Ps : caps-invariants` | — | 254 | yes |
 <!-- END GENERATED ir-constructors -->
 
 A command runs its actions as one transaction (`caps.run`,
-`system.shen:147-157`). Each action sees the transaction's intermediate state;
+`system.shen:150-160`). Each action sees the transaction's intermediate state;
 `publish` appends `[emit Kind V]` to the transaction's effects
 (`system.shen:67`). The commit decision is `caps.finish`
-(`system.shen:141-145`): the transaction commits only if every action
+(`system.shen:144-148`): the transaction commits only if every action
 succeeded and the final state satisfies schema, invariants and postcondition;
 otherwise it is rejected as a whole. A request names an observed outcome, and
-`caps.admissible` (`system.shen:159-166`) maps it to the alternatives an
-observation must be one of:
+`caps.admissible` (`system.shen:192-193`, through the bridge of section 7 to
+`caps.adm`, `system.shen:167-174`) maps it to the alternatives an observation
+must be one of:
 
 | Request outcome | Model commits `(S', E)` | Model rejects |
 |---|---|---|
@@ -142,50 +162,36 @@ transaction, and an unknown outcome resolves in place (section 7 names them).
 <!-- BEGIN GENERATED ir-constructors tests/claim_semantics/fixtures/systems/v2-draft/system-types.shen -->
 | Datatype | Conclusion | Premises | Side condition | Line | `system.py` accepts tag |
 |---|---|---|---|---|---|
-| `caps-outcome` | `[ok] : caps-outcome` | — | — | 19 | no |
-| `caps-outcome` | `[fail R] : caps-outcome` | `R : caps-fail-reason` | — | 22 | no |
-| `caps-outcome` | `[info] : caps-outcome` | — | — | 24 | no |
-| `caps-fail-reason` | `[rejected L] : caps-fail-reason` | `L : string` | — | 29 | no |
-| `caps-fail-reason` | `[aborted] : caps-fail-reason` | — | — | 31 | no |
-| `caps-effect` | `[effect I A L] : caps-effect` | `I : string`; `A : string`; `L : caps-logical-effect` | — | 38 | no |
-| `caps-logical-effect` | `[create T K Fs] : caps-logical-effect` | `T : string`; `K : string`; `Fs : caps-values` | — | 43 | no |
-| `caps-logical-effect` | `[put T K F V] : caps-logical-effect` | `T : string`; `K : string`; `F : string`; `V : string` | — | 46 | no |
-| `caps-logical-effect` | `[delete T K] : caps-logical-effect` | `T : string`; `K : string` | — | 49 | no |
-| `caps-logical-effect` | `[emit Kind V] : caps-logical-effect` | `Kind : string`; `V : string` | — | 52 | no |
-| `caps-value` | `[F V] : caps-value` | `F : string`; `V : string` | — | 57 | — |
-| `caps-system-assuming` | `[system N As Ts Cs Ps] : caps-system-shape` | `N : string`; `As : (list string)`; `Ts : caps-tables`; `Cs : caps-commands`; `Ps : caps-invariants` | — | 63 | yes |
-| `caps-intent` | `[intent X] : caps-intent` | `X : caps-expr` | — | 69 | no |
-| `caps-action-outbox` | `[outbox T I V] : caps-action` | `T : string`; `I : caps-intent`; `V : caps-expr` | — | 75 | no |
-| `caps-contract` | `[at-most-once] : caps-contract` | — | — | 81 | no |
-| `caps-contract` | `[at-least-once] : caps-contract` | — | — | 83 | no |
-| `caps-table-channel` | `[channel Kind C T] : caps-table` | `Kind : string`; `C : caps-contract`; `T : string` | — | 88 | no |
-| `caps-step` | `[transaction N As] : caps-step` | `N : string`; `As : caps-actions` | — | 95 | no |
-| `caps-step` | `[deliver N T I [on-ok Ok] [on-fail Fail] [on-info Info]] : caps-step` | `N : string`; `T : string`; `I : caps-intent`; `Ok : caps-steps`; `Fail : caps-steps`; `Info : caps-steps` | — | 98 | no |
-| `caps-steps` | `[] : caps-steps` | — | — | 102 | — |
-| `caps-steps` | `(cons X Xs) : caps-steps` | `X : caps-step`; `Xs : caps-steps` | — | 105 | — |
-| `caps-operation` | `[operation N Args I Pre Ss Post] : caps-operation` | `N : string`; `Args : (list string)`; `I : caps-intent`; `Pre : caps-pred`; `Ss : caps-steps`; `Post : caps-pred` | — | 112 | no |
-| `caps-commands-operation` | `(cons X Xs) : caps-commands` | `X : caps-operation`; `Xs : caps-commands` | — | 117 | — |
-| `caps-event` | `[open] : caps-event` | — | — | 122 | no |
-| `caps-event` | `[invoke Inv Op Args] : caps-event` | `Inv : string`; `Op : string`; `Args : caps-values` | — | 125 | no |
-| `caps-event` | `[complete Inv O] : caps-event` | `Inv : string`; `O : caps-outcome` | — | 128 | no |
-| `caps-event` | `[close] : caps-event` | — | — | 130 | no |
-| `caps-history` | `[history Es] : caps-history` | `Es : caps-events` | — | 135 | no |
-| `caps-event-observation` | `[observation B Rs] : caps-event` | `B : boolean`; `Rs : caps-reads` | — | 142 | no |
-| `caps-read` | `[rows T D Rows] : caps-read` | `T : string`; `D : boolean`; `Rows : caps-rows` | — | 147 | no |
-| `caps-read` | `[journal S D From To Ps] : caps-read` | `S : string`; `D : boolean`; `From : string`; `To : string`; `Ps : caps-journal-parts` | — | 150 | no |
-| `caps-row` | `[row K Fs] : caps-row` | `K : string`; `Fs : caps-values` | — | 155 | no |
-| `caps-journal-part` | `[entry Seq E] : caps-journal-part` | `Seq : string`; `E : caps-effect` | — | 160 | no |
-| `caps-journal-part` | `[gap From To] : caps-journal-part` | `From : string`; `To : string` | — | 163 | no |
-| `caps-values` | `[] : caps-values` | — | — | 167 | — |
-| `caps-values` | `(cons X Xs) : caps-values` | `X : caps-value`; `Xs : caps-values` | — | 170 | — |
-| `caps-events` | `[] : caps-events` | — | — | 174 | — |
-| `caps-events` | `(cons X Xs) : caps-events` | `X : caps-event`; `Xs : caps-events` | — | 177 | — |
-| `caps-reads` | `[] : caps-reads` | — | — | 181 | — |
-| `caps-reads` | `(cons X Xs) : caps-reads` | `X : caps-read`; `Xs : caps-reads` | — | 184 | — |
-| `caps-rows` | `[] : caps-rows` | — | — | 188 | — |
-| `caps-rows` | `(cons X Xs) : caps-rows` | `X : caps-row`; `Xs : caps-rows` | — | 191 | — |
-| `caps-journal-parts` | `[] : caps-journal-parts` | — | — | 195 | — |
-| `caps-journal-parts` | `(cons X Xs) : caps-journal-parts` | `X : caps-journal-part`; `Xs : caps-journal-parts` | — | 198 | — |
+| `caps-intent` | `[intent X] : caps-intent` | `X : caps-expr` | — | 23 | no |
+| `caps-action-outbox` | `[outbox T I V] : caps-action` | `T : string`; `I : caps-intent`; `V : caps-expr` | — | 29 | no |
+| `caps-contract` | `[at-most-once] : caps-contract` | — | — | 35 | no |
+| `caps-contract` | `[at-least-once] : caps-contract` | — | — | 37 | no |
+| `caps-table-channel` | `[channel Kind C T] : caps-table` | `Kind : string`; `C : caps-contract`; `T : string` | — | 42 | no |
+| `caps-step` | `[transaction N As] : caps-step` | `N : string`; `As : caps-actions` | — | 49 | no |
+| `caps-step` | `[deliver N T I [on-ok Ok] [on-fail Fail] [on-info Info]] : caps-step` | `N : string`; `T : string`; `I : caps-intent`; `Ok : caps-steps`; `Fail : caps-steps`; `Info : caps-steps` | — | 52 | no |
+| `caps-steps` | `[] : caps-steps` | — | — | 56 | — |
+| `caps-steps` | `(cons X Xs) : caps-steps` | `X : caps-step`; `Xs : caps-steps` | — | 59 | — |
+| `caps-operation` | `[operation N Args I Pre Ss Post] : caps-operation` | `N : string`; `Args : (list string)`; `I : caps-intent`; `Pre : caps-pred`; `Ss : caps-steps`; `Post : caps-pred` | — | 66 | no |
+| `caps-commands-operation` | `(cons X Xs) : caps-commands` | `X : caps-operation`; `Xs : caps-commands` | — | 71 | — |
+| `caps-event` | `[open] : caps-event` | — | — | 76 | no |
+| `caps-event` | `[invoke Inv Op Args] : caps-event` | `Inv : string`; `Op : string`; `Args : caps-values` | — | 79 | no |
+| `caps-event` | `[complete Inv O] : caps-event` | `Inv : string`; `O : caps-outcome` | — | 82 | no |
+| `caps-event` | `[close] : caps-event` | — | — | 84 | no |
+| `caps-history` | `[history Es] : caps-history` | `Es : caps-events` | — | 89 | no |
+| `caps-event-observation` | `[observation B Rs] : caps-event` | `B : boolean`; `Rs : caps-reads` | — | 96 | no |
+| `caps-read` | `[rows T D Rows] : caps-read` | `T : string`; `D : boolean`; `Rows : caps-rows` | — | 101 | no |
+| `caps-read` | `[journal S D From To Ps] : caps-read` | `S : string`; `D : boolean`; `From : string`; `To : string`; `Ps : caps-journal-parts` | — | 104 | no |
+| `caps-row` | `[row K Fs] : caps-row` | `K : string`; `Fs : caps-values` | — | 109 | no |
+| `caps-journal-part` | `[entry Seq E] : caps-journal-part` | `Seq : string`; `E : caps-effect` | — | 114 | no |
+| `caps-journal-part` | `[gap From To] : caps-journal-part` | `From : string`; `To : string` | — | 117 | no |
+| `caps-events` | `[] : caps-events` | — | — | 121 | — |
+| `caps-events` | `(cons X Xs) : caps-events` | `X : caps-event`; `Xs : caps-events` | — | 124 | — |
+| `caps-reads` | `[] : caps-reads` | — | — | 128 | — |
+| `caps-reads` | `(cons X Xs) : caps-reads` | `X : caps-read`; `Xs : caps-reads` | — | 131 | — |
+| `caps-rows` | `[] : caps-rows` | — | — | 135 | — |
+| `caps-rows` | `(cons X Xs) : caps-rows` | `X : caps-row`; `Xs : caps-rows` | — | 138 | — |
+| `caps-journal-parts` | `[] : caps-journal-parts` | — | — | 142 | — |
+| `caps-journal-parts` | `(cons X Xs) : caps-journal-parts` | `X : caps-journal-part`; `Xs : caps-journal-parts` | — | 145 | — |
 <!-- END GENERATED ir-constructors -->
 
 A system is v1's `[system N Ts Cs Ps]` or `[system N As Ts Cs Ps]`, where
@@ -268,7 +274,10 @@ payload, and may not conclude "at most one" from a journal that has a gap or
 is not drained (4.5).
 
 Negative: `rejected-effect-without-intent.ops-v2` (T-outbox),
-`rejected-intent-reads-state.ops-v2` (R-INTENT-SCOPE).
+`rejected-intent-reads-state.ops-v2` (R-INTENT-SCOPE),
+`rejected-untagged-effect.ops-v2` (T-effect). At the engine's front end
+(PR 1), a request that names its invocation must report every observed effect
+as a record; an untagged one is refused (`test_r02_bridge`).
 
 ### 4.3 Transactions, outbox records, delivery attempts
 
@@ -436,6 +445,7 @@ implemented by their PR.
 | Rule | Where | Rejects |
 |---|---|---|
 | `T-outcome` | `caps-outcome` | an outcome other than `ok`, `fail R`, `info` |
+| `T-effect` | `caps-effect` | a bare logical effect where an effect record `[effect I A L]` is required (no intent id, no attempt id) |
 | `T-outbox` | `caps-action-outbox` | an outbox record whose key is not `[intent X]` |
 | `T-step` | `caps-step` | a step that is neither a transaction nor a delivery |
 | `T-deliver` | `caps-step` | a delivery without all three arms `on-ok`, `on-fail`, `on-info` |
@@ -563,7 +573,7 @@ side conditions are checked on computed write sets; effects compose by
 concatenation, keeping order and multiplicity (a set union would be M4); one
 transaction gives every record one intent and one attempt. What it rests on:
 the access summary that `outbox` writes its table. Summarized like v1
-`publish` (empty write set, `system.shen:199`), step 3 would still hold, but
+`publish` (empty write set, `system.shen:258`), step 3 would still hold, but
 any later frame or commutation claim involving `transfer-outbox` would be
 unsound (section 12). The `deliver` step after `apply` is not part of the
 composition: it is past a commit point, and the `info` prefixes of 4.1 are
@@ -579,6 +589,7 @@ the rejecting rule. `T-*` fixtures must fail typing in `DraftTypecheckTest`;
 | `rejected-deliver-without-info-arm.ops-v2` | `T-deliver` | an unhandled `info` response treated as success |
 | `rejected-publish-outside-transaction.ops-v2` | `T-step` | an external publish with neither atomicity nor intent id |
 | `rejected-history-unknown-outcome.ops-v2` | `T-outcome` | the v1 request alphabet inside histories |
+| `rejected-untagged-effect.ops-v2` | `T-effect` | a reported effect counted by payload only, its attempt unattributable (M2, M4) |
 | `rejected-publish-in-operation.ops-v2` | `R-EFFECT-PLACEMENT` | atomic publish leaking out of v1 commands |
 | `rejected-outbox-into-plain-table.ops-v2` | `R-CHANNEL` | an outbox record with no state and no contract |
 | `rejected-insert-into-channel-table.ops-v2` | `R-CHANNEL` | an outbox row not keyed by intent, with undefined eligibility |
@@ -615,23 +626,53 @@ the second is about histories, not publish.
 intent, with the single step `[transaction "body" As]`. Request outcomes:
 `committed` ⇒ `[ok]`; `rejected` ⇒ `[fail [rejected L]]` with `L` bound to the
 model's own rejection label, so any label is accepted as v1 does
-(`system.shen:160`); `aborted` ⇒ `[fail [aborted]]`; `unknown` ⇒ `[info]`. The
+(`caps.bridge-outcome`, `system.shen:184-190`); `aborted` ⇒ `[fail [aborted]]`; `unknown` ⇒ `[info]`. The
 request API forces outcomes, so `definite-fail-v1` holds by construction
 there. A v1 effect `L` of invocation `Inv` is `[effect Inv Inv/body L]`;
 `π([effect I A L]) = L`.
+
+**As implemented (PR 1).** `caps.admissible` is `caps.adm` (the table of 4.1
+for a command) applied to `caps.bridge-outcome` of the request's outcome, so
+every v1 request is answered through the bridge. A request may name its
+outcome in the R02 alphabet, as the JSON array of its S-expression (`["ok"]`,
+`["fail", ["rejected", L]]`, `["fail", ["aborted"]]`, `["info"]`), and may name
+an `invocation` id. Only such a request's result carries `assumptions`: the
+model's declared list, or for a v1 system `info-in-place-v1` plus
+`atomic-publish-v1` when a command publishes (`caps.assumptions`). The request
+API forces outcomes, so `definite-fail-v1` is not added there. With an
+`invocation`, the admissible effects are records `[effect Inv Inv/body L]`
+(`caps.identify`), an observation must report records (an untagged effect is
+refused), an observed record with another intent or attempt id does not match,
+and the independent checker (`verify_effects`) checks each record's ids and
+replays the projections. `explore` with an R02 outcome carries the
+assumptions at the top of the campaign. The v1 adapter protocols
+(`capcov-system-adapter-v1`, `capcov-scenario-adapter-v1`) carry v1 requests
+only; R02 outcomes reach adapters with `capcov-scenario-adapter-v2` (PR 4).
+A system `[system N As Ts Cs Ps]` is evaluated like its v1 form, with
+R-ASSUME as a side condition of `caps.scoped?`: `As` names only
+`info-in-place-v1`, `atomic-publish-v1`, `single-landing-v1`, each once, and
+includes those its commands need.
 
 **Claim.** For every v1 request with outcome `committed`, `rejected` or
 `aborted`, `π(Adm(bridge(req))) = caps.admissible(req)`: a command has one
 transaction and no delivery, so `Run` is exactly the one execution `caps.run`
 computes. For `unknown`, one transaction is one commit point, so the `info`
-prefixes are exactly `{nothing, everything}` (`system.shen:165-166`), under
+prefixes are exactly `{nothing, everything}` (`system.shen:173-174`), under
 `info-in-place-v1`, and under `atomic-publish-v1` for a publishing command.
 
 **Gate (G5), from PR 1.** In the `shen` family, every existing `*.ops`
 fixture's `evaluate` and `explore` JSON is byte-identical before and after each
 R02 PR. The v1 request API's output therefore gains no assumption field;
 `capcov-system-evaluation-v1` implies the bridge's assumptions, and only R02
-history verdicts carry them.
+requests and history verdicts carry them. Enforced by
+`tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest` against
+goldens written at the R02 base commit (`g5/manifest.json`). Two values are
+outside the comparison: `libraries`, the digests of the engine's own Shen
+sources, which an R02 PR changes by definition, and `runtime`, the digests of
+the host's binaries. Every other byte, and the exit code, is compared. The
+bridge's claim below is checked by `test_r02_bridge` on the same inputs: each
+v1 request rewritten to its R02 outcome answers exactly as the golden, plus
+`assumptions` as in the table.
 
 | Fixture | Commands | Publishing commands | committed / aborted / rejected | `unknown` → `info` |
 |---|---|---|---|---|
@@ -652,9 +693,16 @@ each typechecks alone), its evaluator case and access summary, wires its
 rejected fixtures to a real rejection, and adds a rejecting mutant. From PR 1,
 the G5 byte-identity gate holds for every PR.
 
-1. **Outcomes and effect records**: `caps-outcome`, `caps-fail-reason`,
-   `caps-effect`, `caps-logical-effect`, the assumption list, the bridge,
-   R-ASSUME.
+1. **Outcomes and effect records** (**implemented**): `caps-outcome`,
+   `caps-fail-reason`, `caps-effect`, `caps-logical-effect`, the assumption
+   list, the bridge, R-ASSUME. Its datatypes are in `system-types.shen`;
+   evaluator case `caps.adm` / `caps.bridge-outcome` / `caps.identify` /
+   `caps.assumptions`; rejected fixtures wired: R-ASSUME
+   (`rejected-command-without-assumption.ops-v2` refused by the engine, its
+   repair accepted), T-effect (`rejected-untagged-effect.ops-v2`, a new
+   fixture, with a tagged control that types). The access summary is
+   unchanged: PR 1 adds no action. `T-outcome`'s fixture is a history, typed
+   by `DraftTypecheckTest` until PR 4.
 2. **Operations**: `caps-intent`, `caps-operation`, `caps-step`
    (transaction, deliver with all three arms typed; the environment answers
    only `ok` or `fail`, so `on-info` is typed but unreachable), outbox,
@@ -669,7 +717,7 @@ the G5 byte-identity gate holds for every PR.
 
 | Probe IR-gap test | Spec | Flips with | Subject and notes |
 |---|---|---|---|
-| `test_effects_carry_intent_and_attempt_identity` | 4.2 | PR 1 | Shape: `["effect", "j", "i1/publish", ["emit", "delivery-attempt", "hello"]]`, not a fourth `emit` element. |
+| `test_effects_carry_intent_and_attempt_identity` | 4.2 | PR 1 (flipped) | Shape: `["effect", "j", "i1/publish", ["emit", "delivery-attempt", "hello"]]`, not a fourth `emit` element. |
 | `test_outbox_record_and_delivery_attempt_are_separate_constructors` | 4.3 | PR 2 | Shape: `[outbox T [intent X] V]` in a `[transaction ...]` and `[deliver N T [intent X] [on-ok ..] [on-fail ..] [on-info ..]]`, inside an `[operation ...]`. |
 | `test_m2_delivery_effects_carry_intent_identity` | 4.2, H1 | PR 2 | The R02 model, intent = job id. Through the bridge, `outbox-intended.ops` effects differ by intent = invocation id, which would flip the test without intent identity; the flipping PR asserts the intents equal the job ids. |
 | `test_info_send_has_at_least_three_alternatives` | 4.1, 4.3 | PR 3 | `send` of `transfer-outbox.ops-v2`: six alternatives, three classes. On `outbox-intended.ops` it stays at two (section 7). |
@@ -689,7 +737,7 @@ least one rejected fixture listed in its row.
 | Tags | Meaning | Negative |
 |---|---|---|
 | `ok` `fail` `info` `rejected` `aborted` | 4.1 | `rejected-history-unknown-outcome.ops-v2`; M3 |
-| `effect` `create` `put` `delete` `emit` | 4.2 | `rejected-journal-merged-entries.ops-v2`; M2 |
+| `effect` `create` `put` `delete` `emit` | 4.2 | `rejected-journal-merged-entries.ops-v2`, `rejected-untagged-effect.ops-v2`; M2 |
 | `intent` | 4.2 | `rejected-effect-without-intent.ops-v2`, `rejected-intent-reads-state.ops-v2` |
 | `outbox` | 4.3 | `rejected-effect-without-intent.ops-v2`, `rejected-outbox-into-plain-table.ops-v2` |
 | `channel` `at-most-once` `at-least-once` | 4.3 | `rejected-insert-into-channel-table.ops-v2`, `rejected-outbox-into-plain-table.ops-v2`; H1 against H5's replay |
@@ -702,16 +750,19 @@ least one rejected fixture listed in its row.
 
 - **G1 Typecheck.** `DraftTypecheckTest` is wired into the `shen` family and
   listed in `tests/tool-families.json`; it skips only in the plain-Python run
-  (`tests/skips-allowed-plain-python.json`). It has never run: its first run
-  is in CI, and a failure there may be in the overlay or in the test's driver.
+  (`tests/skips-allowed-plain-python.json`). It runs in the Shen dev shell.
 - **G2 Side conditions not executed.** `R-*` fixtures are typed and
-  cross-referenced only; each PR wires its own rejection.
+  cross-referenced only; each PR wires its own rejection. R-ASSUME is wired
+  (PR 1).
 - **G3 Composition derivation unchecked.** Section 6 is hand-written; the
   checker is R04.
 - **G4 Admissible sets hand-enumerated.** Section 5 is to be reproduced by
   `explore` in PRs 3–5, executor `model`.
-- **G5 Compatibility.** Argued in section 7; the byte-identity gate runs from
-  PR 1. The base-family compatibility test only cross-checks the table's text.
+- **G5 Compatibility.** Enforced for PR 1's scope: every v1 `.ops` fixture's
+  `evaluate` and `explore` JSON is byte-identical to goldens from the R02 base
+  (`V1CompatibilityGateTest`, `shen` family; section 7 names the two digests
+  it excludes). Each later PR keeps it. The base-family compatibility test
+  only cross-checks the table's text.
 
 ## 11. Decisions and open questions
 
@@ -731,6 +782,28 @@ Decided by the owner (via the coordinator) and recorded here:
 - **Drain is per store.** Rationale: matches the faults completeness flags
   (`applied_closed`, `changes_closed`, `finals_closed`) and real deployments,
   where one store can be quiescent while another is not.
+
+Spec deviations in PR 1, each the minimal correct reading:
+
+- **G5 cannot cover the engine's own digests.** `evaluate` reports
+  `libraries`, the sha256 of `system.shen` and `system-types.shen`, which any
+  R02 PR changes; `runtime` is the host binaries'. The gate compares every
+  other byte and names the two exclusions.
+- **Results carrying assumptions.** Section 4.6 says every verdict carries the
+  assumption list; section 7 says the v1 request API gains no assumption
+  field. Both hold: a v1 request's result is unchanged, a request using an R02
+  outcome or an invocation id carries `assumptions`. The request API forces
+  its outcome, so `definite-fail-v1` is not added to it.
+- **Assumption names a system may declare.** R-ASSUME's "unknown name" is read
+  as anything but `info-in-place-v1`, `atomic-publish-v1`,
+  `single-landing-v1`; `definite-fail-v1:<id>` is the adapter's, not the
+  model's, so a system's list refuses it. A name listed twice is refused.
+- **T-effect.** Section 9 lists no rejected fixture whose only fault is an
+  untagged effect. PR 1 adds `rejected-untagged-effect.ops-v2` and the rule
+  `T-effect` (4.7) for it.
+- **The bridge for a v1 `rejected` request when the model commits.** There is
+  no model label to bind; any `[fail [rejected L]]` then admits nothing, so
+  the bridge binds the empty label.
 
 Still open:
 
@@ -767,7 +840,7 @@ have a home; they land with R04/R17, not R02.
   a retry only of an operation with `[intent X]`.
 - **Frame claims**, `[disjoint A B]`: holds when `W(A) ∩ (R(B) ∪ W(B)) = ∅`,
   symmetrically, and no invariant reads both a table in `W(A)` and one in
-  `W(B)`, with `R`/`W` from `caps.analyze` (`system.shen:192-216`) extended:
+  `W(B)`, with `R`/`W` from `caps.analyze` (`system.shen:231-275`) extended:
   `outbox T` writes `T`, `deliver N T` reads and writes `T`. Rejected example,
   *frame claiming disjointness while writing the outbox table*:
   `[disjoint "transfer" "relay-transfer"]` on the worked model, refuted by

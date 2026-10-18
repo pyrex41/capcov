@@ -184,6 +184,7 @@
     {
       "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, gate G1).",
       "tests": [
+        "tests.test_ir_specification.DraftTypecheckTest.test_an_untagged_effect_is_what_rejects_its_fixture",
         "tests.test_ir_specification.DraftTypecheckTest.test_draft_fixtures_type_as_specified",
         "tests.test_ir_specification.DraftTypecheckTest.test_one_result_per_case",
         "tests.test_ir_specification.DraftTypecheckTest.test_v1_fixtures_still_type_with_the_overlay_loaded"
@@ -196,6 +197,17 @@
         "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_every_golden_comes_from_the_recorded_base_libraries",
         "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_the_cases_are_exactly_the_manifest_and_cover_every_v1_fixture",
         "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest.test_the_inputs_are_the_committed_inputs"
+      ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, R02 PR 1).",
+      "tests": [
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_a_declaring_system_answers_as_its_v1_form",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_explore_with_r02_outcomes_matches_v1_and_carries_assumptions",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_outcomes_identity_and_labels",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_r_assume_refuses_unknown_and_repeated_names",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_r_assume_rejects_the_fixture_and_accepts_its_repair",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_the_bridge_reproduces_every_v1_answer_and_names_its_assumptions"
       ]
     }
   ]

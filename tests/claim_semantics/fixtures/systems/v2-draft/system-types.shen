@@ -5,62 +5,16 @@
 \\ Additive only. Every datatype below has a new name; a rule that extends a
 \\ v1 type concludes that type (as caps-expr-arithmetic does in v1). No v1
 \\ datatype is redefined, so every v1 model types as before. Each block names
-\\ the R02 PR that lands it (section 8).
+\\ the R02 PR that lands it (section 8). A landed PR's blocks move into
+\\ system-types.shen and leave this file: PR 1 (caps-outcome,
+\\ caps-fail-reason, caps-effect, caps-logical-effect, caps-value(s),
+\\ caps-system-assuming) has landed.
 \\
 \\ Not loaded by the engine and not packaged: it lives under tests/. Typing is
 \\ structural only; the R-* side conditions of section 4.7 are specified in
 \\ the doc and land with their PR. tests.test_ir_specification.
 \\ DraftTypecheckTest (shen family) loads kernel.shen, system-types.shen and
 \\ this file under (tc +) and typechecks the fixtures beside it.
-
-\\ PR 1. Outcome of one invocation, in the capcov.faults alphabet.
-(datatype caps-outcome
-  ______________________
-  [ok] : caps-outcome;
-  R : caps-fail-reason;
-  ______________________
-  [fail R] : caps-outcome;
-  ______________________
-  [info] : caps-outcome;)
-
-(datatype caps-fail-reason
-  L : string;
-  ______________________
-  [rejected L] : caps-fail-reason;
-  ______________________
-  [aborted] : caps-fail-reason;)
-
-\\ PR 1. Effect records: intent id, attempt id, logical effect. The logical
-\\ effects are v1's runtime effects (system.py:100-104), now typed.
-(datatype caps-effect
-  I : string; A : string; L : caps-logical-effect;
-  ______________________
-  [effect I A L] : caps-effect;)
-
-(datatype caps-logical-effect
-  T : string; K : string; Fs : caps-values;
-  ______________________
-  [create T K Fs] : caps-logical-effect;
-  T : string; K : string; F : string; V : string;
-  ______________________
-  [put T K F V] : caps-logical-effect;
-  T : string; K : string;
-  ______________________
-  [delete T K] : caps-logical-effect;
-  Kind : string; V : string;
-  ______________________
-  [emit Kind V] : caps-logical-effect;)
-
-(datatype caps-value
-  F : string; V : string;
-  ______________________
-  [F V] : caps-value;)
-
-\\ PR 1. A system that names its assumptions (strings, section 7).
-(datatype caps-system-assuming
-  N : string; As : (list string); Ts : caps-tables; Cs : caps-commands; Ps : caps-invariants;
-  ______________________
-  [system N As Ts Cs Ps] : caps-system-shape;)
 
 \\ PR 2. Intent identity, stable across retries of one logical request.
 (datatype caps-intent
@@ -161,13 +115,6 @@
   From : string; To : string;
   ______________________
   [gap From To] : caps-journal-part;)
-
-(datatype caps-values
-  ______________________
-  [] : caps-values;
-  X : caps-value; Xs : caps-values;
-  ______________________
-  (cons X Xs) : caps-values;)
 
 (datatype caps-events
   ______________________

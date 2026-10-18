@@ -37,7 +37,7 @@ import tempfile
 import unittest
 
 from capcov.faults.history import Result
-from capcov.operations import OperationError
+from capcov.operations import OperationError, _string
 from capcov.operations.scenarios import _payload
 from capcov.operations.system import _effect_terms, _request, _term, digest
 
@@ -535,19 +535,28 @@ class InexpressibleFrontEndTests(IRGapCase):
     def given_effects_carry_intent_and_attempt_identity(self):
         return _effect_terms([EMIT])
 
-    @unittest.expectedFailure
     def test_effects_carry_intent_and_attempt_identity(self):
         """Effects must carry (intent-id, attempt-id, logical-effect).
 
-        Missing: effect identity. An effect is [emit Kind Value] /
-        [put T K F V] / [create ...] / [delete T K] with fixed arity
-        (system.py:100-104; produced by system.shen:67 for publish). So a
-        duplicate can only be "two equal payloads" (plan §2.2), not "two
-        delivered attempts of one intent". Flips when _effect_terms accepts an
-        emit carrying intent and attempt ids.
+        Was missing: effect identity. An effect was [emit Kind Value] /
+        [put T K F V] / [create ...] / [delete T K] with fixed arity, so a
+        duplicate could only be "two equal payloads" (plan §2.2), not "two
+        delivered attempts of one intent". Flipped by R02 PR 1: the effect
+        record [effect I A L] (docs/ir-specification.md section 4.2, in the
+        spec's shape, not a fourth emit element). The ids survive into the
+        Shen term; two records of one logical effect under different attempts
+        stay distinct, and a record without its ids is refused.
         """
+        record = ["effect", "j", "i1/publish", EMIT]
         with self.ir_gap("no intent/attempt identity on effects"):
-            _effect_terms([EMIT + [{"intent": "j", "attempt": "1"}]])
+            term = _effect_terms([record])
+            other = _effect_terms([["effect", "j", "i2/publish", EMIT]])
+        intent, attempt = _string("j"), _string("i1/publish")
+        self.assertEqual(term, f"[[effect {intent} {attempt} {self.given[1:-1]}]]")
+        self.assertNotEqual(term, other)
+        self.assertNotEqual(term, self.given)
+        with self.assertRaises(OperationError):
+            _effect_terms([["effect", "j", EMIT]])
 
     def given_outbox_record_and_delivery_attempt_are_separate_constructors(self):
         return _term(INTENDED)

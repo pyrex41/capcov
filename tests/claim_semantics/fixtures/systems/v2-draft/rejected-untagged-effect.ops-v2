@@ -1,0 +1,17 @@
+; rejected-by: T-effect
+; docs/ir-specification.md section 4.2. Every effect a store reports is an
+; effect record [effect I A L]. Entry 2 of the channel journal is a bare
+; logical effect, with no intent id and no attempt id. No rule types a bare
+; [emit Kind V] as caps-effect, so a second delivery could be told apart from
+; the first only by payload (M2), and its attempt could not be attributed
+; (M4). The same history with entry 2 tagged types; everything else here is
+; well formed.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
+  [invoke "i2" "send" [["id" "j"]]] [complete "i2" [ok]]
+  [observation true
+   [[journal "delivery-attempt" true "1" "2"
+     [[entry "1" [effect "j" "i1/publish" [emit "delivery-attempt" "hello"]]]
+      [entry "2" [emit "delivery-attempt" "hello"]]]]]]
+  [close]]]

@@ -52,6 +52,11 @@ def _payload(scenario, fuel):
         call = step["call"]
         if not isinstance(call, dict) or set(call) != {"command", "args", "outcome"}:
             raise OperationError("scenario call requires command, args, outcome")
+        if not isinstance(call["outcome"], str):
+            # R02 outcomes reach adapters with protocol v2 (histories), not v1.
+            raise OperationError(
+                "capcov-scenario-adapter-v1 calls use the v1 outcome alphabet"
+            )
         _request(dict(call, state=scenario["initial"]), fuel)
         if step["choice"] not in ("0", "1"):
             raise OperationError("executable scenario choice must be 0 or 1")

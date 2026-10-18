@@ -105,9 +105,11 @@
   _ [] -> (error "system: undeclared table"))
 
 (define caps.tables
+  [system _ _ Ts _ _] -> Ts
   [system _ Ts _ _] -> Ts)
 
 (define caps.commands
+  [system _ _ _ Cs _] -> Cs
   [system _ _ Cs _] -> Cs)
 
 (define caps.command
@@ -136,6 +138,7 @@
                (capop.all? (/. T (caps.table-ok? T S)) (caps.tables M)))))
 
 (define caps.invariants?
+  [system _ _ _ _ Ps] S -> (capop.all? (/. P (caps.pred (nth 2 P) [] [] S)) Ps)
   [system _ _ _ Ps] S -> (capop.all? (/. P (caps.pred (nth 2 P) [] [] S)) Ps))
 
 (define caps.finish
@@ -156,14 +159,70 @@
           (error "system: invalid initial state or invariant"))
         (error "system: argument names do not match command"))))
 
+\\ R02 PR 1 (docs/ir-specification.md, sections 4.1 and 7). Adm(x) of one
+\\ invocation of a command, by its outcome in the capcov.faults alphabet. A
+\\ command is one transaction, so its info prefixes at commit points are
+\\ exactly {nothing, everything}: under info-in-place-v1, and under
+\\ atomic-publish-v1 when it publishes (caps.assumptions).
+(define caps.adm
+  S [result After Effects Trace] [ok] -> [[result After Effects Trace]]
+  S [rejected _] [ok] -> []
+  S [rejected Why] [fail [rejected L]] -> (if (= (caps.label Why) L) [[result S [] []]] [])
+  S [result _ _ _] [fail [rejected _]] -> []
+  S _ [fail [aborted]] -> [[result S [] []]]
+  S [result After Effects Trace] [info] -> [[result S [] []] [result After Effects Trace]]
+  S [rejected _] [info] -> [[result S [] []]])
+
+\\ Rejection labels are symbols (precondition, invariant, duplicate-key,
+\\ missing-row) or a require's string; on the wire both are strings.
+(define caps.label
+  Why -> (if (string? Why) Why (str Why)))
+
+\\ The bridge: a v1 request outcome as an R02 outcome. rejected binds L to the
+\\ model's own label, so any label is accepted as v1 does; when the model
+\\ commits there is no label, and Adm of any [fail [rejected L]] is empty.
+(define caps.bridge-outcome
+  committed _ -> [ok]
+  rejected [rejected Why] -> [fail [rejected (caps.label Why)]]
+  rejected _ -> [fail [rejected ""]]
+  aborted _ -> [fail [aborted]]
+  unknown _ -> [info]
+  O _ -> O)
+
 (define caps.admissible
-  S [rejected _] rejected -> [[result S [] []]]
-  S [result _ _ _] rejected -> []
-  S [result After Effects Trace] committed -> [[result After Effects Trace]]
-  S [rejected Why] committed -> []
-  S _ aborted -> [[result S [] []]]
-  S [result After Effects Trace] unknown -> [[result S [] []] [result After Effects Trace]]
-  S [rejected _] unknown -> [[result S [] []]])
+  S R O -> (caps.adm S R (caps.bridge-outcome O R)))
+
+\\ Effect identity through the bridge: effect L of invocation Inv is
+\\ [effect Inv Inv/body L]; a command's single step is "body".
+(define caps.attempt
+  Inv -> (cn Inv "/body"))
+
+(define caps.identify
+  _ [] -> []
+  Inv [[result S Es T] | Alts] ->
+    [[result S (map (/. L [effect Inv (caps.attempt Inv) L]) Es) T] | (caps.identify Inv Alts)])
+
+\\ The assumptions a model's results carry (section 7). A system that names
+\\ its assumptions carries those; a v1 system is read with the bridge's.
+(define caps.publishes?
+  [command _ _ _ As _] -> (not (= [] (nth 3 (caps.summary As)))))
+
+(define caps.publishing
+  Cs -> (if (capop.all? (/. C (not (caps.publishes? C))) Cs) [] ["atomic-publish-v1"]))
+
+(define caps.needed
+  [] -> []
+  Cs -> ["info-in-place-v1" | (caps.publishing Cs)])
+
+(define caps.assumptions
+  [system _ As _ _ _] -> As
+  [system _ _ Cs _] -> ["info-in-place-v1" | (caps.publishing Cs)])
+
+\\ R-ASSUME: known names, each once, and every one the commands need.
+(define caps.assumptions-ok?
+  As Cs -> (and (capop.unique? As)
+            (and (capop.all? (/. A (element? A ["info-in-place-v1" "atomic-publish-v1" "single-landing-v1"])) As)
+                 (capop.all? (/. A (element? A As)) (caps.needed Cs)))))
 
 (define caps.accepts?
   Alternatives S E -> (prolog? (capop.member [result (receive S) (receive E) Trace] (receive Alternatives))))
@@ -296,6 +355,7 @@
              (capop.all? (/. F (and (element? (nth 2 F) (caps.field-names Fields)) (caps.member-table? (nth 3 F) Ts))) Foreign))))))
 
 (define caps.scoped?
+  [system N As Ts Cs Ps] -> (and (caps.assumptions-ok? As Cs) (caps.scoped? [system N Ts Cs Ps]))
   [system _ Ts Cs Ps] ->
     (and (<= (length Ts) 64)
      (and (<= (length Cs) 512)
