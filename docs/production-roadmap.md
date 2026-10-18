@@ -1,11 +1,11 @@
 # Typed behavior and production verification roadmap
 
-Planning revision: October 17, 2026. Baseline: `58ddd39b9edc5972855a3e3626fa818510e20bd5`, on
-`shen-specification-foundation`. This is the execution plan for the reasoning,
+Planning revision: October 17, 2026. Code baseline: `7b18a978d5bab624249ae290846be25c5933846f`, on
+`shen-specification-foundation`; no validation is recorded at that revision (R01). This is the execution plan for the reasoning,
 induction, evidence and adapter extensions. It complements the existing capcov
 plans; it does not declare the branch production-ready.
 
-The governing design is [Executable typed behavior and migration contracts](typed-behavior-architecture.md). This revision moves typed executable behavior ahead of evidence admission: legacy behavior, intended behavior and the migration contract are distinct, connected artifacts. B1-B4 below add the missing critical path; W0-W11 retain the detailed production work. The R-series replaces the previous N-series execution order.
+The governing design is [Executable typed behavior and migration contracts](typed-behavior-architecture.md). This revision moves typed executable behavior ahead of evidence admission: legacy behavior, intended behavior and the migration contract are distinct, connected artifacts. B1-B4 and W0-W11 below are headings that group the work; each lists the R-changes it contains. Dependencies are stated only in R-ids and come from [roadmap-deps.json](roadmap-deps.json), from which `scripts/roadmap-deps.py` generates the tables in sections 4 and 17. The R-series replaces the previous N-series execution order. Terms are defined in the [glossary](typed-behavior-architecture.md#10-glossary).
 
 Status meanings: **implemented** means code exists; **validated** requires the
 specified tests against a named revision; **production-ready** requires the
@@ -35,22 +35,26 @@ repository. The existing specifications are valuable input, not presumed truth.
 
 ## 2. What exists and what is still missing
 
-| Area | Implemented baseline | Remaining obligation |
-| --- | --- | --- |
-| Executable systems | Shen construction judgments, transactional action semantics, state/effect observations | Broader value/error semantics; application models and refinement |
-| Propositional proofs | Search plus independent sequent checking | Quantifiers, equality, richer arithmetic and structural induction |
-| History induction | Explicit Boolean transition systems | Derive/check abstraction from concrete operations; wider state theories |
-| Loop invariants | Initiation, preservation, continuation; nested invariant loops | Stronger relational invariants and compiler-refinement evidence |
-| Loop completion | Processed/remaining partition rule for row-local, current-key updates | Cross-key writes, insert/delete, nested completion and global selectors |
-| Typing | Operation/model datatypes; completion formula/context/judgment datatypes | Typed claim elaboration and authority judgments; checker-function typing is separate |
-| Evidence | Source anchors, identities, dependency invalidation, claim distinctions | Full route inventory, richer producers, durable lineage and admission policy |
-| Soufflé | Existing translation, compiled cache and differential closure checks | Current full validation, extended relation schemas and dependency maintenance |
-| Relational search | Finite Shen Prolog DSL with modes, cardinalities and affine capabilities | Better model integration, scoped symbolic generation and search guidance |
-| Adapters | Lifecycle SDK, HTTP control-plane client, synthetic HTTP/SQLite tests | Enforced leases, service mappings, actual DB/queue barriers and fault hooks |
-| Replay | Whole-history execution, explicit outcome choice, repeated observation comparison | Controlled time, entropy, scheduling and I/O; causal histories and durable replay bundles |
-| Antithesis | Property catalog and SDK publication bridge | Provisioned campaigns, actual environment control and result ingestion |
-| Runtime | Bifrost/Shen-Go process per request | Batching, measured caches, isolated workers, then justified incremental reuse |
-| Release | Targeted native tests, lint and packaging checks from prior work | Full pinned CI, installation/upgrade tests and consuming-system qualification |
+| Area | Code present @ `7b18a97` | Validated @rev (family, run) | Remaining |
+| --- | --- | --- | --- |
+| Executable systems | Shen construction judgments, transactional action semantics, state/effect observations | pending R01 | Broader value/error semantics; application models and refinement |
+| Propositional proofs | Search plus independent sequent checking | pending R01 | Quantifiers, equality, richer arithmetic and structural induction |
+| History induction | Explicit Boolean transition systems | pending R01 | Derive/check abstraction from concrete operations; wider state theories |
+| Loop invariants | Initiation, preservation, continuation; nested invariant loops | pending R01 | Stronger relational invariants and compiler-refinement evidence |
+| Loop completion | Processed/remaining partition rule for row-local, current-key updates | pending R01 | Cross-key writes, insert/delete, nested completion and global selectors |
+| Typing | Operation/model datatypes; completion formula/context/judgment datatypes | pending R01 | Typed claim elaboration and authority judgments; checker-function typing is separate |
+| Evidence | Source anchors, identities, dependency invalidation, claim distinctions; readable observation and static claim specifications elaborated to schema-2 bundles under v2 authority (v1 remains the default profile) | pending R01 | Full route inventory, richer producers, durable lineage and admission policy |
+| Soufflé | Existing translation, compiled cache and differential closure checks; `operations/evidence.dl` source-evidence invalidation closure | pending R01 | Current full validation, extended relation schemas and dependency maintenance |
+| Relational search | Finite Shen Prolog DSL with modes, cardinalities and affine capabilities | pending R01 | Better model integration, scoped symbolic generation and search guidance |
+| Adapters | Lifecycle SDK, HTTP control-plane client, synthetic HTTP/SQLite tests | pending R01 | Enforced leases, service mappings, actual DB/queue barriers and fault hooks |
+| Replay | Whole-history execution, explicit outcome choice, repeated observation comparison | pending R01 | Controlled time, entropy, scheduling and I/O; causal histories and durable replay bundles |
+| Antithesis | Property catalog and SDK publication bridge | pending R01 | Provisioned campaigns, actual environment control and result ingestion |
+| Runtime | Bifrost/Shen-Go process per request | pending R01 | Batching, measured caches, isolated workers, then justified incremental reuse |
+| Release | CI workflow, flake, skip-accounting gate and wheel check scripts | pending R01 | Full pinned CI run, installation/upgrade tests and consuming-system qualification |
+
+"Code present" means the code exists at that revision. No row is validated there:
+earlier targeted runs, including those of prior milestones, are not carried
+forward. R01 fills the validation column with the revision, tool family and run.
 
 Current boundaries must remain visible until deliberately changed: propositional
 proof validation allows 12 distinct atoms and 128 formula nodes; the Boolean
@@ -103,30 +107,50 @@ unbounded unreachability proof.
 
 ## 4. Dependency order
 
-| Work package | Prerequisites | Can proceed alongside |
-| --- | --- | --- |
-| W0: baseline and validation | Current branch | Consumer inventory and ambiguity collection |
-| B1: domain language and model variants | W0 inventory; align W1 identities | W6 adapter lifecycle |
-| W1: evidence/checker contracts | W0; B1 artifact vocabulary | B1, W6 |
-| B2: checked rules and behavior composition | B1, W1 | W2, W3, W6 |
-| B3: model execution, generation and correspondence | B2, supported W3 witnesses | W6-W7, consumer models |
-| B4: migration contracts and three-way qualification | B1, B3, W1; real execution needs W6 | W9 rollout |
-| W2: typed claims and authority | W1, B1 sorts; integrate B2 derivations | W3, W6 |
-| W3: checked compiler transformations | W1, B1 semantics | B2, W2, W6 |
-| W4: quantified/structural induction | B2, W2 conventions, W3 boundary | W6-W8 |
-| W5: general frames and completion | W3, relevant W4 theories | W10 |
-| W6: production adapter enforcement | W0; W1 envelope and B1 domain mapping alignment | B1-B4, W2-W5 |
-| W7: deterministic controls and replay | W6, B3 choice semantics | W4-W5, W9 |
-| W8: concurrency and temporal properties | B2 composition, W7, relevant W4 theories | W9 |
-| W9: complete application migration | Start inventory now; B4 and W6 for qualification | W7-W8 |
-| W10: performance and incrementality | W0 metrics, W1 and B1 identities | After each semantic increment |
-| W11: release qualification | All advertised capabilities; W9 consuming evidence | Final admission gate |
+Generated from [roadmap-deps.json](roadmap-deps.json); edit that file and run
+`python scripts/roadmap-deps.py`. A conditional requirement applies to a record
+(an inventory entry, a claim, or a capability in a release) for which its
+condition holds.
 
-Development can overlap where shown. Admission requires the relevant gates, not
-completion of every future proof theory. B1-B4 describe planned work, not new
-runtime functionality delivered by this documentation revision.
+<!-- generated: roadmap-deps section=4 -->
+
+| Work package | Changes | Depends on | Conditional requirements |
+| --- | --- | --- | --- |
+| W0: Baseline and validation | R01 | — | — |
+| B1: Domain language and model variants | R02 | R01 | — |
+| W1: Evidence/checker contracts | R03 | R02 | — |
+| B2: Checked rules and behavior composition | R04 | R03 | — |
+| W3: Checked compiler transformations | R05 | R03 | — |
+| W2: Typed claims and authority | R06 | R04 | — |
+| B3: Model execution, generation and correspondence | R07, R18 | R07 ← R04, R05; R18 ← R06, R07 | R18: R15 if `replay-claims` |
+| W6: Production adapter enforcement | R08, R09, R14 | R08 ← R01; R09 ← R03, R08; R14 ← R09 | — |
+| B4: Migration contracts and three-way qualification | R10, R10q | R10 ← R07; R10q ← R10, R12, R16 | — |
+| W4: Quantified/structural induction | R11, R12 | R11 ← R04, R05; R12 ← R11 | — |
+| W5: General frames and completion | R13 | R12 | — |
+| W7: Deterministic controls and replay | R15, R16 | R15 ← R07, R09; R16 ← R15 | R15: R14 if `multi-store-observation` |
+| W8: Concurrency and temporal properties | R17 | R15 | R12 if `unbounded-progress` |
+| W9: Complete application migration | R19 | none to start; R10q to qualify | to qualify, R14 if `multi-store-observation`; to qualify, R17 if `concurrent-or-retry` |
+| W10: Performance and incrementality | R20, R21 | R20 ← R03; R21 ← R05, R06, R20 | — |
+| W11: Release qualification | R22 | R19 | R13, R14, R16, R17, R18, R21 if `advertised` |
+
+Conditions are evaluated per record, not by judgment. The fields a condition reads belong to the record it applies to; for an inventory entry they are part of the R19 inventory schema, which R19 owns.
+
+* `multi-store-observation` (per inventory entry): The observation map reads more than one store, or any store with asynchronous workers or TTL.
+* `concurrent-or-retry` (per inventory entry): Two or more commands can be in flight concurrently, or an info-able step is followed by a retry.
+* `unbounded-progress` (per claim): A progress or liveness claim beyond a bounded campaign, needing ranking or well-founded arguments.
+* `replay-claims` (per claim): A projection or targeting result is reported as a replayable execution claim.
+* `advertised` (per (release, capability) pair): The capability is in that release's advertised scope; recorded separately for each capability of each release.
+
+<!-- end generated: roadmap-deps -->
+
+A change may start once its dependencies are met; anything outside its
+dependency closure can proceed alongside it. Admission requires the relevant
+gates, not completion of every future proof theory. B1-B4 describe planned work,
+not new runtime functionality delivered by this documentation revision.
 
 ### B1 — Typed domain language and distinct behavioral models
+
+**Changes:** R02 (§17). <!-- generated: roadmap-deps wp=B1 -->
 
 Define sorted domain values, state schemas, commands, errors, effects, capabilities,
 footprints and predicates, with explicit numeric/partial-expression semantics.
@@ -149,12 +173,15 @@ versioned IR modules. New paths are design proposals until implemented.
 
 ### B2 — Typed rule contracts and checked behavior composition
 
+**Changes:** R04 (§17). <!-- generated: roadmap-deps wp=B2 -->
+
 Implement the object-language judgment described in the architecture document.
 Separate structural well-formedness, contract derivability and execution outcome.
 Define trusted primitive rules and checked derived rules, then sequencing,
 branching, frames, transactional commit/abort, effects and resource accounting.
 Integrate existing loop proofs; add retry/idempotency, recursive and concurrent
-rules only with the relevant W4/W5/W8 obligations. Unsupported contracts stay open.
+rules only once the changes that check their obligations have landed (§17).
+Unsupported contracts stay open.
 
 **Deliverables:** frozen primitive/axiom ledger, rule declaration syntax, explicit
 proof terms, independent checker, elaboration diagnostics and reusable behavior
@@ -168,11 +195,14 @@ mechanized and which semantic correspondence arguments remain trusted.
 
 ### B3 — Shared execution, generation and conformance semantics
 
+**Changes:** R07, R18 (§17). <!-- generated: roadmap-deps wp=B3 -->
+
 Execute canonical behavior IR in the reference Shen interpreter. Generate legal
 inputs/histories through typed modes and finite constraints; label invalid-input
 campaigns separately. Emit transition witnesses and typed effect requests. Derive
 obligations and finite graph/relation projections from that same model, retaining
-translation witnesses or explicit trust boundaries under W3.
+translation witnesses or explicit trust boundaries under the checked
+transformation protocol.
 
 Define adapter observation maps for arguments, returns, errors, state and effects,
 including hidden transitions and pending outcomes. A conformance monitor tracks
@@ -192,6 +222,8 @@ engine becomes the authority for behavioral judgments. ELF is a separate produce
 
 ### B4 — Explicit migration contract and three-way qualification
 
+**Changes:** R10, R10q (§17). <!-- generated: roadmap-deps wp=B4 -->
+
 Create versioned preserve/change/remove/defer decisions binding legacy and intended
 clauses, observation mappings, rationale, approval provenance and obligations.
 Run model, legacy and target on comparable scenarios and classify disagreements.
@@ -202,13 +234,24 @@ must not force rejection of an approved correction or disappear from reporting.
 **Deliverables:** decision schema, three-way report, per-capability obligation
 matrix, source/specification ambiguity queue and dependency invalidation rules.
 
-**Gate:** synthetic transfer/outbox/retry workflow with a legacy duplicate-effect
-bug, intended correction and explicit decision. Detect a target mutant, a shared
-legacy/target bug, missing approval, incomplete mapping and replay identity drift.
-Then apply the same contract to real consumer capabilities under W9. One passing
-fixture validates integration only; it does not qualify the full migration.
+**Gate (R10):** synthetic transfer/outbox/retry workflow with a legacy
+duplicate-effect bug, intended correction and explicit decision, run with `model`
+and `fake` executors only. Detect the duplicate effect in a history containing an
+indeterminate step, check the approved change, reject a target mutant, and report
+a shared legacy/target bug, missing approval and incomplete mapping. Conservation
+at R10 is bounded per-transition checking during execution, not a proof. Every
+artifact names its executor class; a Python fake is never called a legacy
+implementation.
+
+**Gate (R10q):** the same contract against real-service adapters, with
+conservation proved, the failure replayed in a fresh environment and minimized,
+and replay identity drift detected. Then apply the contract to
+real consumer capabilities under R19. One passing fixture validates integration
+only; it does not qualify the full migration.
 
 ## 5. W0 — Establish the actual baseline
+
+**Changes:** R01 (§17). <!-- generated: roadmap-deps wp=W0 -->
 
 **Deliverables**
 
@@ -233,10 +276,12 @@ basis for later performance budgets, not an estimate from a few examples.
 
 ## 6. W1 — Version evidence and checker contracts
 
+**Changes:** R03 (§17). <!-- generated: roadmap-deps wp=W1 -->
+
 Define a common envelope without erasing the distinctions between artifact kinds.
 Use Model, Claim, Obligation, Proposal, Evidence and Judgment records. Bind legacy/
 intended variant, migration decision, behavior/rule identity and observation mapping
-where applicable. W1 standardizes transport; B1/B2 define behavioral meaning:
+where applicable. R03 standardizes transport; R02/R04 define behavioral meaning:
 
 
 * Statement/model identity; context and assumptions; proof or observation scope.
@@ -267,7 +312,9 @@ Failure cannot become a successful claim through folding or CLI exit handling.
 
 ## 7. W2 — Extend genuine Shen typing into claim elaboration
 
-Integrate B1 domain sorts and B2 behavioral derivations into evidence admission.
+**Changes:** R06 (§17). <!-- generated: roadmap-deps wp=W2 -->
+
+Integrate typed domain sorts and checked behavioral derivations into evidence admission.
 Behavior validity and producer authority remain separate checked judgments.
 Build typed judgments around existing semantics rather than copying the untyped
 authority code and relabeling its column checks as a type system.
@@ -302,6 +349,8 @@ new claim datatype/checker modules, `tests/claim_semantics/authority_v2/`.
 
 ## 8. W3 — Reduce trust in compilation and abstraction
 
+**Changes:** R05 (§17). <!-- generated: roadmap-deps wp=W3 -->
+
 Make each transformation produce a checkable witness:
 
 | Transformation | Required witness/check |
@@ -330,6 +379,8 @@ For each claimed mechanically verified transformation, supply the actual checked
 refinement derivation, not only passing differential tests.
 
 ## 9. W4 — General quantified and structural induction
+
+**Changes:** R11, R12 (§17). <!-- generated: roadmap-deps wp=W4 -->
 
 ### W4a: Terms, binders, equality and quantifiers
 
@@ -382,6 +433,8 @@ branch-resource accounting and concrete witnesses for satisfiable preconditions.
 
 ## 10. W5 — General completion, frames and domain changes
 
+**Changes:** R13 (§17). <!-- generated: roadmap-deps wp=W5 -->
+
 Replace syntactic current-key locality with checked relational footprints.
 Introduce proof-level relations for selected, processed, remaining, inserted and
 deleted keys, with explicit disjointness, membership and cardinality facts.
@@ -412,6 +465,8 @@ nested aliasing. Do not broaden the constructor allowlist before its rule exists
 loop/checker datatypes and executable `system.shen` semantics.
 
 ## 11. W6 — Enforce production adapter contracts
+
+**Changes:** R08, R09, R14 (§17). <!-- generated: roadmap-deps wp=W6 -->
 
 ### W6a: Lease and identity enforcement
 
@@ -461,6 +516,8 @@ application routes, schemas, credentials and orchestration remain private.
 
 ## 12. W7 — Controlled replay and fault exploration
 
+**Changes:** R15, R16 (§17). <!-- generated: roadmap-deps wp=W7 -->
+
 Define a versioned choice/event tape covering virtual time, entropy, logical
 schedule, request/response delivery, retry timing, process restarts and effect
 acknowledgments. Separate nondeterministic input events from expected outputs.
@@ -491,6 +548,8 @@ property IDs/artifacts without upgrading observations into proofs.
 
 ## 13. W8 — Concurrency and temporal properties
 
+**Changes:** R17 (§17). <!-- generated: roadmap-deps wp=W8 -->
+
 Add invocation/completion intervals, actor/transaction IDs, causal edges and
 explicit pending operations to histories. Define each consistency contract
 separately: linearizable operations, transactional isolation, causal ordering or
@@ -512,6 +571,8 @@ linearization exists; incomplete histories that remain unresolved.
 
 ## 14. W9 — Integrate the whole application migration
 
+**Changes:** R19 (§17). <!-- generated: roadmap-deps wp=W9 -->
+
 Build a canonical inventory in the consuming repository, starting with the
 reported 230 routes and reconciling the actual count. Include route variants,
 authorization roles, validation branches, jobs, timers, events and dependencies.
@@ -523,7 +584,7 @@ invariants, effects, adapter mapping, proof obligations, campaigns, evidence
 producers and unresolved questions. Unsupported or intentionally removed behavior
 must be visible with a disposition; it cannot vanish from the denominator.
 
-Use the B4 migration contract and classify three-way outcomes, including shared
+Use the R10 migration contract and classify three-way outcomes, including shared
 legacy/target defects and approved differences. Every entry names its legacy and
 intended variant, decision identity, observation map and remaining obligations.
 
@@ -544,6 +605,11 @@ behavior, idempotent commands, outbox/worker workflows, then cross-store and
 concurrent scenarios. These are rollout groups, not the final scope. Finish every
 inventory entry and its declared critical behavior.
 
+Record per entry whether each inventory-entry condition of section 4 holds;
+the conditional requirements there decide what its qualification needs. A
+three-way report that marks an entry preserved without a requirement its
+conditions impose fails.
+
 **Gate:** all entries have traceable dispositions; critical target obligations
 meet the agreed evidence policy; mismatches have reproducible minimized cases;
 source/model/adapter changes invalidate precisely identified dependencies.
@@ -551,6 +617,8 @@ Unresolved critical semantics block target admission. Report proof scope and
 bounded test scope explicitly, not “90% confidence.”
 
 ## 15. W10 — Performance without weakening evidence
+
+**Changes:** R20, R21 (§17). <!-- generated: roadmap-deps wp=W10 -->
 
 **Order:** measure, batch, cache, isolate workers, then incrementally maintain.
 
@@ -566,7 +634,7 @@ bounded test scope explicitly, not “90% confidence.”
    Handle removals, negative premises and completeness-witness changes, not only
    new facts. Compare incrementally updated results with full recomputation.
 5. Track p50/p95 elapsed time, native launches, proof nodes, memory, cache hits
-   and invalidation fan-out on the real workload. Set budgets from W0 measurements.
+   and invalidation fan-out on the real workload. Set budgets from R01 measurements.
 
 **Gate:** cold/warm/batched/worker/incremental modes agree semantically under fault
 and mutation tests. Cache corruption and incomplete dependencies fail closed.
@@ -574,6 +642,8 @@ Persistent execution is not called “incremental evaluation” until dependency
 reuse itself is implemented and validated.
 
 ## 16. W11 — Qualification and release
+
+**Changes:** R22 (§17). <!-- generated: roadmap-deps wp=W11 -->
 
 A release claiming the full workflow requires:
 
@@ -584,8 +654,8 @@ A release claiming the full workflow requires:
   paths for prior artifacts. Changed checker semantics cannot silently reuse proofs.
 * Real-service qualification of the adapter/control scope actually advertised.
 * Cold restoration of replay bundles, crash recovery, cleanup and identity checks.
-* Checked B1/B2 behavior/rule judgments and B3 correspondence boundaries, with
-  versioned B4 migration decisions; distinguish model proofs from implementation evidence.
+* Checked behavior/rule judgments and correspondence boundaries, with versioned
+  migration decisions; distinguish model proofs from implementation evidence.
 * A consuming application report that covers its entire reconciled inventory and
   keeps unresolved/unsupported cases visible.
 * A trusted-code/assumption ledger with no undocumented semantic authority.
@@ -601,39 +671,65 @@ cloud applications” is not justified by the current implementation or this pla
 This R-series supersedes N01-N19 from the previous roadmap. All original work
 packages remain above; the revised order adds typed behavior as the common basis.
 Each row is a reviewable change or small series. Dependencies gate admission.
+The table is generated from [roadmap-deps.json](roadmap-deps.json).
 
-| ID | Change | Depends on | Exit evidence |
-| --- | --- | --- | --- |
-| R01 | Full pinned baseline, trust inventory and benchmarks (W0) | Current branch | Accounted test families and named validation report |
-| R02 | Typed domain/behavior IR, variants and `.ops` compatibility (B1) | R01 | Construction and compatibility fixtures |
-| R03 | Common artifacts, outcomes, mappings and decision identities (W1) | R02 vocabulary | Cross-version/adversarial envelope checks |
-| R04 | Primitive contract rules and composition checker (B2) | R02, R03 | Independent valid/forged derivation checks |
-| R05 | Checked WP/frame/substitution transformation protocol (W3) | R02, R03 | Checked rewrites and mutant detection |
-| R06 | Typed claims, authority and pack migration (W2) | R03, R04 | Differential admission and occurrence checks |
-| R07 | Shared simulator, typed generation and conformance monitor (B3) | R04, R05 supported fragment | Cross-interpretation and ambiguity checks |
-| R08 | Enforced leases, fencing and server lifecycle (W6a) | R01; align R03 | Crash, expiry, cleanup and isolation suite |
-| R09 | Real SQL transaction/journal adapters and domain maps (W6b) | R08, R02 | Real MySQL/PostgreSQL outcome tests |
-| R10 | Migration decisions and three-way integration (B4) | R07, R09 | Transfer/outbox/retry fixture and target mutants |
-| R11 | Sorted quantifier/equality kernel (W4a) | R04, R05 | Binder/eigenvariable/definedness adversarial checks |
-| R12 | Structural induction, arithmetic and resource lemmas (W4b/c) | R11 | Constructor coverage, range/conservation proofs |
-| R13 | Cross-key, domain-changing and nested completion (W5) | R12, R05 | Valid proofs and invalid-frame countercases |
-| R14 | Redis/DocDB/queues and consistent observation cuts (W6c) | R09 | Real-service barriers and journal completeness |
-| R15 | Controlled choices, uncertainty and durable replay (W7) | R07, R09, relevant R14 controls | Fresh-environment fault replay |
-| R16 | Causal minimization and Antithesis round trip (W7) | R15 | Reduced reproducible failures and imported evidence |
-| R17 | Concurrent behaviors, histories and temporal contracts (W8) | R04, relevant R12 theories, R15 | Independent small-history oracles and progress assumptions |
-| R18 | Souffle-guided targeting and optional GraphWalker projection (B3) | R07, R06; R15 for replay claims | Projection mapping, feasibility and seed/control distinction |
-| R19 | Full consumer inventory, decisions and evidence rollout (W9) | Inventory now; R10 for qualification | Every entry disposed; critical gaps resolved |
-| R20 | Batch, cache and isolated workers (W10) | R01, R03, stable relevant semantics | Measured cross-mode agreement |
-| R21 | Incremental fact/proof/decision invalidation (W10) | R06, R05, R20 | Full recomputation agreement including removals |
-| R22 | Complete release qualification (W11) | All advertised capabilities and R19 | Scope-specific release bundle |
+<!-- generated: roadmap-deps section=17 -->
 
-**Immediate next work:** R01, then R02/R03 as a coordinated schema increment,
-followed by R04/R05/R07. Start R08 and consumer inventory alongside that work.
-R10 is the first complete behavioral migration loop, not the release endpoint.
-R11-R17 extend its proof and execution coverage; R19 covers the whole application.
-R18 is optional and must not block required consumer qualification. R22 requires
-it only if that integration is advertised. Do not substitute another isolated
-example or a larger Boolean search bound for the behavioral-language milestone.
+| ID | Change | Depends on | Conditional | Executors | Exit evidence |
+| --- | --- | --- | --- | --- | --- |
+| R01 | Full pinned baseline, trust inventory and benchmarks (W0) | — | — | model, fake | Accounted test families and named validation report |
+| R02 | Typed domain/behavior IR, variants and `.ops` compatibility (B1) | R01 | — | model | Reviewed IR specification; construction and compatibility fixtures |
+| R03 | Common artifacts, outcomes, mappings and decision identities (W1) | R02 | — | none | Cross-version/adversarial envelope checks |
+| R04 | Primitive contract rules and composition checker (B2) | R03 | — | none | Independent valid/forged derivation checks |
+| R05 | Checked WP/frame/substitution transformation protocol (W3) | R03 | — | model | Checked rewrites and mutant detection |
+| R06 | Typed claims, authority and pack migration (W2) | R04 | — | none | Differential admission and occurrence checks |
+| R07 | Shared simulator, typed generation and conformance monitor (B3) | R04, R05 | — | model, fake | Cross-interpretation and ambiguity checks on the supported fragment |
+| R08 | Enforced leases, fencing and server lifecycle (W6) | R01 | — | fake, real-service | Crash, expiry, cleanup and isolation suite |
+| R09 | Real SQL transaction/journal adapters and domain maps (W6) | R03, R08 | — | real-service | Real MySQL/PostgreSQL outcome tests |
+| R10 | Migration decisions and three-way workflow on available capabilities (B4) | R07 | — | model, fake | Transfer/outbox/retry fixture: duplicate effect detected in a history with an indeterminate step, approved change checked, target mutant rejected; conservation is bounded per-transition checking, not proof |
+| R11 | Sorted quantifier/equality kernel (W4) | R04, R05 | — | none | Binder/eigenvariable/definedness adversarial checks |
+| R12 | Structural induction, arithmetic and resource lemmas (W4) | R11 | — | none | Constructor coverage, range/conservation proofs |
+| R13 | Cross-key, domain-changing and nested completion (W5) | R12 | — | model | Valid proofs and invalid-frame countercases |
+| R14 | Redis/DocDB/queues and consistent observation cuts (W6) | R09 | — | real-service | Real-service barriers and journal completeness |
+| R15 | Controlled choices, uncertainty and durable replay (W7) | R07, R09 | R14 if `multi-store-observation` | model, fake, real-service | Fresh-environment fault replay |
+| R16 | Causal minimization and Antithesis round trip (W7) | R15 | — | fake, real-service | Reduced reproducible failures and imported evidence |
+| R10q | Three-way qualification of the transfer/outbox/retry fixture (B4) | R10, R12, R16 | — | model, fake, real-service | R10 fixture against real-service adapters with conservation proved, failure replayed in a fresh environment and minimized; replay identity drift detected |
+| R17 | Concurrent behaviors, histories and temporal contracts (W8) | R15 | R12 if `unbounded-progress` | model, fake, real-service | Independent small-history oracles and progress assumptions |
+| R18 | Souffle-guided targeting and optional GraphWalker projection (B3) | R06, R07 | R15 if `replay-claims` | model | Projection mapping, feasibility and seed/control distinction |
+| R19 | Full consumer inventory, decisions and evidence rollout (W9) | none to start; R10q to qualify | to qualify, R14 if `multi-store-observation`; to qualify, R17 if `concurrent-or-retry` | model, real-service | Every entry disposed with its condition classification recorded; critical gaps resolved |
+| R20 | Batch, cache and isolated workers (W10) | R03 | — | none | Measured cross-mode agreement |
+| R21 | Incremental fact/proof/decision invalidation (W10) | R05, R06, R20 | — | none | Full recomputation agreement including removals |
+| R22 | Complete release qualification (W11) | R19 | R13, R14, R16, R17, R18, R21 if `advertised` | model, real-service | Scope-specific release bundle |
+
+Executors name what an exit artifact executes:
+
+* `model`: Shen reference model execution.
+* `fake`: Synthetic in-process adapter or service substitute; never called a legacy or target implementation.
+* `real-service`: Pinned real service or deployed implementation behind an enforced adapter.
+* `none`: No implementation is executed; checker, schema or proof work.
+
+<!-- end generated: roadmap-deps -->
+
+**Immediate next work**, in order:
+
+1. Documentation correction: this dependency data, the glossary and the
+   provenance columns of section 2.
+2. R01 validation report: the pinned flake matrix on the current head, reported
+   per family. An unexecuted family is an unresolved gate, not a pass.
+3. Worked migration model on the current IR: the R10 histories as fixtures with
+   `model`/`fake` executors. Cases the current IR cannot express are checked in
+   as expected failures with a written reason.
+4. Concrete IR specification, driven by those fixtures: indeterminate outcomes,
+   intent/attempt identity, outbox record versus delivery, and the `.ops`
+   compatibility mapping. It is the review gate for R02.
+5. R02, with R03 as a coordinated schema increment, then the table's order.
+
+Changes outside each other's dependency closure proceed alongside. R10 is the
+first complete behavioral migration loop on model/fake executors; R10q
+qualifies it; neither is the release endpoint. R19 covers the whole
+application. R18 is optional; whether a release needs it follows from the
+`advertised` condition. Do not substitute another isolated example or a larger
+Boolean search bound for the behavioral-language milestone.
 
 ## 18. Migration, rollback and stop conditions
 
