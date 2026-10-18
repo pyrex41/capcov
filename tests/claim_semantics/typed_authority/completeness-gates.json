@@ -1,0 +1,764 @@
+{
+  "note": "Closed-world gates over the authority_v2 completeness base.",
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "missing",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "claim",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "derived",
+        "primitive": false,
+        "context_indices": [
+          "run"
+        ]
+      },
+      {
+        "name": "closed",
+        "columns": [
+          {
+            "name": "scope_run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "operation",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "request",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "path",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "window",
+            "type": "unsigned",
+            "context": false
+          }
+        ],
+        "modality": "completeness",
+        "primitive": true,
+        "context_indices": [
+          "scope_run"
+        ],
+        "completes": "missing"
+      }
+    ],
+    "completeness_scopes": [
+      {
+        "relation": "closed",
+        "target": "missing",
+        "mapping": [
+          [
+            "scope_run",
+            "run"
+          ],
+          [
+            "operation",
+            "operation"
+          ],
+          [
+            "request",
+            "request"
+          ],
+          [
+            "path",
+            "path"
+          ],
+          [
+            "window",
+            "window"
+          ]
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "name": "absence",
+        "head": {
+          "relation": "claim",
+          "terms": [
+            {
+              "variable": "R"
+            },
+            {
+              "variable": "O"
+            },
+            {
+              "variable": "Q"
+            },
+            {
+              "variable": "P"
+            },
+            {
+              "variable": "W"
+            },
+            {
+              "variable": "I"
+            }
+          ],
+          "negated": false
+        },
+        "body": [
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              },
+              {
+                "variable": "I"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "closed",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "missing",
+            "terms": [
+              {
+                "variable": "R"
+              },
+              {
+                "variable": "O"
+              },
+              {
+                "variable": "Q"
+              },
+              {
+                "variable": "P"
+              },
+              {
+                "variable": "W"
+              },
+              {
+                "variable": "I"
+              }
+            ],
+            "negated": true
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "closure-substituted-from-another-occurrence",
+      "note": "the closure is bound to a second seen occurrence of another run, not the negated run",
+      "categories": [
+        "compatibility",
+        "completeness"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R2"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R2"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "one-closure-for-two-negations",
+      "note": "two negated occurrences of different windows; the single closure matches only one",
+      "categories": [
+        "completeness"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W2"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W2"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "each-negation-closed-by-its-own-occurrence",
+      "categories": [],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W2"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W2"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W2"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "negation-before-its-binder",
+      "note": "safety is order-dependent in both evaluators; the typed judgement scopes negation to preceding premises. categories are authority.judge's (it does not check safety); Python validation and the typed authority reject",
+      "categories": [],
+      "rejected": true,
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "missing",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": true
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "R"
+                },
+                {
+                  "variable": "O"
+                },
+                {
+                  "variable": "Q"
+                },
+                {
+                  "variable": "P"
+                },
+                {
+                  "variable": "W"
+                },
+                {
+                  "variable": "I"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

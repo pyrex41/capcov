@@ -1,9 +1,10 @@
 # Executable typed behavior and migration contracts
 
 Design revision: October 17, 2026. This document specifies the next architecture;
-it does not claim these features are already implemented. The implementation
-baseline is `58ddd39b9edc5972855a3e3626fa818510e20bd5`. See the
-[production roadmap](production-roadmap.md) for ordered work and release gates.
+it does not claim these features are already implemented. The code baseline is
+`7b18a978d5bab624249ae290846be25c5933846f`; no validation is recorded at that
+revision. See the [production roadmap](production-roadmap.md) for ordered work and
+release gates, and the [glossary](#10-glossary) for terms.
 
 ## 1. Purpose
 
@@ -231,16 +232,19 @@ First introduce typed state/commands/effects and checked behavioral composition
 alongside existing `.ops` semantics. Then integrate claim admission and
 transformation witnesses. Develop production adapters alongside that work.
 General induction and concurrency extend the same language rather than creating
-parallel modeling systems. See work packages B1-B4 and W0-W11 in the roadmap.
+parallel modeling systems. The roadmap's R-changes order this work; their
+dependencies are kept only in [roadmap-deps.json](roadmap-deps.json).
 
 The first complete integration fixture is an account transfer with an outbox,
 idempotent retry and a response-lost outcome. Its legacy variant deliberately
 allows a duplicate effect; its intended variant forbids it. Include an approved
-migration decision and prove/check the supported conservation and composition
-obligations. Execute the model and real-service synthetic adapters; detect the
-legacy defect, accept the intended difference only under the decision, reject a
-target mutant, and replay/minimize the failure. This fixture tests the architecture;
-release scope remains the full inventoried consumer application.
+migration decision. R10 runs it on model and fake executors: detect the legacy
+defect in a history with an indeterminate step, accept the intended difference
+only under the decision, and reject a target mutant; conservation there is
+bounded per-transition checking. R10q repeats it against real-service adapters
+with conservation proved, and the failure replayed and minimized. This fixture
+tests the architecture; release scope remains the full inventoried consumer
+application.
 
 Acceptance requires adversarial tests for forged contract derivations, omitted
 error paths, capability duplication, unsound frames, changed model identities,
@@ -251,3 +255,49 @@ claim full implementation refinement from model-level proofs.
 No new runtime is required. Python remains transport/storage/orchestration while
 Shen owns model semantics and checked judgments. Optimize only after measuring;
 worker isolation and complete dependency identities precede incremental reuse.
+
+## 10. Glossary
+
+**Clause.** An identifiable, versioned behavioral requirement in a legacy model,
+intended model or migration contract. Claims, decisions and obligations name
+clauses by identity; changing a clause changes its identity and invalidates its
+dependents.
+
+**Proposal.** An untrusted candidate experiment or derivation targeting specified
+obligations. Proof search, Prolog, Soufflé targeting, GraphWalker, a developer or
+an LLM may produce one; none is admitted without checking.
+
+**Critical.** A classification the consumer assigns to a clause or inventory
+entry, with a named owner and explicit promotion consequences: an unresolved
+critical obligation blocks target admission. capcov does not infer it.
+
+**Evidence policy.** Versioned requirements stating which evidence kinds, scopes,
+assumptions and operational controls satisfy an obligation. It has no weighted
+confidence score. No evidence-policy artifact exists yet. Existing code has
+narrower policy components that an evidence policy may reference, but they are
+not that concept. An evidence-policy bundle in `capcov.claims` gives each
+evidence relation an explicit polarity toward a claim (`EvidenceMapping` with
+support, refutation, observation or forbidden effect, `claims/ir.py`);
+`tests/claim_semantics/test_evidence_policy.py` checks that the claim-semantics
+corpus compiles into that form and that malformed bundles are refused.
+`DerivedCompletenessPolicy` (`claims/contracts.py`) names one
+reviewed exact closure rule, by digest, as an admissible way to establish a
+relation's completeness; `DiagnosticPolicy` (`claims/ir.py`) declares how a
+bundle reports missing or inconsistent premises, out-of-scope and forbidden
+evidence, revocation and required completeness. The replay and static
+"evidence policy" tests (`test_replay_evidence_policy`,
+`test_static_evidence_policy`) check that a claim joining observations from
+different producers stays unresolved, naming the missing premise, until the
+declared rows and binding witness are present.
+
+**Indeterminate outcome.** A step whose result was not observed: a lost
+response, timeout or crash after sending (`info` in `capcov.faults`, as opposed
+to `ok` and `fail`). It stays open until the history closes and may take effect
+at any later point, including after the final reads. Every admissible
+alternative is retained; none is selected for convenience.
+
+**Observation cut.** The declared set of reads (stores, journal ranges, cursors)
+from which a history's state and effects are taken, with the barrier that makes
+them mutually consistent. Independent reads of several stores are not a cut
+until that barrier is established. A missing journal range or unestablished cut
+makes the result unresolved, never an empty set of effects.

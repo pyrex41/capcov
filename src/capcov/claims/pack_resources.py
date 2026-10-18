@@ -10,8 +10,8 @@ import json
 from .ir import Bundle, bundle_from_json
 
 DOMAINS = frozenset({'static', 'replay', 'observation'})
-#: Domains with a generated, manifest-checked v2 profile installed beside v1. V1 stays the default.
-V2_DOMAINS = frozenset({'static', 'replay', 'observation'})
+#: Every domain ships a generated, manifest-checked v2 profile beside v1; v1 stays the default.
+V2_DOMAINS = DOMAINS
 RELATION_FIELDS = frozenset({'name','columns','modality','polarity','binding','primitive',
     'producer_classes','context_indices','completes','finite','nonempty',
     'compatibility_targets','compatibility_context_indices'})
