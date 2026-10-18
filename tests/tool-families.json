@@ -52,7 +52,9 @@
     "tests.claim_semantics.test_reasoning.NativeReasoningTests",
     "tests.claim_semantics.test_adapters_induction.NativeInductionTests",
     "tests.claim_semantics.test_loop_induction.NativeLoopTests",
-    "tests.claim_semantics.test_loop_completion.NativeCompletionTests"
+    "tests.claim_semantics.test_loop_completion.NativeCompletionTests",
+    "tests.claim_semantics.test_shen_derivation_pins.ShenDerivationPinTest",
+    "tests.claim_semantics.test_spec_templates.NativeTemplateTests"
    ]
   },
   "indexers": {
