@@ -1,0 +1,3728 @@
+[
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "a",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "20",
+      "from": "b",
+      "request": "r",
+      "to": "b"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "7"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "5"
+        }
+      },
+      {
+        "table": "transfer",
+        "key": "r",
+        "fields": {
+          "from": "a",
+          "to": "b",
+          "amount": "3"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "7"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "5"
+          }
+        },
+        {
+          "table": "transfer",
+          "key": "r",
+          "fields": {
+            "from": "a",
+            "to": "b",
+            "amount": "3"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "transfer",
+    "args": {
+      "amount": "3",
+      "from": "a",
+      "request": "r",
+      "to": "a"
+    },
+    "state": [
+      {
+        "table": "wallet",
+        "key": "a",
+        "fields": {
+          "balance": "10"
+        }
+      },
+      {
+        "table": "wallet",
+        "key": "b",
+        "fields": {
+          "balance": "2"
+        }
+      }
+    ],
+    "outcome": "committed",
+    "trace": {
+      "state": [
+        {
+          "table": "wallet",
+          "key": "a",
+          "fields": {
+            "balance": "10"
+          }
+        },
+        {
+          "table": "wallet",
+          "key": "b",
+          "fields": {
+            "balance": "2"
+          }
+        }
+      ],
+      "effects": [],
+      "steps": []
+    }
+  }
+]

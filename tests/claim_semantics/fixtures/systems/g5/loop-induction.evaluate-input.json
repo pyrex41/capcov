@@ -1,0 +1,251 @@
+[
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "item",
+          "key": "x",
+          "fields": {
+            "status": "open"
+          }
+        },
+        {
+          "table": "item",
+          "key": "y",
+          "fields": {
+            "status": "closed"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "item",
+          "key": "x",
+          "fields": {
+            "status": "open"
+          }
+        },
+        {
+          "table": "item",
+          "key": "y",
+          "fields": {
+            "status": "closed"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "committed"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "rejected"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "aborted"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "aborted",
+    "observed": {
+      "state": [],
+      "effects": []
+    }
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "unknown"
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [],
+    "outcome": "unknown",
+    "observed": {
+      "state": [],
+      "effects": []
+    }
+  },
+  {
+    "command": "close-all",
+    "args": {},
+    "state": [
+      {
+        "table": "item",
+        "key": "x",
+        "fields": {
+          "status": "open"
+        }
+      },
+      {
+        "table": "item",
+        "key": "y",
+        "fields": {
+          "status": "closed"
+        }
+      }
+    ],
+    "outcome": "committed",
+    "trace": {
+      "state": [
+        {
+          "table": "item",
+          "key": "x",
+          "fields": {
+            "status": "open"
+          }
+        },
+        {
+          "table": "item",
+          "key": "y",
+          "fields": {
+            "status": "closed"
+          }
+        }
+      ],
+      "effects": [],
+      "steps": []
+    }
+  }
+]

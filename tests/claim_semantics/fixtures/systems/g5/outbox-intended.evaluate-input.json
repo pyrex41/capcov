@@ -1,0 +1,1594 @@
+[
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "k",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "send",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "j"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "rejected"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "aborted",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown"
+  },
+  {
+    "command": "ack",
+    "args": {
+      "id": "k"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "attempted",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "unknown",
+    "observed": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "attempted",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": []
+    }
+  },
+  {
+    "command": "enqueue",
+    "args": {
+      "id": "j",
+      "payload": "hello"
+    },
+    "state": [
+      {
+        "table": "job",
+        "key": "j",
+        "fields": {
+          "status": "pending",
+          "payload": "hello"
+        }
+      }
+    ],
+    "outcome": "committed",
+    "trace": {
+      "state": [
+        {
+          "table": "job",
+          "key": "j",
+          "fields": {
+            "status": "pending",
+            "payload": "hello"
+          }
+        }
+      ],
+      "effects": [],
+      "steps": []
+    }
+  }
+]
