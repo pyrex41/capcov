@@ -129,6 +129,8 @@ class BridgeFrontEndTests(unittest.TestCase):
             ["fail", ["rejected", ""]],
             ["fail", ["aborted"], "x"],
             ["ok", "extra"],
+            [["x"]],
+            [{"x": 1}],
             [],
             None,
         ):
@@ -357,6 +359,81 @@ class BridgeTests(unittest.TestCase):
         self.assertIs(unknown["observed_matches"], True)
         self.assertEqual(unknown["assumptions"], PUBLISHING)
         self.assertNotIn("assumptions", v1)
+
+    def test_claim_export_is_conditional_on_assumptions(self):
+        """Spec 4.6: a verdict that used an assumption is exported under it."""
+        from capcov.claims.evaluator import evaluate as judge
+        from capcov.claims.ir import Bundle
+        from capcov.claims.validation import validate_bundle
+        from capcov.operations.system import certify, claim_bundle
+
+        empty = {"state": JOB, "effects": []}
+        cases = [
+            send(["fail", ["aborted"]], observed=empty),
+            send(["fail", ["aborted"]], observed={"state": JOB, "effects": [EMIT]}),
+            send("aborted", observed=empty),
+        ]
+        cert = certify(OUTBOX, cases)
+        bundle = claim_bundle(OUTBOX, cert)
+        self.assertFalse(validate_bundle(bundle), validate_bundle(bundle))
+        assumed = [e for e in bundle.evidence if e.kind == "assumption"]
+        self.assertEqual(
+            sorted({e.atom.terms[2].value for e in assumed}),
+            sorted(PUBLISHING + [DEFINITE_FAIL]),
+        )
+        self.assertEqual({e.atom.terms[1].value for e in assumed}, {
+            c.id for c in bundle.claims[:2]
+        })
+        answer = judge(bundle)
+        self.assertTrue(answer.claims[0].result.support)
+        self.assertTrue(answer.claims[1].result.refutation)
+        self.assertTrue(answer.claims[2].result.support)
+
+        # Withdrawing any one assumption leaves its cases undecided, never
+        # unconditionally decided; the v1 case is untouched.
+        for name in PUBLISHING + [DEFINITE_FAIL]:
+            kept = tuple(
+                e for e in bundle.evidence
+                if e.kind != "assumption" or e.atom.terms[2].value != name
+            )
+            withdrawn = Bundle(
+                bundle.relations,
+                facts=tuple(e.atom for e in kept),
+                rules=bundle.rules,
+                claims=bundle.claims,
+                evidence=kept,
+                mappings=bundle.mappings,
+                metadata=bundle.metadata,
+            )
+            with self.subTest(withdrawn=name):
+                self.assertFalse(validate_bundle(withdrawn))
+                result = judge(withdrawn)
+                self.assertFalse(result.claims[0].result.support)
+                self.assertFalse(result.claims[1].result.refutation)
+                self.assertTrue(result.claims[2].result.support)
+
+        # Comparison reports a change of assumptions, not only of admissibility.
+        from capcov.operations.system import compare_models
+
+        names = PUBLISHING + ["single-landing-v1"]
+        changed = compare_models(OUTBOX, declared(names), cases[:1])["differences"]
+        self.assertEqual(len(changed), 1)
+        self.assertEqual(changed[0]["left"], changed[0]["right"])
+        self.assertEqual(changed[0]["assumptions"], {
+            "left": PUBLISHING + [DEFINITE_FAIL],
+            "right": names + [DEFINITE_FAIL],
+        })
+        self.assertEqual(compare_models(OUTBOX, OUTBOX, cases[:1])["differences"], [])
+        v1_only = compare_models(OUTBOX, declared(names), cases[2:])
+        self.assertEqual(v1_only["differences"], [])
+
+        # A certificate without assumptions exports exactly as before.
+        v1 = claim_bundle(OUTBOX, certify(OUTBOX, cases[2:]))
+        self.assertEqual(
+            {r.name for r in v1.relations},
+            {"system_case_matches", "system_case_differs", "system_case_conforms"},
+        )
+        self.assertFalse([e for e in v1.evidence if e.kind == "assumption"])
 
     def test_r_assume_rejects_the_fixture_and_accepts_its_repair(self):
         fixture = (V2 / "rejected-command-without-assumption.ops-v2").read_text()

@@ -88,7 +88,7 @@ def _pairs(values):
 def _logical_effect(e):
     if not isinstance(e, list) or not e:
         raise OperationError("malformed effect")
-    if e[0] not in REQUEST_TAGS - {"effect"}:
+    if not isinstance(e[0], str) or e[0] not in REQUEST_TAGS - {"effect"}:
         raise OperationError("unsupported effect")
     if e[0] == "create" and len(e) == 4:
         if not isinstance(e[3], list) or any(
@@ -176,7 +176,12 @@ def _outcome(out):
     """
     if isinstance(out, str) and out in V1_OUTCOMES:
         return out
-    if not isinstance(out, list) or not out or out[0] not in REQUEST_TAGS:
+    if (
+        not isinstance(out, list)
+        or not out
+        or not isinstance(out[0], str)
+        or out[0] not in REQUEST_TAGS
+    ):
         raise OperationError("invalid outcome")
     if out == ["ok"]:
         return "[ok]"
@@ -654,6 +659,12 @@ def claim_bundle(source, certificate, *, timeout=60):
 
     No operation-wide qualification, closure, reviewer admission or replay ABI
     compatibility is asserted by a finite collection of normalized cases.
+
+    A result that carries `assumptions` (an R02 outcome or effect identity)
+    supports or refutes its case only through assumption-kind evidence, one
+    record per named assumption, so the verdict is conditional (spec 4.6) and
+    withdrawing any one assumption leaves the case unresolved. Results without
+    assumptions export exactly as before.
     """
     recheck(source, certificate, timeout=timeout)
     from capcov.claims.ir import (
@@ -689,6 +700,8 @@ def claim_bundle(source, certificate, *, timeout=60):
     facts = []
     evidence = []
     claims = []
+    assumed = set()
+    source = "systemcheck native-reproduction " + certificate["sha256"]
     for index, (request, result) in enumerate(
         zip(certificate["requests"], certificate["evaluation"]["results"])
     ):
@@ -703,15 +716,37 @@ def claim_bundle(source, certificate, *, timeout=60):
         )
         if verdict is None:
             continue
+        names = tuple(sorted(set(result.get("assumptions", ()))))
         relation = "system_case_matches" if verdict else "system_case_differs"
+        if names:
+            assumed.add(names)
+            relation += "_assuming"
+            constants += (Constant(_assumption_set(names), "symbol"),)
+            for name in names:
+                row = constants[:2] + (Constant(name, "symbol"),)
+                atom = Atom("system_case_assumes", row)
+                facts.append(atom)
+                evidence.append(
+                    Evidence(
+                        f"systemcheck:{certificate['sha256']}:{index}:{name}",
+                        atom,
+                        source=source,
+                        kind="assumption",
+                    )
+                )
         atom = Atom(relation, constants)
         facts.append(atom)
         evidence.append(
             Evidence(
                 "systemcheck:" + certificate["sha256"] + ":" + str(index),
                 atom,
-                source="systemcheck native-reproduction " + certificate["sha256"],
+                source=source,
             )
+        )
+    refuting = ("system_case_differs",)
+    if assumed:
+        relations, rules, refuting = _conditional_rules(
+            relations, rules, terms, sorted(assumed)
         )
     return Bundle(
         relations,
@@ -722,17 +757,82 @@ def claim_bundle(source, certificate, *, timeout=60):
         mappings=tuple(
             EvidenceMapping(
                 "system_case_conforms",
-                "system_case_differs",
+                refuted,
                 "refutation",
                 bindings=(("model", "model"), ("case", "case")),
                 claim_id=c.id,
             )
             for c in claims
+            for refuted in refuting
         ),
         metadata=(
             ("basis", "normalized-finite-cases"),
             ("certificate", certificate["sha256"]),
         ),
+    )
+
+
+def _assumption_set(names):
+    return "+".join(names)
+
+
+def _conditional_rules(relations, rules, terms, assumption_sets):
+    """Relations and rules for verdicts that hold only under named assumptions.
+
+    One rule per distinct assumption set, its body naming every assumption as
+    a constant, so a case is decided only while all of its assumptions stand.
+    """
+    from capcov.claims.ir import Atom, Column, Constant, RelationDecl, Rule, Variable
+
+    columns = (Column("model", "digest"), Column("case", "symbol"))
+    under = columns + (Column("assumptions", "symbol"),)
+    relations = relations + (
+        RelationDecl(
+            "system_case_assumes",
+            columns + (Column("assumption", "symbol"),),
+            producer_classes=("systemcheck",),
+        ),
+        RelationDecl(
+            "system_case_matches_assuming", under, producer_classes=("systemcheck",)
+        ),
+        RelationDecl(
+            "system_case_differs_assuming", under, producer_classes=("systemcheck",)
+        ),
+        RelationDecl(
+            "system_case_differs_conditionally",
+            columns,
+            modality="derived",
+            primitive=False,
+        ),
+    )
+    extra = []
+    for names in assumption_sets:
+        key = _assumption_set(names)
+        body = tuple(
+            Atom("system_case_assumes", terms + (Constant(name, "symbol"),))
+            for name in names
+        )
+        for verdict, head, label in (
+            ("matches", "system_case_conforms", "system-case-match-assuming"),
+            ("differs", "system_case_differs_conditionally", "system-case-differ-assuming"),
+        ):
+            extra.append(
+                Rule(
+                    Atom(head, terms),
+                    (
+                        Atom(
+                            f"system_case_{verdict}_assuming",
+                            terms + (Constant(key, "symbol"),),
+                        ),
+                    )
+                    + body,
+                    f"{label}:{key}",
+                )
+            )
+    return (
+        relations,
+        rules + tuple(extra),
+        ("system_case_differs", "system_case_differs_conditionally"),
     )
 
 
@@ -745,10 +845,14 @@ def compare_models(left, right, requests, *, fuel=1024, timeout=60):
         # Admissibility is outcome-sensitive; diagnostics are not observations.
         ax = [r[1:3] for r in x["admissible"]]
         by = [r[1:3] for r in y["admissible"]]
-        if ax != by:
-            differences.append(
-                {"case": i, "request": requests[i], "left": ax, "right": by}
-            )
+        # The same admissible set under different assumptions is a different
+        # answer (spec 4.6); v1 results carry none and compare as before.
+        assumed = (x.get("assumptions"), y.get("assumptions"))
+        if ax != by or assumed[0] != assumed[1]:
+            difference = {"case": i, "request": requests[i], "left": ax, "right": by}
+            if assumed != (None, None):
+                difference["assumptions"] = {"left": assumed[0], "right": assumed[1]}
+            differences.append(difference)
     return {
         "format": "capcov-system-comparison-v1",
         "basis": "supplied-cases",

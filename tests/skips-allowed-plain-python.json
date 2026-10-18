@@ -203,6 +203,7 @@
       "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, R02 PR 1).",
       "tests": [
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_bridge_mutants_are_caught",
+        "tests.claim_semantics.test_r02_bridge.BridgeTests.test_claim_export_is_conditional_on_assumptions",
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_a_declaring_system_answers_as_its_v1_form",
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_every_rejection_label_binds",
         "tests.claim_semantics.test_r02_bridge.BridgeTests.test_explore_with_r02_outcomes_matches_v1_and_carries_assumptions",
