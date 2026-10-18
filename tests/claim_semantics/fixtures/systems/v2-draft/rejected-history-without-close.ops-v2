@@ -6,6 +6,5 @@
 [history
  [[open]
   [invoke "i1" "send" [["id" "j"]]] [complete "i1" [info]]
-  [read [observation [cut ["job" "outbox" "delivery-attempt"] [barrier "b1"] [drained]]
-    [[row "job" "j" [["payload" "hello"] ["status" "pending"]]]]
-    [journal "1" "0" []]]]]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "pending"]]]]]]]]]

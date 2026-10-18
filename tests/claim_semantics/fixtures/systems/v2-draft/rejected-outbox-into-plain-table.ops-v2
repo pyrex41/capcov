@@ -1,17 +1,16 @@
-; rejected-by: R-OUTBOX-TABLE
-; docs/ir-specification.md section 4.3. [outbox T I V] must name an
-; outbox-table; job is an ordinary table, so the record would have no state
-; field, no channel and no delivery contract.
-[system-v2 "outbox-into-plain-table"
- []
+; rejected-by: R-CHANNEL
+; docs/ir-specification.md section 4.3. [outbox T I V] must name the outbox
+; table of a declared [channel Kind Contract T]; log is an ordinary table, so
+; the record would have no state field, no channel and no delivery contract.
+; The audit channel is declared correctly; it is not the one named.
+[system "outbox-into-plain-table"
+ ["single-landing-v1"]
  [[table "job" ["payload"] [] []]
-  [table "log" ["payload"] [] []]]
- []
+  [table "log" ["payload"] [] []]
+  [channel "audit" [at-least-once] "audit-outbox"]]
  [[operation "send" ["id"] [intent [argument "id"]]
    [exists "job" [argument "id"]]
    [[transaction "record"
      [[named "enqueue" [outbox "log" [intent [argument "id"]] [lookup "job" [argument "id"] "payload"]]]]]]
    [yes]]]
- []
- []
  []]

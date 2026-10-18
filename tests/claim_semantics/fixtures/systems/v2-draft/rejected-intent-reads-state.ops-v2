@@ -3,16 +3,13 @@
 ; (the job's payload). Two jobs with one payload would share an intent, and a
 ; retry after the state changed would get a different one. An intent
 ; expression may use literal and argument (and row-key inside for-each) only.
-[system-v2 "intent-reads-state"
- []
+[system "intent-reads-state"
+ ["single-landing-v1"]
  [[table "job" ["payload"] [] []]
-  [outbox-table "outbox" "delivery-attempt"]]
- [[channel "delivery-attempt" [at-most-once]]]
+  [channel "delivery-attempt" [at-most-once] "outbox"]]
  [[operation "send" ["id"] [intent [lookup "job" [argument "id"] "payload"]]
    [exists "job" [argument "id"]]
    [[transaction "record"
      [[named "enqueue" [outbox "outbox" [intent [lookup "job" [argument "id"] "payload"]] [lookup "job" [argument "id"] "payload"]]]]]]
    [yes]]]
- []
- []
  []]

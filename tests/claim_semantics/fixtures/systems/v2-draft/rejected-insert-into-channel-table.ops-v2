@@ -1,0 +1,16 @@
+; rejected-by: R-CHANNEL
+; docs/ir-specification.md section 4.3. A plain insert creates a row in a
+; channel's outbox table. Outbox rows are created only by [outbox ...], which
+; sets state pending and keys the row by intent; an inserted row bypasses
+; both, so its delivery eligibility is undefined.
+[system "insert-into-channel-table"
+ ["single-landing-v1"]
+ [[table "job" ["payload"] [] []]
+  [channel "delivery-attempt" [at-most-once] "outbox"]]
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [exists "job" [argument "id"]]
+   [[transaction "record"
+     [[named "enqueue" [insert "outbox" [argument "id"]
+       [["payload" [lookup "job" [argument "id"] "payload"]] ["state" [literal "pending"]]]]]]]]
+   [yes]]]
+ []]

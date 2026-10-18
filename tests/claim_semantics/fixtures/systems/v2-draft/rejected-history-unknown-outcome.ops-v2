@@ -1,9 +1,13 @@
 ; rejected-by: T-outcome
 ; docs/ir-specification.md section 4.1. "unknown" is the v1 request alphabet
-; (system.py:126-128); a v2 history uses the capcov.faults alphabet ok / fail
-; / info. The bridge (section 7) maps unknown to info under atomic-publish-v1;
-; it never appears in a v2 history.
+; (system.py:126-128); a history uses the capcov.faults alphabet ok / fail /
+; info. The bridge (section 7) maps unknown to info under info-in-place-v1;
+; unknown never appears in a history. Every other completion here types.
 [history
  [[open]
-  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [unknown]]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [ok]]
+  [invoke "i2" "send" [["id" "k"]]] [complete "i2" [fail [rejected "precondition"]]]
+  [invoke "i3" "send" [["id" "m"]]] [complete "i3" [fail [aborted]]]
+  [invoke "i4" "send" [["id" "n"]]] [complete "i4" [info]]
+  [invoke "i5" "send" [["id" "p"]]] [complete "i5" [unknown]]
   [close]]]

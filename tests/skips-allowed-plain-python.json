@@ -180,6 +180,14 @@
         "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_forged_completion_and_frame_rejected",
         "tests.claim_semantics.test_loop_completion.NativeCompletionTests.test_completion_reaches_claim_pipeline"
       ]
+    },
+    {
+      "reason": "Requires native Shen; runs without accepted skips in the Shen CI family (docs/ir-specification.md, gate G1).",
+      "tests": [
+        "tests.test_ir_specification.DraftTypecheckTest.test_draft_fixtures_type_as_specified",
+        "tests.test_ir_specification.DraftTypecheckTest.test_one_result_per_case",
+        "tests.test_ir_specification.DraftTypecheckTest.test_v1_fixtures_still_type_with_the_overlay_loaded"
+      ]
     }
   ]
 }

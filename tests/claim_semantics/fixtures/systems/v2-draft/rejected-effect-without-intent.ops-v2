@@ -1,19 +1,16 @@
 ; rejected-by: T-outbox
 ; docs/ir-specification.md section 6. The outbox record's key is a bare
-; expression, not [intent X]. No rule types [outbox T X V] with X : caps-expr,
-; so the record has no intent id and a duplicate of it could only be stated
+; expression, not [intent X]. No rule types [outbox T X V] with X a caps-expr,
+; so the record has no intent id and a duplicate of it could be stated only
 ; by payload (the M2 failure).
-[system-v2 "effect-without-intent"
- []
+[system "effect-without-intent"
+ ["single-landing-v1"]
  [[table "job" ["payload"] [] []]
-  [outbox-table "outbox" "delivery-attempt"]]
- [[channel "delivery-attempt" [at-most-once]]]
+  [channel "delivery-attempt" [at-most-once] "outbox"]]
  [[operation "send" ["id"] [intent [argument "id"]]
    [exists "job" [argument "id"]]
    [[transaction "record"
      [[named "enqueue" [outbox "outbox" [argument "id"] [lookup "job" [argument "id"] "payload"]]]]]
-    [deliver "publish" "outbox" [intent [argument "id"]] [ok []] [fail []] [info []]]]
+    [deliver "publish" "outbox" [intent [argument "id"]] [on-ok []] [on-fail []] [on-info []]]]
    [yes]]]
- []
- []
  []]

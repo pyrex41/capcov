@@ -1,0 +1,12 @@
+; rejected-by: R-HISTORY
+; docs/ir-specification.md section 4.4. i2 is invoked while i1 is invoked and
+; not yet completed. Until R17, an invoke may not occur while another
+; invocation is outstanding; an invocation completed info is complete for
+; this rule, though it stays open for its effects.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]]
+  [invoke "i2" "send" [["id" "k"]]]
+  [complete "i1" [ok]]
+  [complete "i2" [ok]]
+  [close]]]
