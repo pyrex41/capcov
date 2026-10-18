@@ -24,11 +24,11 @@
   "pending": [
     "Declarative reporting policies, and default selection of the v2 profiles after the full release gate.",
     "V2 mapping, aggregation, universal-domain, and native derivation admission.",
-    "Declarative reporting policies for claim packs; templated .decl declarations (installed pack bytes keep declaration order, which instantiation-point emission does not reproduce for interleaved php/go decls).",
     "Static invariant-preservation proofs beyond runtime checks, unbounded/non-serial concurrency reasoning, and reviewed application-specific model/receipt adapters.",
     "Automatic application-domain inference and richer Prolog explanations; system campaigns enumerate only explicit bounded argument, state and schedule domains.",
     "Complete pinned release CI gates; the operation milestone has native tests and a synthetic independent transition corpus, not a release-readiness claim.",
-    "Typed claim authority (W2 first increment): schema-1 typed-rule, an aggregation sort, typing or checking of the reifier and prelude predicates, the five recorded typed_authority_disagreements, and replacing an admission path with the typed authority."
+    "Typed claim authority (W2 first increment): schema-1 typed-rule, an aggregation sort, typing or checking of the reifier and prelude predicates, the five recorded typed_authority_disagreements, and replacing an admission path with the typed authority.",
+    "Replay's exporter identity hashes the selected profile's relation names (55 under v1, 116 under v2), so one receipt gets a different replay_digest per profile; static and observation hash the frozen v1 name set. Align replay or justify the difference before default selection."
   ],
   "native_authority_disagreements": [
     {
@@ -48,18 +48,21 @@
       "rule": "masked_admitted",
       "native_id": "declaration-promoted-to-effect",
       "status": "resolved: single-premise assumption projection to a derived relation retains its assumption dependency; direct assumption-to-claim promotion remains rejected"
+    },
+    {
+      "pack": "(authored fixture) typed_authority/negation-before-its-binder",
+      "rule": "absence",
+      "native_id": "ungrounded-side-condition-variable",
+      "status": "resolved: rule-authority.shen now grounds a side condition only from the positive premises preceding it, as Python validation, the typed judgement and both evaluators do; the untyped authority had bound over the whole body"
+    },
+    {
+      "pack": "(no installed pack aggregates)",
+      "rule": "*",
+      "native_id": "ungrounded-conclusion-variable",
+      "status": "resolved: rule-authority.shen treated an aggregation's name as a bound variable; an aggregation binds no rule variable (its value_variable names a column), matching Python validation"
     }
   ],
   "typed_authority_disagreements": [
-    {
-      "case": "typed_authority/negation-before-its-binder",
-      "rule": "absence",
-      "id": "ungrounded-side-condition-variable",
-      "python": true,
-      "untyped": false,
-      "typed": true,
-      "analysis": "The negated premise precedes the only positive premise binding its variables. The untyped authority binds over the whole body and admits the rule. Python validation, the typed judgement (cc-side scopes a negation to the PRECEDING positive premises) and both evaluators are order-dependent: claim-workbench.shen capcov.inst refuses a negation that is not ground at check time, and the spec elaborator requires negated variables bound first. The permissive untyped verdict is not adopted. Resolution belongs in rule-authority.shen (out of this change's scope)."
-    },
     {
       "case": "planted/context-index-loss",
       "rule": "bad",
@@ -67,7 +70,7 @@
       "python": true,
       "untyped": false,
       "typed": false,
-      "analysis": "Schema-1 pack: head derived(X, X) puts a symbol variable in a digest column. Python validation reports type-mismatch. Neither Shen authority runs typed-rule under schema 1, because rule-authority.shen emits it only for schema 2 and the typed authority keeps the same id set. Python is stricter here. Schema-1 typing is the pending static/observation v2 migration."
+      "analysis": "Schema-1 pack: head derived(X, X) puts a symbol variable in a digest column. Python validation reports type-mismatch. Neither Shen authority runs typed-rule under schema 1, because rule-authority.shen emits it only for schema 2 and the typed authority keeps the same id set. Python is stricter here. Schema-1 packs are retained as installed defaults; their v2 profiles are typed."
     },
     {
       "case": "planted/context-index-loss",

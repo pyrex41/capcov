@@ -175,10 +175,13 @@
                 (capcov.check "undeclared-relation" true "every relation in the rule is declared")
                 (capcov.check "undeclared-relation" false (cn "undeclared (unapproved effectful side condition): " (capcov.names-text Missing))))))
 
+\* Variables a rule binds positively: every positive premise's variables.  An
+   aggregation binds none: its [Name Rel GroupBy ValueVar Op Domain Closure]
+   names a relation column in ValueVar, not a rule variable, and its Name is a
+   label.  (Treating Name as a bound variable let a head variable sharing the
+   aggregation's name pass as grounded.)  The Python validator agrees. *\
 (define capcov.positive-vars
-  Rule -> (let Vars (capcov.dedupe (capcov.sort-strings (capcov.join-vars (capcov.positive-atoms (capcov.rule-body Rule)))))
-               Agg (capcov.rule-aggregation Rule)
-            (if (= Agg capcov.null) Vars [(nth 1 Agg) | Vars])))
+  Rule -> (capcov.dedupe (capcov.sort-strings (capcov.join-vars (capcov.positive-atoms (capcov.rule-body Rule))))))
 
 (define capcov.join-vars
   [] -> []
@@ -191,10 +194,22 @@
                 (capcov.check "ungrounded-conclusion-variable" true "every head variable is bound by a positive premise")
                 (capcov.check "ungrounded-conclusion-variable" false (cn "head variables without a positive premise: " (capcov.names-text Missing))))))
 
+\* A side condition (negated premise or comparison) is grounded only by the
+   positive premises that PRECEDE it in the body, which is the order every
+   kernel evaluates in (capcov.inst refuses a non-ground negation at check
+   time; the Python validator walks the body left to right; the spec
+   elaborator requires negated variables bound first).  Binding over the whole
+   body admitted a negation placed before its binder; that is a defect, not a
+   permissive variant. *\
+(define capcov.side-unbound
+  [] _ -> []
+  [[capcov.pos Rel Terms] | Rest] Bound -> (capcov.side-unbound Rest (append (capcov.term-vars Terms) Bound))
+  [[capcov.neg Rel Terms] | Rest] Bound -> (append (capcov.minus (capcov.term-vars Terms) Bound) (capcov.side-unbound Rest Bound))
+  [[capcov.cmp L Op R] | Rest] Bound -> (append (capcov.minus (capcov.term-vars [L R]) Bound) (capcov.side-unbound Rest Bound))
+  [_ | Rest] Bound -> (capcov.side-unbound Rest Bound))
+
 (define capcov.check-side-grounding
-  Rule -> (let Bound (capcov.positive-vars Rule)
-               Side (append (capcov.join-vars (capcov.negative-atoms (capcov.rule-body Rule))) (capcov.comparison-vars (capcov.rule-body Rule)))
-               Missing (capcov.dedupe (capcov.sort-strings (capcov.minus Side Bound)))
+  Rule -> (let Missing (capcov.dedupe (capcov.sort-strings (capcov.side-unbound (capcov.rule-body Rule) [])))
             (if (empty? Missing)
                 (capcov.check "ungrounded-side-condition-variable" true "negation and comparison variables are positively bound")
                 (capcov.check "ungrounded-side-condition-variable" false (cn "side-condition variables without a positive premise: " (capcov.names-text Missing))))))

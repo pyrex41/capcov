@@ -71,10 +71,9 @@ select: result(R, X) :- seen(R, X), X != "excluded".
                 raw=(ROOT/pack['path']).read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest(),pack['file_sha256'])
                 _,_,bundle,_=decode_source(ROOT/f"specs/claims/{pack['domain']}.claims")
-                if pack['domain'] not in ('replay','static','observation'):
-                    self.assertEqual(digest(bundle),pack['bundle_digest'])
-                else:
-                    self.assertEqual(bundle.schema_version, 2)
+                # Every pack is authored at schema 2; the frozen v1 digest is
+                # re-established by the native reconstruction tests below.
+                self.assertEqual(bundle.schema_version, 2)
                 self.assertEqual(len(bundle.rules),pack['rule_count'])
         fixture=ROOT/'tests/claim_semantics/fixtures/model_min'
         for name,expected in baseline['model_min'].items():
