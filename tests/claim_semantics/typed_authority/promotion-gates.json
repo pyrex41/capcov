@@ -1,0 +1,184 @@
+{
+  "note": "Producer gates over the authority_v2 promotion base.",
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "observation",
+        "primitive": true
+      },
+      {
+        "name": "closed",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "completeness",
+        "completes": "seen",
+        "primitive": true
+      },
+      {
+        "name": "assumed",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "assumption",
+        "primitive": true
+      },
+      {
+        "name": "clear",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          }
+        ],
+        "context_indices": [
+          "run"
+        ],
+        "binding": "runtime",
+        "modality": "claim",
+        "primitive": false
+      }
+    ],
+    "completeness_scopes": [
+      {
+        "relation": "closed",
+        "target": "seen",
+        "mapping": [
+          [
+            "run",
+            "run"
+          ]
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "name": "clear",
+        "head": {
+          "relation": "clear",
+          "terms": [
+            {
+              "variable": "R"
+            }
+          ]
+        },
+        "body": [
+          {
+            "relation": "closed",
+            "terms": [
+              {
+                "variable": "R"
+              }
+            ]
+          },
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "R"
+              }
+            ],
+            "negated": true
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "static-producer-cannot-establish-runtime-claim",
+      "note": "the observation is re-declared with static binding; a runtime claim needs runtime support",
+      "categories": [
+        "promotion"
+      ],
+      "changes": [
+        {
+          "path": "/relations/2",
+          "value": {
+            "name": "declared",
+            "columns": [
+              {
+                "name": "run",
+                "type": "symbol",
+                "context": true
+              }
+            ],
+            "context_indices": [
+              "run"
+            ],
+            "binding": "static",
+            "modality": "observation",
+            "primitive": true
+          }
+        },
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "declared",
+              "terms": [
+                {
+                  "variable": "R"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "completeness-alone-cannot-establish-runtime-claim",
+      "note": "closure evidence without a negation it closes is not scoped absence",
+      "categories": [
+        "promotion"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "closed",
+              "terms": [
+                {
+                  "variable": "R"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

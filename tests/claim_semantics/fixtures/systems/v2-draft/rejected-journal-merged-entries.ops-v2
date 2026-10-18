@@ -1,0 +1,21 @@
+; rejected-by: R-JOURNAL
+; docs/ir-specification.md section 4.5. The channel journal declares
+; positions 1-2, but position 2 is neither an entry nor a gap: an adapter
+; merged two equal delivery records into one (M4, set normalization). Every
+; position of the declared range must be covered exactly once, by an entry or
+; by a gap. This catches M4 only when the range comes from the source's own
+; sequence; an adapter that also rewrites the range to 1-1 is not caught here.
+; The rows and the other journals are well formed.
+[history
+ [[open]
+  [invoke "i1" "send" [["id" "j"]]] [complete "i1" [ok]]
+  [observation true
+   [[rows "job" true [[row "j" [["payload" "hello"] ["status" "queued"]]]]]
+    [journal "job" true "1" "4"
+     [[entry "1" [effect "i0" "i0/body" [create "job" "j" [["payload" "hello"] ["status" "pending"]]]]]
+      [entry "2" [effect "i0" "i0/body" [delete "job" "k"]]]
+      [gap "3" "3"]
+      [entry "4" [effect "i1" "i1/body" [put "job" "j" "status" "queued"]]]]]
+    [journal "delivery-attempt" true "1" "2"
+     [[entry "1" [effect "i1" "i1/body" [emit "delivery-attempt" "hello"]]]]]]]
+  [close]]]

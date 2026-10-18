@@ -1,0 +1,15 @@
+; rejected-by: R-EFFECT-PLACEMENT
+; docs/ir-specification.md section 4.3. An operation with intent identity
+; uses publish inside its transaction. publish is allowed only in a command,
+; under atomic-publish-v1; an operation states its external effect as
+; [outbox ...] plus [deliver ...]. (Symmetrically, outbox is allowed only in
+; an operation.) The action types; the rule is a side condition.
+[system "publish-in-operation"
+ ["atomic-publish-v1"]
+ [[table "job" ["payload"] [] []]]
+ [[operation "send" ["id"] [intent [argument "id"]]
+   [exists "job" [argument "id"]]
+   [[transaction "record"
+     [[named "send" [publish "delivery-attempt" [lookup "job" [argument "id"] "payload"]]]]]]
+   [yes]]]
+ []]

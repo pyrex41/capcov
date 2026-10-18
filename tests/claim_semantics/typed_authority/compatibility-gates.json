@@ -1,0 +1,707 @@
+{
+  "note": "Join gates over the authority_v2 compatibility base: one capability authorizes one exact join.",
+  "base": {
+    "schema_version": 2,
+    "relations": [
+      {
+        "name": "seen",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "other",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "observation",
+        "primitive": true,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "claim",
+        "columns": [
+          {
+            "name": "run",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "tenant",
+            "type": "symbol",
+            "context": true
+          },
+          {
+            "name": "item",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "derived",
+        "primitive": false,
+        "context_indices": [
+          "run",
+          "tenant"
+        ]
+      },
+      {
+        "name": "permit",
+        "columns": [
+          {
+            "name": "from",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "to",
+            "type": "symbol",
+            "context": false
+          },
+          {
+            "name": "extra",
+            "type": "symbol",
+            "context": false
+          }
+        ],
+        "modality": "compatibility",
+        "primitive": true,
+        "context_indices": []
+      }
+    ],
+    "compatibility_capabilities": [
+      {
+        "name": "run-pair",
+        "witness": "permit",
+        "left_dimension": "run",
+        "right_dimension": "run",
+        "left_column": "from",
+        "right_column": "to",
+        "left_targets": [
+          "seen",
+          "other",
+          "claim"
+        ],
+        "right_targets": [
+          "seen",
+          "other",
+          "claim"
+        ],
+        "symmetric": false
+      }
+    ],
+    "rules": [
+      {
+        "name": "join",
+        "head": {
+          "relation": "claim",
+          "terms": [
+            {
+              "variable": "A"
+            },
+            {
+              "variable": "T"
+            },
+            {
+              "variable": "X"
+            }
+          ],
+          "negated": false
+        },
+        "body": [
+          {
+            "relation": "seen",
+            "terms": [
+              {
+                "variable": "A"
+              },
+              {
+                "variable": "T"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "other",
+            "terms": [
+              {
+                "variable": "B"
+              },
+              {
+                "variable": "T"
+              },
+              {
+                "variable": "X"
+              }
+            ],
+            "negated": false
+          },
+          {
+            "relation": "permit",
+            "terms": [
+              {
+                "variable": "A"
+              },
+              {
+                "variable": "B"
+              },
+              {
+                "variable": "Noise"
+              }
+            ],
+            "negated": false
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "duplicated-occurrence-needs-its-own-witness",
+      "note": "other is duplicated with a fresh run; permit(A,B) authorizes only the first occurrence",
+      "categories": [
+        "compatibility"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B2"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "Noise"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "duplicated-occurrence-with-its-own-witness",
+      "note": "each duplicated occurrence carries its own exact witness; other/other is the same run",
+      "categories": [],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "Y"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "Noise"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "substituted-witness-occurrence",
+      "note": "the witness endpoint is bound to the conclusion-only occurrence's term, not the joined premise",
+      "categories": [
+        "compatibility"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "Noise"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "chained-witnesses-are-not-transitive",
+      "note": "permit(A,C) and permit(C,B) through a third carrier do not authorize A/B",
+      "categories": [
+        "compatibility"
+      ],
+      "changes": [
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "N1"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "N2"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "symmetric-capability-is-still-not-transitive",
+      "note": "a symmetric capability authorizes both orientations of each witnessed join, never a composed one",
+      "categories": [
+        "compatibility"
+      ],
+      "changes": [
+        {
+          "path": "/compatibility_capabilities/0/symmetric",
+          "value": true
+        },
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "N1"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "N2"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "symmetric-witnessed-chain-covers-each-join",
+      "note": "every pair has its own witness (A/C, C/B and A/B), so the symmetric capability admits the rule",
+      "categories": [],
+      "changes": [
+        {
+          "path": "/compatibility_capabilities/0/symmetric",
+          "value": true
+        },
+        {
+          "path": "/rules/0/body",
+          "value": [
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "other",
+              "terms": [
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "seen",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "T"
+                },
+                {
+                  "variable": "X"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "N1"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "C"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "N2"
+                }
+              ],
+              "negated": false
+            },
+            {
+              "relation": "permit",
+              "terms": [
+                {
+                  "variable": "A"
+                },
+                {
+                  "variable": "B"
+                },
+                {
+                  "variable": "N3"
+                }
+              ],
+              "negated": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
