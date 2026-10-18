@@ -59,7 +59,7 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .ir import canonical_json
 
@@ -70,11 +70,58 @@ PRODUCER_CLASS = "modelcheck"
 IMPL = "shen-go"
 DEFAULT_TIMEOUT = 300.0
 
-# Load order matters: a datatype may only mention datatypes loaded before it.
-DATATYPES = ("table-list", "wf-writes", "cell", "cell-list", "wf-matrix",
-             "wf-atlas", "wf-registry", "id-list")
-JUDGES = ("judge-writes", "judge-matrix", "judge-atlas", "judge-registry", "judge-ids")
-PRELUDE = "prelude.shen"
+@dataclass(frozen=True)
+class CheckerProfile:
+    """One typed checker: its source directory, the datatypes and judges it
+    loads under ``(tc +)`` and in what order, and the judge every generated
+    unit must call.  The runner, the unit isolation and the transcript
+    protocol are shared; a profile only names what gets typechecked."""
+
+    name: str
+    directory_env: str              # environment override for the source directory
+    default_directory: tuple[str, ...]  # path parts below the repository root
+    prelude: str
+    # Load order matters: a datatype may only mention datatypes loaded before it.
+    datatypes: tuple[str, ...]
+    judges: tuple[str, ...]
+    judge_for: Callable[[str], str]  # unit id -> judge function the unit must call
+
+    def directory(self) -> Path:
+        override = os.environ.get(self.directory_env)
+        if override:
+            return Path(override)
+        return Path(__file__).resolve().parents[3].joinpath(*self.default_directory)
+
+    @property
+    def type_files(self) -> tuple[str, ...]:
+        """Every file loaded under ``(tc +)``, datatypes first, in load order."""
+        return (*self.datatypes, *self.judges)
+
+    def source_files(self) -> list[str]:
+        return [self.prelude, *(f"types/{name}.shen" for name in self.type_files)]
+
+
+def _model_wf_judge(unit_id: str) -> str:
+    if unit_id == "registry-ids":
+        return "mc.judge-ids"
+    if unit_id.startswith("registry:"):
+        return "mc.judge-registry"
+    return f"mc.judge-{unit_id.split(':', 1)[0]}"
+
+
+MODEL_WF = CheckerProfile(
+    name="model-wf",
+    directory_env="CAPCOV_MODELCHECK_DIR",
+    default_directory=("shen", "modelcheck"),
+    prelude="prelude.shen",
+    datatypes=("table-list", "wf-writes", "cell", "cell-list", "wf-matrix",
+               "wf-atlas", "wf-registry", "id-list"),
+    judges=("judge-writes", "judge-matrix", "judge-atlas", "judge-registry", "judge-ids"),
+    judge_for=_model_wf_judge,
+)
+DATATYPES = MODEL_WF.datatypes
+JUDGES = MODEL_WF.judges
+PRELUDE = MODEL_WF.prelude
 
 _LOAD_LINE = re.compile(r'^\(load "([^"]+)"\)\s*$')
 _FORBIDDEN_RUNTIME_SYMBOL = re.compile(
@@ -275,14 +322,11 @@ def model_digest(model_dir: str | os.PathLike[str]) -> str:
 
 
 def modelcheck_dir() -> Path:
-    override = os.environ.get("CAPCOV_MODELCHECK_DIR")
-    if override:
-        return Path(override)
-    return Path(__file__).resolve().parents[3] / "shen" / "modelcheck"
+    return MODEL_WF.directory()
 
 
-def _source_files() -> list[str]:
-    return [PRELUDE, *(f"types/{name}.shen" for name in DATATYPES), *(f"types/{name}.shen" for name in JUDGES)]
+def _source_files(profile: CheckerProfile = MODEL_WF) -> list[str]:
+    return profile.source_files()
 
 
 _NATIVE_EXECUTABLE_MAGICS = {
@@ -319,7 +363,7 @@ def _resolve_native_executable(path: str, *, setting: str) -> tuple[str, str]:
     return str(resolved), _sha256_file(resolved)
 
 
-def runtime() -> Runtime:
+def runtime(profile: CheckerProfile = MODEL_WF) -> Runtime:
     """Resolve the pinned runtime and the checker sources, or raise; never fall back."""
     bifrost = shutil.which("bifrost")
     if not bifrost:
@@ -328,9 +372,9 @@ def runtime() -> Runtime:
     if not shen_go:
         raise ModelcheckUnavailable("BIFROST_SHEN_GO is not set; the pinned shen-go binary must be named explicitly")
     shen_go, shen_go_sha256 = _resolve_native_executable(shen_go, setting="BIFROST_SHEN_GO")
-    directory = modelcheck_dir()
+    directory = profile.directory()
     sources = []
-    for relative in _source_files():
+    for relative in profile.source_files():
         path = directory / relative
         if not path.is_file():
             raise ModelcheckUnavailable(f"checker source {path} is missing")
@@ -349,26 +393,31 @@ def _shen_path(path: Path) -> str:
     return text
 
 
-def render_driver(model_dir: Path, workdir: Path, checker_dir: Path, protocol_nonce: str) -> str:
+def _type_loads(checker_dir: Path, profile: CheckerProfile) -> list[str]:
+    types = checker_dir / "types"
+    return [f'(load "{_shen_path(types / (name + ".shen"))}")' for name in profile.type_files]
+
+
+def render_driver(model_dir: Path, workdir: Path, checker_dir: Path, protocol_nonce: str,
+                  profile: CheckerProfile = MODEL_WF) -> str:
     """The top-level script.  Its own forms run untyped; only the nested loads
     after ``(tc +)`` are typechecked, which is exactly the boundary wanted."""
     model = _shen_path(model_dir.resolve())
     gen = _shen_path((workdir / "gen").resolve())
-    types = checker_dir / "types"
     lines = [
         "(tc -)",
         # The checker owns model loading so every transitive source is reported.
-        f'(load "{_shen_path(checker_dir / PRELUDE)}")',
+        f'(load "{_shen_path(checker_dir / profile.prelude)}")',
         f'(output "MC {protocol_nonce} BEGIN~%")',
         f'(cd "{model}/")',
         '(mc.quiet-load "shen/load.shen")',
         '(cd "")',
         # Restore checker definitions after the untrusted model so it cannot
         # replace mc.* protocol or judgement helpers.
-        f'(load "{_shen_path(checker_dir / PRELUDE)}")',
+        f'(load "{_shen_path(checker_dir / profile.prelude)}")',
         f'(set mc.units (mc.reify "{gen}/"))',
         "(tc +)",
-        *(f'(load "{_shen_path(types / (name + ".shen"))}")' for name in (*DATATYPES, *JUDGES)),
+        *_type_loads(checker_dir, profile),
         "(mc.judge-all (value mc.units))",
         "(tc -)",
         f'(output "MC {protocol_nonce} DONE ~A~%" (length (value mc.units)))',
@@ -395,23 +444,21 @@ def _run(argv: list[str], *, cwd: Path, env: dict[str, str], timeout: float) -> 
 
 
 def _judge_unit(rt: Runtime, checker_dir: Path, unit: Path, unit_id: str,
-                nonce: str, workdir: Path, env: dict[str, str], timeout: float) -> tuple[str, str, str, float]:
+                nonce: str, workdir: Path, env: dict[str, str], timeout: float,
+                profile: CheckerProfile = MODEL_WF) -> tuple[str, str, str, float]:
     """Typecheck one generated literal in a fresh process that never loads the model."""
-    expected_judge = ("mc.judge-ids" if unit_id == "registry-ids" else
-                      "mc.judge-registry" if unit_id.startswith("registry:") else
-                      f"mc.judge-{unit_id.split(':', 1)[0]}")
+    expected_judge = profile.judge_for(unit_id)
     text = unit.read_text(encoding="utf-8")
     prefix = f'(output "MC {nonce} PASS {unit_id} ~A~%" ({expected_judge} '
     stripped = text.rstrip("\n")
     if not stripped.startswith(prefix) or not stripped.endswith("))") or "\n" in stripped:
         raise ModelcheckFailure(f"generated unit {unit_id} does not have the canonical one-form shape")
     _validate_shen_literal(stripped[len(prefix):-2], unit_id)
-    types = checker_dir / "types"
     driver_lines = [
         "(tc -)",
-        f'(load "{_shen_path(checker_dir / PRELUDE)}")',
+        f'(load "{_shen_path(checker_dir / profile.prelude)}")',
         "(tc +)",
-        *(f'(load "{_shen_path(types / (name + ".shen"))}")' for name in (*DATATYPES, *JUDGES)),
+        *_type_loads(checker_dir, profile),
         f'(trap-error (load "{_shen_path(unit)}") '
         f'(/. E (output "MC {nonce} FAIL {unit_id} ~A~%" (error-to-string E))))',
         "(tc -)",
@@ -473,7 +520,8 @@ def _validate_shen_literal(text: str, unit_id: str) -> None:
 # the transcript
 
 
-def _parse_transcript(stdout: str, protocol_nonce: str) -> dict[str, Any]:
+def _parse_transcript(stdout: str, protocol_nonce: str,
+                      profile: CheckerProfile = MODEL_WF) -> dict[str, Any]:
     loaded: list[str] = []
     operations: list[str] = []
     skipped: list[tuple[str, str]] = []
@@ -530,7 +578,7 @@ def _parse_transcript(stdout: str, protocol_nonce: str) -> dict[str, Any]:
     extra = sorted(set(verdicts) - set(units))
     if missing or extra:
         raise ModelcheckFailure(f"verdicts do not cover the generated units (missing {missing}, unknown {extra})")
-    if sorted(judges) != sorted(f"mc.{name}" for name in JUDGES):
+    if sorted(judges) != sorted(f"mc.{name}" for name in profile.judges):
         raise ModelcheckFailure(f"judgement functions loaded do not match the checker's: {judges}")
     if stray_errors:
         raise ModelcheckFailure("runtime errors outside the judgement protocol: " + " | ".join(stray_errors[:3]))
@@ -685,10 +733,11 @@ def _snapshot_model(source: Path, destination: Path) -> tuple[list[str], tuple[t
     return files, tuple(hashes), h.hexdigest()
 
 
-def _protocol_checker(source: Path, destination: Path, nonce: str) -> Path:
+def _protocol_checker(source: Path, destination: Path, nonce: str,
+                      profile: CheckerProfile = MODEL_WF) -> Path:
     """Copy checker sources with an unguessable per-run protocol prefix."""
     destination.mkdir()
-    for relative in _source_files():
+    for relative in profile.source_files():
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         text = (source / relative).read_text(encoding="utf-8")
@@ -900,6 +949,7 @@ def recheck(certificate: dict[str, Any], model_dir: str | os.PathLike[str] | Non
 
 
 __all__ = ["CHECKER", "CHECKER_VERSION", "CERTIFICATE_KIND", "PRODUCER_CLASS", "DATATYPES", "JUDGES",
+           "CheckerProfile", "MODEL_WF",
            "ModelcheckUnavailable", "ModelcheckFailure", "Runtime", "Judgement", "CheckResult", "RecheckResult",
            "model_files", "model_digest", "modelcheck_dir", "runtime", "render_driver", "check", "preflight", "recheck",
            "certificate_digest", "well_formed_file"]
