@@ -4,8 +4,11 @@
 named and hashed, that shen-go records keep their earlier shape, and that the
 transport refuses integers past 2**53 and floats whatever runtime is selected.
 ``NumericContractTest`` runs the selected runtime on integers at the edge of
-that contract and requires the certificate Python computes, so running it
-under each runtime shows the runtimes agree there.
+that contract, and ``TextContractTest`` on non-ASCII and quoted strings; both
+require the certificate Python computes, so running them under each runtime
+shows whether the runtimes agree there.  (shen-scheme d037ae6 does not on
+text: its ``pr`` UTF-8-encodes strings its reader built byte by byte, so every
+byte above 127 comes back double-encoded; docs/shen-runtime-choice.md.)
 """
 from __future__ import annotations
 
@@ -63,6 +66,29 @@ def numeric_bundle():
         "evidence": [{"id": f"num-{i}", "atom": _num(n), "context": {"index": INDEX},
                       "source": "numeric contract fixture", "depends_on": [], "kind": "fact"}
                      for i, n in enumerate(ROWS)],
+        "claims": [],
+    })
+
+
+TEXTS = ("plain", "λ雪", 'quote " and \\ backslash', "naïve café")
+
+
+def text_bundle():
+    """``named(IX, S) <- tag(IX, S)`` over strings outside ASCII."""
+    def tag(value):
+        return {"relation": "tag", "terms": [{"value": INDEX, "type": "digest"}, {"value": value, "type": "symbol"}],
+                "negated": False}
+    return bundle_from_json({
+        "schema_version": 1,
+        "relations": [_decl("tag", [("index", "digest"), ("s", "symbol")]),
+                      _decl("named", [("index", "digest"), ("s", "symbol")], modality="derived", primitive=False)],
+        "rules": [{"name": "named-if-tagged",
+                   "head": {"relation": "named", "terms": [{"variable": "IX"}, {"variable": "S"}], "negated": False},
+                   "body": [{"relation": "tag", "terms": [{"variable": "IX"}, {"variable": "S"}], "negated": False}]}],
+        "facts": [tag(t) for t in TEXTS],
+        "evidence": [{"id": f"tag-{i}", "atom": tag(t), "context": {"index": INDEX},
+                      "source": "text contract fixture", "depends_on": [], "kind": "fact"}
+                     for i, t in enumerate(TEXTS)],
         "claims": [],
     })
 
@@ -217,6 +243,22 @@ class NumericContractTest(unittest.TestCase):
         self.assertEqual(rt.binary_sha256, hashlib.sha256(Path(impl.binary()).read_bytes()).hexdigest())
         self.assertEqual(rt.support_sha256, shen_runtime.support_sha256(impl, impl.binary()))
         self.assertEqual(result.provenance.as_dict()["runtime"]["impl"], impl.name)
+
+
+@unittest.skipUnless(RUNTIME_PRESENT, SKIP_REASON)
+class TextContractTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.bundle = text_bundle()
+        cls.relations = certificate.normalize_relations(evaluate(cls.bundle).relations)
+
+    def test_strings_outside_ascii_derive_the_python_certificate(self) -> None:
+        self.assertEqual(sorted(s for _, s in self.relations["named"]), sorted(TEXTS))
+        for row in self.relations["named"]:
+            with self.subTest(s=row[1]):
+                result = shen.evaluate(self.bundle, None, "named", row)
+                self.assertEqual(result.outcome, "positive")
+                self.assertEqual(result.certificate, certificate.certify(self.bundle, self.relations, "named", row))
 
 
 if __name__ == "__main__":
