@@ -195,6 +195,23 @@ class RuntimeSelectionTest(unittest.TestCase):
                 self.assertEqual(set(doc), modelcheck._runtime_keys(impl))
         self.assertIsNone(modelcheck._runtime_keys("shen-cobol"))
 
+    def test_modelcheck_recheck_requires_the_selected_runtime(self) -> None:
+        documents = {impl: modelcheck.Runtime("/b", "b" * 64, "/x", "a" * 64, "/mc", (), impl).as_dict()
+                     for impl in ("shen-go", "shen-c")}
+        for selected, recorded, refused in (("shen-go", "shen-c", True), ("shen-c", "shen-c", False),
+                                            ("shen-c", "shen-go", True)):
+            with self.subTest(selected=selected, recorded=recorded), \
+                    mock.patch.dict(os.environ, {shen_runtime.SETTING: selected}):
+                result = modelcheck.recheck({"runtime": documents[recorded]})
+                self.assertEqual(f"runtime impl is not {selected}" in result.problems, refused, result.problems)
+
+    def test_operations_refuse_a_shen_scheme_without_its_support_files(self) -> None:
+        binary = _executable(self.tmp / "scheme" / "bin" / "shen-scheme")
+        with mock.patch.dict(os.environ, {shen_runtime.SETTING: "shen-scheme", "BIFROST_SHEN_SCHEME": binary}), \
+                mock.patch("shutil.which", return_value=binary):
+            with self.assertRaisesRegex(OperationError, "petite.boot is missing"):
+                _native_shen()
+
     def test_children_never_inherit_runtime_relocation_variables(self) -> None:
         impl = shen_runtime.IMPLS["shen-scheme"]
         env = shen_runtime.child_env(impl, "/s", {"PATH": "/bin", "SHEN_SCHEME_HOME": "/elsewhere",

@@ -34,8 +34,9 @@ v2 pack manifests or any recorded evidence.
     are named in the record:
     - `Runtime.as_dict` (`impl`, `binary_sha256`, `support_sha256`,
       `runtime_sha256`);
-    - the modelcheck certificate, whose `recheck` accepts the exact key set of
-      the recorded runtime;
+    - the modelcheck certificate. Its `recheck` requires the exact key set of
+      the recorded runtime, and requires that runtime to be the selected one,
+      as it required shen-go before;
     - the spec manifest (`implementation`, `sha256` = identity digest);
     - the operations evidence (`runtime_impl`, and `runtime.impl`).
 * **Numbers.** The transport contract is the same for every runtime: integers
@@ -74,8 +75,9 @@ v2 pack manifests or any recorded evidence.
   the benchmarked build. `share/shen-scheme/compiled.sha256` records them, and
   the executable is identical too (`b94c9d65…`).
 - The boot files and `runtime.so` differ from the benchmarked host build.
-- Precompiling with the pinned shen-go instead of the prebuilt also works, but
-  the result is not byte-identical: gensym numbering differs, and so does symbol
+- Precompiling with the pinned shen-go instead of the prebuilt also produces the
+  compiled sources (no runtime was built or run from them), but they are not
+  byte-identical: gensym numbering differs, and so does symbol
   escaping (`kl:r#` against `|kl:r#|`). It would not be the measured binary.
 - `dontStrip` is required: `strip` rewrites the boot files, which then fail
   Chez's version check.
@@ -111,7 +113,9 @@ Runtime file digests (aarch64-darwin, this build):
 
 ## Measured: the `shen` family under each runtime
 
-Revision `a541e7d` (this branch, before this document), 2026-10-19, one shard (`--shard 1/1`),
+Revision `a541e7d` (this branch, before this document and before the commit
+that makes `modelcheck.recheck` require the selected runtime; the reruns for
+that commit are below the table), 2026-10-19, one shard (`--shard 1/1`),
 `CAPCOV_SHEN_REQUIRED=1`. The machine is the macOS 27 / Apple M5 host of the
 [e5bf644 report](validation/e5bf644.md). It was shared with other sessions,
 with load average 17 to 36, so wall times are upper bounds. Runtimes ran one
@@ -130,6 +134,13 @@ nix develop --no-update-lock-file 'path:.#shen-runtimes' --command bash -lc \
 | shen-scheme | 152 | **3** | 1 | 4 | 109.9 | 19.5 (14.6 / 4.2) | pass (46.9 s; bridge 14.8 s) |
 | shen-c | 152 | 0 | 1 | 4 | 292.0 | 289.8 (242.1 / 47.3) | pass (53.3 s; bridge 17.5 s) |
 
+* After the `recheck` commit, the classes it can affect were re-run under each
+  runtime: `RuntimeSelectionTest`, the modelcheck `RecipeTest`, `CheckerTest`,
+  `PreflightTest` and `ControlledRuntimeAuthorityTest`, and
+  `NativeOperationTests`, 44 tests in all.
+  - shen-go: OK, 162.7 s.
+  - shen-scheme: one failure, 67.9 s. It is the unicode transport test below.
+  - shen-c: OK, 86.3 s.
 * The skip is the accepted one (`LiveModelTest` needs `CAPCOV_MODEL_DIR`).
 * The 152 tests are the 148 of the e5bf644 report plus the four live tests this
   branch adds.
@@ -174,8 +185,10 @@ All three shen-scheme failures have one cause.
   reachable: `scm.` interop is undefined in script mode at this revision, and
   `pr` is protected.
 
-No shen-c divergence was found at `05a84f1`. The benchmark's earlier DIFFERS on
-c-untyped, d-g5 and e-draft were at `802e724`, before the fixes merged.
+No shen-c divergence was found at `05a84f1`. The benchmark's DIFFERS on
+c-untyped, d-g5 and e-draft were measured at `802e724`. The benchmark itself was
+not re-run at `05a84f1`, but the family tests that cover those paths (G5,
+`DraftTypecheckTest`, the untyped authority) pass there.
 
 Tests that hardcoded shen-go now follow the selected runtime:
 - `test_shen_transport`;

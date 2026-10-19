@@ -960,6 +960,14 @@ def recheck(certificate: dict[str, Any], model_dir: str | os.PathLike[str] | Non
         problems.append(f"runtime impl is not one of {', '.join(shen_runtime.IMPLS)}")
     elif set(runtime_doc) != runtime_keys:
         problems.append("runtime identity is missing or has unknown fields")
+    else:
+        try:
+            expected_impl = shen_runtime.selected().name
+        except shen_runtime.UnknownImpl as exc:
+            problems.append(str(exc))
+        else:
+            if runtime_doc["impl"] != expected_impl:
+                problems.append(f"runtime impl is not {expected_impl}")
     directory = modelcheck_dir()
     if directory.is_dir():
         expected_sources = {relative: _sha256_file(directory / relative) for relative in _source_files()}

@@ -40,6 +40,10 @@ def _native_shen():
     binary = impl.binary()
     if not launcher or not os.path.isfile(binary) or not os.access(binary, os.X_OK):
         raise OperationError(f'native Shen unavailable: require bifrost and {impl.env}')
+    try:
+        shen_runtime.support_sha256(impl, binary)
+    except FileNotFoundError as exc:
+        raise OperationError(f'native Shen unavailable: {exc}') from None
     return impl, launcher, binary
 
 
