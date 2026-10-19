@@ -7,7 +7,8 @@ from producer class ``modelcheck`` (``schema_replay_v1``).  This module is that
 producer.  It does not judge replays and it does not trust the model host.
 
 What "well formed" means here is decided by Shen's type checker, not by a
-Python walker.  The pinned shen-go runtime loads the model untyped, asks it a
+Python walker.  The pinned Shen runtime (shen-go unless ``CAPCOV_SHEN_IMPL``
+names another, ``capcov.shen_runtime``) loads the model untyped, asks it a
 fixed set of questions (``shen/modelcheck/prelude.shen``), writes each answer
 as a Shen literal into a one-form unit, and then, under ``(tc +)``, loads the
 datatypes in ``shen/modelcheck/types/`` and each unit in turn.  A unit whose
@@ -61,13 +62,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
+from .. import shen_runtime
 from .ir import canonical_json
 
 CHECKER = "capcov-modelcheck"
 CHECKER_VERSION = "1.2.0"
 CERTIFICATE_KIND = "capcov-modelcheck-certificate-v1"
 PRODUCER_CLASS = "modelcheck"
-IMPL = "shen-go"
+IMPL = shen_runtime.DEFAULT_IMPL
 DEFAULT_TIMEOUT = 300.0
 
 @dataclass(frozen=True)
@@ -178,24 +180,38 @@ class ModelcheckFailure(RuntimeError):
 class Runtime:
     bifrost: str
     bifrost_sha256: str
-    shen_go: str
-    shen_go_sha256: str
+    binary: str
+    binary_sha256: str
     modelcheck_dir: str
     sources: tuple[tuple[str, str], ...]
+    impl: str = IMPL
+    support_sha256: tuple[tuple[str, str], ...] = ()
 
     def as_dict(self) -> dict[str, Any]:
         # Host paths and executable names are not evidence and may leak a
         # machine's layout; the executable digests identify the runtime.
-        return {"impl": IMPL,
+        binary_key = "shen_go_sha256" if self.impl == IMPL else "binary_sha256"
+        return {"impl": self.impl,
                 "bifrost_sha256": self.bifrost_sha256,
-                "shen_go_sha256": self.shen_go_sha256,
+                binary_key: self.binary_sha256,
+                **({"support_sha256": dict(self.support_sha256)} if self.support_sha256 else {}),
                 "checker_binary": self.checker_binary,
-                "invocation": ["bifrost", "run", "--impl", IMPL, "--raw", "<driver.shen>"]}
+                "invocation": shen_runtime.invocation(shen_runtime.IMPLS[self.impl])}
 
     @property
     def checker_binary(self) -> str:
-        """Digest of the resolved native Shen checker executable itself."""
-        return self.shen_go_sha256
+        """Digest of the resolved native Shen checker executable itself, or, for
+        a runtime that loads support files, of the executable and those files."""
+        return shen_runtime.identity_sha256(self.binary_sha256, self.support_sha256)
+
+
+def _runtime_keys(impl: str) -> set[str] | None:
+    """The exact key set of a certificate's runtime identity for ``impl``."""
+    if impl not in shen_runtime.IMPLS:
+        return None
+    keys = {"impl", "bifrost_sha256", "checker_binary", "invocation",
+            "shen_go_sha256" if impl == IMPL else "binary_sha256"}
+    return keys | ({"support_sha256"} if shen_runtime.IMPLS[impl].support else set())
 
 
 @dataclass(frozen=True)
@@ -343,7 +359,7 @@ _NATIVE_EXECUTABLE_MAGICS = {
 }
 
 
-def _resolve_native_executable(path: str, *, setting: str) -> tuple[str, str]:
+def _resolve_native_executable(path: str, *, setting: str, impl: str = IMPL) -> tuple[str, str]:
     """Hash the resolved native executable, never an executable shell wrapper."""
     try:
         resolved = Path(path).resolve(strict=True)
@@ -359,19 +375,27 @@ def _resolve_native_executable(path: str, *, setting: str) -> tuple[str, str]:
     if magic not in _NATIVE_EXECUTABLE_MAGICS:
         raise ModelcheckUnavailable(
             f"{setting}={path!r} is not a recognized native executable; name the actual pinned "
-            "shen-go binary, not a shell or script launcher")
+            f"{impl} binary, not a shell or script launcher")
     return str(resolved), _sha256_file(resolved)
 
 
 def runtime(profile: CheckerProfile = MODEL_WF) -> Runtime:
     """Resolve the pinned runtime and the checker sources, or raise; never fall back."""
+    try:
+        impl = shen_runtime.selected()
+    except shen_runtime.UnknownImpl as exc:
+        raise ModelcheckUnavailable(str(exc)) from None
     bifrost = shutil.which("bifrost")
     if not bifrost:
         raise ModelcheckUnavailable("bifrost launcher is not on PATH")
-    shen_go = os.environ.get("BIFROST_SHEN_GO", "")
-    if not shen_go:
-        raise ModelcheckUnavailable("BIFROST_SHEN_GO is not set; the pinned shen-go binary must be named explicitly")
-    shen_go, shen_go_sha256 = _resolve_native_executable(shen_go, setting="BIFROST_SHEN_GO")
+    binary = impl.binary()
+    if not binary:
+        raise ModelcheckUnavailable(f"{impl.env} is not set; the pinned {impl.name} binary must be named explicitly")
+    binary, binary_sha256 = _resolve_native_executable(binary, setting=impl.env, impl=impl.name)
+    try:
+        support = shen_runtime.support_sha256(impl, binary)
+    except FileNotFoundError as exc:
+        raise ModelcheckUnavailable(str(exc)) from None
     directory = profile.directory()
     sources = []
     for relative in profile.source_files():
@@ -379,7 +403,8 @@ def runtime(profile: CheckerProfile = MODEL_WF) -> Runtime:
         if not path.is_file():
             raise ModelcheckUnavailable(f"checker source {path} is missing")
         sources.append((relative, _sha256_file(path)))
-    return Runtime(bifrost, _sha256_file(bifrost), shen_go, shen_go_sha256, str(directory), tuple(sources))
+    return Runtime(bifrost, _sha256_file(bifrost), binary, binary_sha256, str(directory), tuple(sources),
+                   impl.name, support)
 
 
 # ---------------------------------------------------------------------------
@@ -468,7 +493,7 @@ def _judge_unit(rt: Runtime, checker_dir: Path, unit: Path, unit_id: str,
     driver = workdir / f"judge-{hashlib.sha256(unit_id.encode()).hexdigest()[:16]}.shen"
     driver.write_text("\n".join(driver_lines), encoding="utf-8")
     code, stdout, stderr, elapsed = _run(
-        [rt.bifrost, "run", "--impl", IMPL, "--raw", str(driver)],
+        shen_runtime.bifrost_argv(rt.bifrost, shen_runtime.IMPLS[rt.impl], driver),
         cwd=workdir, env=env, timeout=timeout)
     if code != 0:
         raise ModelcheckFailure(f"isolated judgement process failed for {unit_id}")
@@ -776,9 +801,9 @@ def check(model_dir: str | os.PathLike[str], *, out_dir: str | os.PathLike[str] 
     driver = workdir / "driver.shen"
     driver.write_text(driver_text, encoding="utf-8")
     limit = timeout if timeout is not None else float(os.environ.get("CAPCOV_MODELCHECK_TIMEOUT") or DEFAULT_TIMEOUT)
-    env = {**os.environ, "BIFROST_SHEN_GO": rt.shen_go}
+    env = shen_runtime.child_env(shen_runtime.IMPLS[rt.impl], rt.binary)
     try:
-        code, stdout, stderr, elapsed = _run([rt.bifrost, "run", "--impl", IMPL, "--raw", str(driver)],
+        code, stdout, stderr, elapsed = _run(shen_runtime.bifrost_argv(rt.bifrost, shen_runtime.IMPLS[rt.impl], driver),
                                              cwd=workdir, env=env, timeout=limit)
         if code != 0:
             raise ModelcheckFailure(f"runtime exited {code}; stdout tail {stdout[-400:]!r}; stderr {stderr[-300:]!r}")
@@ -928,11 +953,13 @@ def recheck(certificate: dict[str, Any], model_dir: str | os.PathLike[str] | Non
     else:
         unchecked.append("model digest (no model directory given)")
     runtime_doc = certificate.get("runtime")
-    runtime_keys = {"impl", "bifrost_sha256", "shen_go_sha256", "checker_binary", "invocation"}
-    if not isinstance(runtime_doc, dict) or set(runtime_doc) != runtime_keys:
+    runtime_keys = _runtime_keys(runtime_doc.get("impl")) if isinstance(runtime_doc, dict) else None
+    if not isinstance(runtime_doc, dict):
         problems.append("runtime identity is missing or has unknown fields")
-    elif runtime_doc.get("impl") != IMPL:
-        problems.append(f"runtime impl is not {IMPL}")
+    elif runtime_keys is None:
+        problems.append(f"runtime impl is not one of {', '.join(shen_runtime.IMPLS)}")
+    elif set(runtime_doc) != runtime_keys:
+        problems.append("runtime identity is missing or has unknown fields")
     directory = modelcheck_dir()
     if directory.is_dir():
         expected_sources = {relative: _sha256_file(directory / relative) for relative in _source_files()}

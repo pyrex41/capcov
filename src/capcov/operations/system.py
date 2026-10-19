@@ -9,7 +9,6 @@ from __future__ import annotations
 import copy
 import itertools
 import json
-import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -17,7 +16,8 @@ import math
 from importlib import resources
 
 from capcov.claims.spec.parser import parse, Symbol
-from . import OperationError, _sha, _string, _state, MAX_BYTES
+from capcov import shen_runtime
+from . import OperationError, _native_shen, _sha, _string, _state, MAX_BYTES
 from .process import run as run_process
 
 SYSTEM_LIBRARIES = ("kernel.shen", "system.shen", "system-types.shen")
@@ -303,12 +303,7 @@ def evaluate(source, requests, *, fuel=1024, timeout=60):
         raise OperationError("request batch exceeds 4 MiB")
     program = _term(source)
     terms = [_request(r, fuel) for r in requests]
-    launcher = shutil.which("bifrost")
-    binary = os.environ.get("BIFROST_SHEN_GO", "")
-    if not launcher or not os.path.isfile(binary) or not os.access(binary, os.X_OK):
-        raise OperationError(
-            "native Shen unavailable: require bifrost and BIFROST_SHEN_GO"
-        )
+    impl, launcher, binary = _native_shen()
     root = resources.files("capcov.operations").joinpath("shen")
     libs = {n: root.joinpath(n).read_bytes() for n in SYSTEM_LIBRARIES}
     with tempfile.TemporaryDirectory(prefix="capcov-system-") as tmp:
@@ -329,9 +324,10 @@ def evaluate(source, requests, *, fuel=1024, timeout=60):
             + '(error "system: schema, scope or construction judgment failed")))\n'
         )
         code, stdout, stderr = run_process(
-            [launcher, "run", "--impl", "shen-go", "--raw", str(driver)],
+            shen_runtime.bifrost_argv(launcher, impl, driver),
             cwd=directory,
             timeout=timeout,
+            env=shen_runtime.child_env(impl, binary),
         )
         marker = b"CAPCOV-OPERATION-RESULT "
         lines = [
@@ -381,7 +377,7 @@ def evaluate(source, requests, *, fuel=1024, timeout=60):
         "requests": digest(requests),
         "fuel": fuel,
         "runtime": {
-            "shen": _sha(Path(binary).read_bytes()),
+            **shen_runtime.runtime_record(impl, binary),
             "bifrost": _sha(Path(launcher).read_bytes()),
         },
         "libraries": {n: _sha(b) for n, b in libs.items()},

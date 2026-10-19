@@ -25,7 +25,8 @@ from importlib import resources
 from pathlib import Path
 
 from capcov.claims.spec.parser import Symbol, parse
-from capcov.operations import OperationError, _string
+from capcov import shen_runtime
+from capcov.operations import OperationError, _native_shen, _string
 from capcov.operations.process import run as run_process
 from capcov.operations.system import _term
 
@@ -303,10 +304,12 @@ class DraftTypecheckTest(unittest.TestCase):
                 + " ".join(f"(capsdraft.types? {term} {kind})" for _, kind, _, term in cases)
                 + "])\n"
             )
+            impl, launcher, binary = _native_shen()
             code, stdout, stderr = run_process(
-                [shutil.which("bifrost"), "run", "--impl", "shen-go", "--raw", str(driver)],
+                shen_runtime.bifrost_argv(launcher, impl, driver),
                 cwd=directory,
                 timeout=600,
+                env=shen_runtime.child_env(impl, binary),
             )
         marker = b"CAPCOV-OPERATION-RESULT "
         lines = [line[len(marker):] for line in stdout.splitlines() if line.startswith(marker)]

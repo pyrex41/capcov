@@ -25,6 +25,9 @@ Named operational failures
 Recorded provenance (section 18): sha256 of the canonical JSON input, of the
 generated Shen file, of the runtime binary and of the elaborated pack the
 Shen side printed back, plus the Shen side's own checksum of that pack.
+
+The runtime is shen-go unless ``CAPCOV_SHEN_IMPL`` names another one
+(``capcov.shen_runtime``); the runtime record then names it and its files.
 """
 from __future__ import annotations
 
@@ -40,6 +43,7 @@ import tempfile
 import time
 from typing import Any, Mapping, Sequence
 
+from .. import shen_runtime
 from .ir import (Aggregation, Atom, Bundle, BundleIngestionError, Comparison, Constant,
                  Rule, Variable, bundle_from_json, canonical_dict, canonical_json, digest)
 from .validation import ValidationError, assert_valid
@@ -49,7 +53,7 @@ DEFAULT_TIMEOUT = 60.0
 # Compiling the typed-authority datatypes dominates a typed run (minutes on a
 # loaded host); its default deadline is separate so ordinary runs keep theirs.
 TYPED_TIMEOUT = 900.0
-IMPL = "shen-go"
+IMPL = shen_runtime.DEFAULT_IMPL
 LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen",
                  "spec-templates.shen")
 # The typed authority (roadmap W2): its primitive predicates, one datatype per
@@ -62,7 +66,7 @@ TYPED_LIBRARY_FILES = tuple(f"claim-types/{name}.shen" for name in (
     "legacy-widening", "contracts")) + ("typed-authority.shen",)
 BEGIN_MARKER = "<<<CAPCOV-SHEN-JSON-BEGIN>>>"
 END_MARKER = "<<<CAPCOV-SHEN-JSON-END>>>"
-_EXACT_INT_LIMIT = 2 ** 53  # shen-go numbers are float64
+_EXACT_INT_LIMIT = 2 ** 53  # shen-go numbers are float64; the limit holds for every runtime
 
 _ERROR_KINDS = (
     ("capcov-invalid-input", "invalid-input"),
@@ -76,7 +80,7 @@ _ERROR_KINDS = (
 
 
 class ShenUnavailable(RuntimeError):
-    """The bifrost launcher or the pinned shen-go binary cannot be used."""
+    """The bifrost launcher or the selected runtime binary cannot be used."""
 
     operational_failure = "shen-unavailable"
 
@@ -118,24 +122,32 @@ class NotDerivable(Exception):
 @dataclass(frozen=True)
 class Runtime:
     bifrost: str
-    shen_go: str
-    shen_go_sha256: str
+    binary: str
+    binary_sha256: str
     shen_dir: str
     library_sha256: tuple[tuple[str, str], ...]
+    impl: str = IMPL
+    support_sha256: tuple[tuple[str, str], ...] = ()
+
+    @property
+    def sha256(self) -> str:
+        """The runtime's identity digest (the binary's own for shen-go)."""
+        return shen_runtime.identity_sha256(self.binary_sha256, self.support_sha256)
 
     def as_dict(self) -> dict[str, Any]:
-        return {"bifrost": self.bifrost, "impl": IMPL, "shen_go": self.shen_go,
-                "shen_go_sha256": self.shen_go_sha256, "shen_dir": self.shen_dir,
+        if self.impl == IMPL:
+            return {"bifrost": self.bifrost, "impl": IMPL, "shen_go": self.binary,
+                    "shen_go_sha256": self.binary_sha256, "shen_dir": self.shen_dir,
+                    "library_sha256": dict(self.library_sha256),
+                    "invocation": shen_runtime.invocation(shen_runtime.IMPLS[IMPL])}
+        return {"bifrost": self.bifrost, "impl": self.impl, "binary": self.binary,
+                "binary_sha256": self.binary_sha256, "support_sha256": dict(self.support_sha256),
+                "runtime_sha256": self.sha256, "shen_dir": self.shen_dir,
                 "library_sha256": dict(self.library_sha256),
-                "invocation": ["bifrost", "run", "--impl", IMPL, "--raw", "<driver.shen>"]}
+                "invocation": shen_runtime.invocation(shen_runtime.IMPLS[self.impl])}
 
 
-def _sha256_file(path: str | os.PathLike[str]) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 16), b""):
-            h.update(chunk)
-    return h.hexdigest()
+_sha256_file = shen_runtime.sha256_file
 
 
 def _sha256_text(text: str) -> str:
@@ -150,17 +162,25 @@ def shen_dir() -> Path:
 
 
 def runtime(typed: bool = False) -> Runtime:
-    """Resolve the pinned runtime or raise ``ShenUnavailable``; never falls back.
+    """Resolve the selected runtime or raise ``ShenUnavailable``; never falls back.
 
     ``typed`` adds the typed-authority libraries (hashed like the others)."""
+    try:
+        impl = shen_runtime.selected()
+    except shen_runtime.UnknownImpl as exc:
+        raise ShenUnavailable(str(exc)) from None
     bifrost = shutil.which("bifrost")
     if not bifrost:
         raise ShenUnavailable("bifrost launcher is not on PATH")
-    shen_go = os.environ.get("BIFROST_SHEN_GO", "")
-    if not shen_go:
-        raise ShenUnavailable("BIFROST_SHEN_GO is not set; the pinned shen-go binary must be named explicitly")
-    if not (os.path.isfile(shen_go) and os.access(shen_go, os.X_OK)):
-        raise ShenUnavailable(f"BIFROST_SHEN_GO={shen_go!r} is not an executable file")
+    binary = impl.binary()
+    if not binary:
+        raise ShenUnavailable(f"{impl.env} is not set; the pinned {impl.name} binary must be named explicitly")
+    if not (os.path.isfile(binary) and os.access(binary, os.X_OK)):
+        raise ShenUnavailable(f"{impl.env}={binary!r} is not an executable file")
+    try:
+        support = shen_runtime.support_sha256(impl, binary)
+    except FileNotFoundError as exc:
+        raise ShenUnavailable(str(exc)) from None
     directory = shen_dir()
     libraries = []
     for name in LIBRARY_FILES + (TYPED_LIBRARY_FILES if typed else ()):
@@ -168,7 +188,7 @@ def runtime(typed: bool = False) -> Runtime:
         if not path.is_file():
             raise ShenUnavailable(f"workbench source {path} is missing")
         libraries.append((name, _sha256_file(path)))
-    return Runtime(bifrost, shen_go, _sha256_file(shen_go), str(directory), tuple(libraries))
+    return Runtime(bifrost, binary, _sha256_file(binary), str(directory), tuple(libraries), impl.name, support)
 
 
 # ---------------------------------------------------------------------------
@@ -191,12 +211,14 @@ def _literal(value: Any) -> str:
     if value is False:
         return "false"
     if isinstance(value, int):
+        # shen-scheme and shen-c are exact past 2^53 but shen-go is not; one
+        # limit for every runtime keeps an answer independent of the runtime.
         if abs(value) >= _EXACT_INT_LIMIT:
             raise ShenFailure("invalid-input", f"integer {value} exceeds the runtime's exact range (2^53)")
         return str(value)
     if isinstance(value, float):
-        raise ShenFailure("invalid-input", "float values are not transported (shen-go prints 3.0 as 3, "
-                          "which would break canonical row keys)")
+        raise ShenFailure("invalid-input", "float values are not transported (shen-go prints 3.0 as 3 and "
+                          "shen-c as 3.0, which would break canonical row keys)")
     if isinstance(value, str):
         return _string(value)
     if isinstance(value, Mapping):
@@ -415,7 +437,7 @@ class Provenance:
             "bundle_digest": self.bundle_digest, "rules_digest": self.rules_digest,
             "hashes": {"canonical_input_sha256": self.input_sha256,
                        "generated_shen_sha256": self.generated_sha256,
-                       "runtime_binary_sha256": self.runtime.shen_go_sha256,
+                       "runtime_binary_sha256": self.runtime.binary_sha256,
                        "elaborated_pack_sha256": self.elaborated_sha256,
                        "elaborated_pack_checksum": self.elaborated_checksum},
             "generated_bytes": self.generated_bytes, "elapsed_seconds": self.elapsed_seconds,
@@ -474,13 +496,17 @@ def _extract_blocks(stdout: str, count: int) -> list[dict[str, Any]]:
 
 
 def _argv(rt: Runtime, driver: Path, *, direct: bool) -> list[str]:
-    """The launcher argv.  ``bifrost run`` kills shen-go after a fixed 60s, which
-    a typed run (datatype compilation) or a batch exceeds on a loaded host, so
-    those invoke the same pinned binary with the argv bifrost's shen-go adapter
-    uses (``{bin} script {file}``) under the Python-side deadline instead."""
+    """The launcher argv.  ``bifrost run`` kills the runtime after a fixed 60s,
+    which a typed run (datatype compilation) or a batch exceeds on a loaded
+    host, so those invoke the same pinned binary with the argv bifrost's
+    adapter uses (``{bin} script {file}``) under the Python-side deadline."""
     if direct:
-        return [rt.shen_go, "script", str(driver)]
-    return [rt.bifrost, "run", "--impl", IMPL, "--raw", str(driver)]
+        return shen_runtime.direct_argv(rt.binary, driver)
+    return shen_runtime.bifrost_argv(rt.bifrost, shen_runtime.IMPLS[rt.impl], driver)
+
+
+def _env(rt: Runtime) -> dict[str, str]:
+    return shen_runtime.child_env(shen_runtime.IMPLS[rt.impl], rt.binary)
 
 
 def _timeout() -> float:
@@ -521,7 +547,7 @@ def run(bundle: Bundle, request: Mapping[str, Any], *, frozen: str | None = None
                 bounds={"max_depth": max_depth, "max_nodes": max_nodes},
                 driver_path=str(driver) if keep else None)
     argv = _argv(rt, driver, direct=request.get("kind") == "typed-authority")
-    env = {**os.environ, "BIFROST_SHEN_GO": rt.shen_go}
+    env = _env(rt)
     limit = timeout if timeout is not None else (max(_timeout(), TYPED_TIMEOUT) if request.get("kind") == "typed-authority" else _timeout())
     started = time.monotonic()
     stdout = stderr = ""
@@ -777,7 +803,7 @@ def authority_batch(bundles: Sequence[Bundle], *, typed: bool = False, timeout: 
         driver = workdir / "driver.shen"
         driver.write_text(program, encoding="utf-8")
         argv = _argv(rt, driver, direct=True)
-        env = {**os.environ, "BIFROST_SHEN_GO": rt.shen_go}
+        env = _env(rt)
         limit = timeout if timeout is not None else (TYPED_TIMEOUT if typed else 0) + _timeout() * len(sources)
         started = time.monotonic()
         proc = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,

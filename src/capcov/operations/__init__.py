@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 from importlib import resources
 
+from capcov import shen_runtime
 from capcov.claims.spec.parser import parse, Symbol
 
 TAGS = frozenset({'operation', 'live', 'named', 'delete-related', 'set-target',
@@ -27,6 +28,19 @@ MAX_BYTES = 1024 * 1024
 
 class OperationError(ValueError):
     """Malformed data, unsupported constructs, or a failed native execution."""
+
+
+def _native_shen():
+    """The selected Shen runtime (``capcov.shen_runtime``), its launcher and binary."""
+    try:
+        impl = shen_runtime.selected()
+    except shen_runtime.UnknownImpl as exc:
+        raise OperationError(f'native Shen unavailable: {exc}') from None
+    launcher = shutil.which('bifrost')
+    binary = impl.binary()
+    if not launcher or not os.path.isfile(binary) or not os.access(binary, os.X_OK):
+        raise OperationError(f'native Shen unavailable: require bifrost and {impl.env}')
+    return impl, launcher, binary
 
 
 def _sha(data):
@@ -156,10 +170,7 @@ def execute(source: str, request: dict, *, timeout: float = 30) -> dict:
         else:
             raise OperationError('search variant must be intended or a named omission')
         search_term = '(capop.find-disagreement P V ' + other_term + ' [' + ' '.join(_state(s) for s in search['states']) + '] I)'
-    launcher = shutil.which('bifrost')
-    binary = os.environ.get('BIFROST_SHEN_GO', '')
-    if not launcher or not os.path.isfile(binary) or not os.access(binary, os.X_OK):
-        raise OperationError('native Shen unavailable: require bifrost and BIFROST_SHEN_GO')
+    impl, launcher, binary = _native_shen()
     root = resources.files(__package__).joinpath('shen')
     libs = {name: root.joinpath(name).read_bytes() for name in LIBRARIES}
     # Materialize resources: installed wheels need no source checkout.
@@ -179,9 +190,9 @@ def execute(source: str, request: dict, *, timeout: float = 30) -> dict:
             f'      (capop.print-result [(capop.analyze P V) (capop.run P V S I)\n'
             f'                           (capop.admissible P V S I {outcome}) {observation} {trace_check} {search_term}])\n'
             f'      (error "operation: specification does not inhabit capop-program")))\n', encoding='utf-8')
-        proc = subprocess.Popen([launcher,'run','--impl','shen-go','--raw',str(driver)],
+        proc = subprocess.Popen(shen_runtime.bifrost_argv(launcher, impl, driver),
             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            cwd=directory, start_new_session=True)
+            cwd=directory, env=shen_runtime.child_env(impl, binary), start_new_session=True)
         try:
             stdout, stderr = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -196,9 +207,13 @@ def execute(source: str, request: dict, *, timeout: float = 30) -> dict:
             analysis, result, alternatives, matches, trace_valid, counterexample = json.loads(lines[0])
         except (ValueError, TypeError) as exc:
             raise OperationError('malformed native operation response') from exc
+    # For shen-go exactly the binary's digest; another runtime is named, with
+    # its identity digest (capcov.shen_runtime.runtime_record).
+    record = shen_runtime.runtime_record(impl, binary)
     return {'format':'capcov-operation-result-v1', 'basis':'bounded-operation-model',
             'spec_sha256':_sha(source.encode('utf-8')), 'request_sha256':_sha(raw),
-            'runtime_sha256':_sha(Path(binary).read_bytes()), 'launcher_sha256':_sha(Path(launcher).read_bytes()),
+            **({'runtime_impl':impl.name} if impl.name != shen_runtime.DEFAULT_IMPL else {}),
+            'runtime_sha256':record['shen'], 'launcher_sha256':_sha(Path(launcher).read_bytes()),
             'libraries':{n:_sha(b) for n,b in libs.items()},
             'analysis':analysis, 'transition':result, 'admissible':alternatives,
             'observed_matches':matches, 'trace_valid':trace_valid,

@@ -28,6 +28,8 @@
           go = families.indexers.go;
           python = families.base.python;
           shenGo = families.shen.shenGo;
+          shenScheme = families.shen.shenScheme;
+          shenC = families.shen.shenC;
           bifrost = families.shen.bifrost;
           scipPython = families.indexers.scipPython;
           scipPhp = families.indexers.scipPhp;
@@ -40,6 +42,8 @@
           capcov = values.capcov;
           capcov-treesitter = values.capcov.override { withTreesitter = true; };
           shen-go = values.shenGo;
+          shen-scheme = values.shenScheme;
+          shen-c = values.shenC;
           bifrost = values.bifrost;
           scip-python = values.scipPython;
           scip-php = values.scipPhp;
@@ -93,7 +97,13 @@
         # `shen` and `indexers` have the base family and that one, for a job that
         # runs only the tests of one family.
         { default = mkShellOf everything; }
-        // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ])));
+        // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ]))
+        # The shen family plus the candidate runtimes CAPCOV_SHEN_IMPL selects.
+        // {
+          shen-runtimes =
+            let shen = shellOf [ "shen" ] values.families.shen.candidates.packages;
+            in mkShellOf (shen // { environment = shen.environment // values.families.shen.candidates.env; });
+        });
 
       checks = eachSystem (system:
         let

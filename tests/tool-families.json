@@ -61,7 +61,8 @@
     "tests.claim_semantics.test_migration_probe.InexpressibleModelTests",
     "tests.test_ir_specification.DraftTypecheckTest",
     "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest",
-    "tests.claim_semantics.test_r02_bridge.BridgeTests"
+    "tests.claim_semantics.test_r02_bridge.BridgeTests",
+    "tests.claim_semantics.test_shen_runtime_choice.NumericContractTest"
    ]
   },
   "indexers": {

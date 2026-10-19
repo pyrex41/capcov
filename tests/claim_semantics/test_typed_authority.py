@@ -255,7 +255,7 @@ class ForgedTypedIRTest(unittest.TestCase):
             driver = Path(tmp) / "driver.shen"
             driver.write_text("\n".join(lines + [f'(load "{helper}")', "(tc +)", "(forge.main)"]) + "\n",
                               encoding="utf-8")
-            proc = subprocess.run([rt.bifrost, "run", "--impl", shen.IMPL, "--raw", str(driver)],
+            proc = subprocess.run(shen._argv(rt, driver, direct=False), env=shen._env(rt),
                                   stdin=subprocess.DEVNULL, capture_output=True, text=True,
                                   timeout=shen.TYPED_TIMEOUT, cwd=tmp)
         verdicts = dict(line.split()[1:3] for line in proc.stdout.splitlines() if line.startswith("FORGE "))

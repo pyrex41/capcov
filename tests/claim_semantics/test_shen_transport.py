@@ -17,6 +17,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from capcov import shen_runtime
 from capcov.claims import bundle_from_json
 from capcov.claims import shen
 
@@ -83,10 +84,11 @@ class TranslationTest(unittest.TestCase):
         self.assertEqual(ctx.exception.kind, "malformed-output")
 
     def test_missing_runtime_is_shen_unavailable(self) -> None:
-        with mock.patch.dict(os.environ, {"BIFROST_SHEN_GO": ""}):
+        variable = shen_runtime.selected().env
+        with mock.patch.dict(os.environ, {variable: ""}):
             with self.assertRaises(shen.ShenUnavailable):
                 shen.runtime()
-        with mock.patch.dict(os.environ, {"BIFROST_SHEN_GO": "/nonexistent/shen-go"}):
+        with mock.patch.dict(os.environ, {variable: "/nonexistent/shen-go"}):
             with self.assertRaises(shen.ShenUnavailable):
                 shen.runtime()
         with mock.patch("capcov.claims.shen.shutil.which", return_value=None):
@@ -96,7 +98,10 @@ class TranslationTest(unittest.TestCase):
 
 @unittest.skipUnless(RUNTIME_PRESENT, SKIP_REASON)
 class FakeLauncherFailureTest(unittest.TestCase):
-    """bifrost is real; BIFROST_SHEN_GO points at a script that misbehaves."""
+    """bifrost is real; BIFROST_SHEN_GO points at a script that misbehaves.
+
+    The transport is under test, not a runtime, so whatever CAPCOV_SHEN_IMPL
+    selects, the fake stands in for the single-file shen-go adapter."""
 
     def setUp(self) -> None:
         self.tmp = Path(tempfile.mkdtemp(prefix="capcov-shen-fake-"))
@@ -104,7 +109,8 @@ class FakeLauncherFailureTest(unittest.TestCase):
         self.bundle = pack_bundle()
 
     def _with_fake(self, body: str):
-        return mock.patch.dict(os.environ, {"BIFROST_SHEN_GO": _fake_launcher(self.tmp, body)})
+        return mock.patch.dict(os.environ, {shen_runtime.SETTING: "shen-go",
+                                            "BIFROST_SHEN_GO": _fake_launcher(self.tmp, body)})
 
     def test_timeout_is_a_named_failure_and_the_process_is_killed(self) -> None:
         with self._with_fake("sleep 30"):
@@ -173,10 +179,10 @@ class ExperimentCliTest(unittest.TestCase):
         document = json.loads((tmp / "authority.json").read_text(encoding="utf-8"))
         self.assertTrue(document["ok"])
         self.assertEqual(document["provenance"]["hashes"]["runtime_binary_sha256"],
-                         shen.runtime().shen_go_sha256)
+                         shen.runtime().binary_sha256)
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            with mock.patch.dict(os.environ, {"BIFROST_SHEN_GO": "/nonexistent"}):
+            with mock.patch.dict(os.environ, {shen_runtime.selected().env: "/nonexistent"}):
                 rc = cli.main(["experiment", "claims", "shen", "authority", "--bundle", str(bundle_path)])
         self.assertEqual(rc, 3)
         self.assertEqual(json.loads(out.getvalue())["operational_failure"], "shen-unavailable")
