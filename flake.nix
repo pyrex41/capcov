@@ -42,9 +42,11 @@
           capcov = values.capcov;
           capcov-treesitter = values.capcov.override { withTreesitter = true; };
           shen-go = values.shenGo;
-          shen-scheme = values.shenScheme;
           shen-c = values.shenC;
           bifrost = values.bifrost;
+        } // nixpkgs.lib.optionalAttrs values.families.shen.schemeAvailable {
+          shen-scheme = values.shenScheme;
+        } // {
           scip-python = values.scipPython;
           scip-php = values.scipPhp;
           default = values.capcov;
@@ -128,7 +130,27 @@
               exit 1
             fi
           '';
-
+        } // pkgs.lib.optionalAttrs values.families.shen.schemeAvailable {
+          # The candidate runtime CAPCOV_SHEN_IMPL=shen-scheme selects: it evaluates,
+          # refuses malformed input, and prints a UTF-8 literal as its own bytes
+          # (pyrex41/shen-scheme#11). Building it compiles Chez (minutes).
+          shen-scheme-smoke = pkgs.runCommand "shen-scheme-smoke" {
+            nativeBuildInputs = [ values.shenScheme ];
+          } ''
+            mkdir -p "$out"
+            shen-scheme --version | tee "$out/version.txt"
+            shen-scheme eval -e '(+ 20 22)' | tee "$out/evaluation.txt"
+            grep -Fx '42' "$out/evaluation.txt"
+            if shen-scheme eval -e '(+ 1' >"$out/malformed.stdout" 2>"$out/malformed.stderr"; then
+              echo "malformed Shen unexpectedly succeeded" >&2
+              exit 1
+            fi
+            printf '\316\273\351\233\252 caf\303\251' > expected
+            printf '(pr "%s" (stoutput))\n' "$(cat expected)" > text.shen
+            shen-scheme script text.shen > "$out/text.out"
+            cmp expected "$out/text.out"
+          '';
+        } // {
           souffle-recursive-typed-smoke = pkgs.runCommand "souffle-recursive-typed-smoke" {
             nativeBuildInputs = [ pkgs.souffle ];
           } ''

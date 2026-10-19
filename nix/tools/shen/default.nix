@@ -14,10 +14,13 @@ rec {
   # Not part of the family: only the `shen-runtimes` dev shell carries them.
   shenScheme = pkgs.callPackage ./shen-scheme.nix { };
   shenC = pkgs.callPackage ./shen-c.nix { };
+  # shen-scheme builds only where its bootstrap binary runs (shen-scheme.nix).
+  schemeAvailable = pkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform shenScheme;
   candidates = {
-    packages = [ shenScheme shenC ];
-    env = {
+    packages = pkgs.lib.optional schemeAvailable shenScheme ++ [ shenC ];
+    env = pkgs.lib.optionalAttrs schemeAvailable {
       BIFROST_SHEN_SCHEME = "${shenScheme}/bin/shen-scheme";
+    } // {
       BIFROST_SHEN_C = "${shenC}/bin/shen-c";
     };
   };
