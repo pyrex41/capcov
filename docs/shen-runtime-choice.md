@@ -61,7 +61,7 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 |---|---|
 | aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/airvywm27qpxxza8mlhxz5rl8gz5lk4i-shen-scheme-0.52` |
 | aarch64-linux | package and `shen-scheme-smoke` built and pass, natively, in a `nixos/nix:2.24.10` container on OrbStack (2 min 50 s) |
-| x86_64-linux | package and `shen-scheme-smoke` built and pass under Rosetta emulation (`linux/amd64` container, `filter-syscalls = false` because Rosetta cannot load nix's seccomp filter; 5 min 31 s). Not a native runner; the CI flake job is the first native x86_64 build. |
+| x86_64-linux | natively on GitHub Actions `ubuntu-latest` (run 39348528451 at `7aa4f75`): the flake checks, including `shen-scheme-smoke`, and all three Shen shards passed. With a cold cache, the Shen shards took 9 to 11 min, mostly the Chez build. Earlier, it also built under Rosetta emulation (5 min 31 s). |
 
 Each Linux build prints `λ雪 café` as its own 11 bytes.
 
@@ -170,5 +170,4 @@ Since the switch, every suite run checks both runtimes:
 ## Remaining work
 
 - **Propose the patch upstream.** The draft is ready; opening it needs the owner's OK. When upstream releases the fix, drop the patch and pin the release.
-- **Native x86_64-linux.** The CI flake job is the first native x86_64-linux build.
 - **Binary cache.** The builds are not bit-reproducible. A binary cache (or reproducible Chez boot files) would let a manifest digest name the build CI uses.
