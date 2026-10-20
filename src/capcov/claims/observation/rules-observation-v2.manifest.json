@@ -22,7 +22,7 @@
     "evaluator.py": "a3cc6b5f8719be146613f47b211d3c463b6dd48dcb177b6d8055a3a897855cc8",
     "ir.py": "2d33f21fbce3cb6f8941564926fd70456530c8acc785e95fb5dfccd53f2dc473",
     "migration.py": "b1cc51115e9682f88ee797f273b23c4e1a658b96ccdd6dbfea8c15bea649c0ee",
-    "modelcheck.py": "e7f91d3870120affc913c48163d81dea738a3f0f703e1dac93b9f54f5b795c91",
+    "modelcheck.py": "8b1c7c1b625d85fcee5a811130a9127b667ec9a9f75d402e0f06ada46e256c7f",
     "observation/__init__.py": "2d9c057bd189856bad7e6b9fb16952bebc29a6a9dd29ba79fac0b2590c961ad1",
     "observation/join.py": "fdf975f41d59feeadb22cd19e29a029716528a51d6b136835d33ddd77c6c8acf",
     "observation/judge.py": "581305c5029da03622bb9ec6c543fc3127cbc22a4898951db09045babf0ad63b",
@@ -35,11 +35,12 @@
     "replay/judge.py": "d48370b70c845ee9095f6a13edc160e9bff01d368b2e2e8e04293141e38d8a7c",
     "replay/pack.py": "0b4338aaceab5930f7efb2c21de3f74d281c8d0240634ca5823e8e4c66f5ddc6",
     "replay/replay_facts.py": "d5db44999b71f9c9ac69da3fb38840e75d0bcc3f9cd9ae610801d812b7ff5cf2",
-    "shen.py": "50e3e65a2b53b03ae6999ed3f86095e9aa9cd055959290cd7e5389c463a87f81",
+    "shen.py": "45c97a8b38ba7ded33d1941f878b76bf71f575cef367f25d32c1db3111f0dc1a",
+    "shen_runtime.py": "81b3e60767deb034cd6246581dbf44d59b9c3f2811ba3c46d3b577a44c4e827b",
     "shrinker.py": "f38d4e2526790fdc33cf20e718b4e1b0ae08c7296dc223c0cfbd0dc155fd7ecf",
     "souffle/__init__.py": "0112ebd8a3a102a09489e5d8d45c59cc994849561863e96a47b19b5dcf120be4",
-    "souffle/compile.py": "ecad961f19c8a696dff26c0c02968a01a501874b21fe94c66fc3b87e162c859b",
-    "spec/__init__.py": "dd09d88fcfa82ee0932de5cc7989789142161d7d44157c9cc0071bc6d9a09ef0",
+    "souffle/compile.py": "1dc76fb6e8e464001077d072a0b45422dbe86c9cbb2dd0d1027943c033379fb7",
+    "spec/__init__.py": "54a6378ad6b17f46e34d9e8a86b20eb638feb679b0d795b467893d0fa0292baf",
     "spec/logic.py": "a91c1db57230e6622fbec1b3b9027e799ad730b28ee0f2f17cd4f136061c49f3",
     "spec/parser.py": "0163d26fe47015acec8a939aad38464f6b8da6116897cd9ab86d3a39fa5793c9",
     "spec/templates.py": "9b55031bfa539035c2cd58a1b0f92a3ddda979f991de276c4f0320cb7f6fc0cc",
@@ -57,7 +58,8 @@
   "language_version": 2,
   "pack_id": "rules-observation-v2",
   "runtime": {
-    "implementation": "shen-go",
+    "binary_sha256": "b94c9d6578b0d9fd133836b1e09a15b8c73f9634270c3039159e846c06d55100",
+    "implementation": "shen-scheme",
     "launcher_sha256": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5",
     "libraries": {
       "certificate-output.shen": "b6dbb0c33d73478d431f79ad40833c93ef7ee9f9684141a2b8ddd4d14e0c7f29",
@@ -75,7 +77,12 @@
         7
       ]
     },
-    "sha256": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba"
+    "sha256": "ab1d9b096210549fcc36a506d14898c91da952989dd885c99f268b666d33d0c8",
+    "support": {
+      "petite.boot": "da411e8438ab70662abd21c7b12f08d406823ea9b7e02a090569abbeba1b9048",
+      "scheme.boot": "2a9d307bc80af069c6f23d62a453b0621f79b7947c7c213fd73efb3019c3e73c",
+      "shen-scheme/runtime.so": "0feaebd3acaee472d0d0d0e8eeda7b64b198b0a7238ea303c654e582ac13874e"
+    }
   },
   "sources": {
     "observation.claims": "e94d523dcc71414403b9484da5c057046e9d77d98fc48b45cece3cacdc8159f1"
