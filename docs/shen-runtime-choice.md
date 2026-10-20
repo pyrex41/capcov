@@ -5,7 +5,7 @@ Status: **shen-scheme is the default runtime.**
 - The one capcov needs, byte strings written as bytes, is proposed upstream as a draft, [tizoc/shen-scheme#43](https://github.com/tizoc/shen-scheme/pull/43).
 - shen-go, the earlier runtime, stays selectable and runs beside it as a differential on every suite run.
 - shen-c is a third, optional choice.
-- [`validation/`](validation/) holds the full gate runs: [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file) and the later run on the fork release (the roadmap names it).
+- [`validation/`](validation/) holds the full gate runs: [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file) and [`f7c1d3c.md`](validation/f7c1d3c.md) on the fork release. GitHub Actions on x86_64-linux passed at both.
 
 ## Selection
 
