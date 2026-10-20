@@ -16,7 +16,7 @@ import math
 from importlib import resources
 
 from capcov.claims.spec.parser import parse, Symbol
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from . import OperationError, _native_shen, _sha, _string, _state, MAX_BYTES
 from .process import run as run_process
 

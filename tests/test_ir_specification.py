@@ -25,7 +25,7 @@ from importlib import resources
 from pathlib import Path
 
 from capcov.claims.spec.parser import Symbol, parse
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from capcov.operations import OperationError, _native_shen, _string
 from capcov.operations.process import run as run_process
 from capcov.operations.system import _term

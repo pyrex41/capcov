@@ -1,6 +1,6 @@
 """Which Shen runtime capcov starts, and how that runtime is named in evidence.
 
-``CAPCOV_SHEN_IMPL`` selects one of ``IMPLS`` (unset or empty: ``shen-go``).
+``CAPCOV_SHEN_IMPL`` selects one of ``IMPLS`` (unset or empty: ``shen-scheme``).
 Each runtime is launched through bifrost's adapter of the same name, with the
 binary named explicitly by that adapter's variable, so bifrost never falls
 back to a default path.  Nothing here chooses a runtime on its own: an unknown
@@ -9,8 +9,9 @@ name, an unset variable or a missing support file is an error.
 Evidence names the runtime by its files.  shen-go and shen-c are one
 self-contained executable each.  shen-scheme is an executable plus the Chez
 boot files and the compiled Shen runtime it loads from ``../lib/shen-scheme``;
-all four are hashed, since the executable alone does not identify what runs.
-For shen-go every record keeps the shape it had before this module existed.
+all four are hashed, since the executable alone does not identify what runs
+(it is the same file across shen-scheme releases). shen-go records keep the
+shape they had when shen-go was the only runtime (``LEGACY_SHAPE_IMPL``).
 
 Numbers are the same contract for every runtime: integers below 2**53 in
 magnitude and no floats.  shen-go numbers are float64; shen-scheme and shen-c
@@ -25,7 +26,9 @@ import os
 from pathlib import Path
 from typing import Mapping
 
-DEFAULT_IMPL = "shen-go"
+DEFAULT_IMPL = "shen-scheme"
+# The runtime whose records keep their pre-selection keys (shen_go, shen_go_sha256).
+LEGACY_SHAPE_IMPL = "shen-go"
 SETTING = "CAPCOV_SHEN_IMPL"
 # Variables a runtime reads to relocate itself or change mode; a child never
 # inherits them, so the hashed files are the files that run.
@@ -117,7 +120,7 @@ def runtime_record(impl: Impl, binary: str) -> dict[str, object]:
     exactly ``{"shen": <sha256>}`` as before; other runtimes add their name
     and their support files, and ``shen`` is their identity digest."""
     binary_sha = sha256_file(binary)
-    if impl.name == DEFAULT_IMPL:
+    if impl.name == LEGACY_SHAPE_IMPL:
         return {"shen": binary_sha}
     support = support_sha256(impl, binary)
     record: dict[str, object] = {"impl": impl.name, "shen": identity_sha256(binary_sha, support)}
@@ -127,6 +130,6 @@ def runtime_record(impl: Impl, binary: str) -> dict[str, object]:
     return record
 
 
-__all__ = ["DEFAULT_IMPL", "IMPLS", "Impl", "SCRUBBED_ENV", "SETTING", "UnknownImpl", "bifrost_argv",
+__all__ = ["DEFAULT_IMPL", "IMPLS", "Impl", "LEGACY_SHAPE_IMPL", "SCRUBBED_ENV", "SETTING", "UnknownImpl", "bifrost_argv",
            "child_env", "direct_argv", "identity_sha256", "invocation", "runtime_record", "selected",
            "sha256_file", "support_sha256"]

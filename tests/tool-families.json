@@ -63,7 +63,8 @@
     "tests.claim_semantics.test_v1_compatibility.V1CompatibilityGateTest",
     "tests.claim_semantics.test_r02_bridge.BridgeTests",
     "tests.claim_semantics.test_shen_runtime_choice.NumericContractTest",
-    "tests.claim_semantics.test_shen_runtime_choice.TextContractTest"
+    "tests.claim_semantics.test_shen_runtime_choice.TextContractTest",
+    "tests.claim_semantics.test_shen_runtime_choice.RuntimeDifferentialTest"
    ]
   },
   "indexers": {

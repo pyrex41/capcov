@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 from importlib import resources
 
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from . import OperationError, _native_shen, _sha, _string
 from .process import run
 

@@ -6,9 +6,11 @@ transport refuses integers past 2**53 and floats whatever runtime is selected.
 ``NumericContractTest`` runs the selected runtime on integers at the edge of
 that contract, and ``TextContractTest`` on non-ASCII and quoted strings; both
 require the certificate Python computes, so running them under each runtime
-shows whether the runtimes agree there.  (shen-scheme d037ae6 does not on
+shows whether the runtimes agree there.  (Unpatched shen-scheme does not on
 text: its ``pr`` UTF-8-encodes strings its reader built byte by byte, so every
-byte above 127 comes back double-encoded; docs/shen-runtime-choice.md.)
+byte above 127 comes back double-encoded; nix/tools/shen/patches.)
+``RuntimeDifferentialTest`` runs shen-go, the earlier runtime, beside the
+default shen-scheme on a few cheap requests and requires equal answers.
 """
 from __future__ import annotations
 
@@ -20,16 +22,21 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from capcov.claims import bundle_from_json, modelcheck, shen
 from capcov.claims.evaluator import evaluate
 from capcov.claims.static import certificate
 from capcov.operations import OperationError, _native_shen
 
 RUNTIME_PRESENT = bool(shutil.which("bifrost") and shen_runtime.selected().binary())
+BOTH_PRESENT = bool(shutil.which("bifrost") and shen_runtime.IMPLS["shen-go"].binary()
+                    and shen_runtime.IMPLS["shen-scheme"].binary())
 SKIP_REASON = "bifrost on PATH and the selected runtime's binary variable are required"
 if os.environ.get("CAPCOV_SHEN_REQUIRED") and not RUNTIME_PRESENT:
     raise RuntimeError("CAPCOV_SHEN_REQUIRED is set but " + SKIP_REASON)
+BOTH_REASON = "bifrost, BIFROST_SHEN_GO and BIFROST_SHEN_SCHEME are required for the differential"
+if os.environ.get("CAPCOV_SHEN_REQUIRED") and not BOTH_PRESENT:
+    raise RuntimeError("CAPCOV_SHEN_REQUIRED is set but " + BOTH_REASON)
 
 LIMIT = 2 ** 53 - 1
 INDEX = "sha256:" + "0" * 64
@@ -113,13 +120,13 @@ class RuntimeSelectionTest(unittest.TestCase):
             (home / name).write_bytes(name.encode())
         return binary
 
-    def test_shen_go_is_the_default_and_unknown_names_are_refused(self) -> None:
+    def test_shen_scheme_is_the_default_and_unknown_names_are_refused(self) -> None:
         for value in (None, ""):
             env = {k: v for k, v in os.environ.items() if k != shen_runtime.SETTING}
             if value is not None:
                 env[shen_runtime.SETTING] = value
             with mock.patch.dict(os.environ, env, clear=True):
-                self.assertEqual(shen_runtime.selected().name, "shen-go")
+                self.assertEqual(shen_runtime.selected().name, "shen-scheme")
         with mock.patch.dict(os.environ, {shen_runtime.SETTING: "shen-cobol"}):
             with self.assertRaisesRegex(shen.ShenUnavailable, "CAPCOV_SHEN_IMPL='shen-cobol'"):
                 shen.runtime()
@@ -174,11 +181,11 @@ class RuntimeSelectionTest(unittest.TestCase):
                 shen.runtime()
 
     def test_shen_go_records_keep_their_shape(self) -> None:
-        rt = shen.Runtime("/b", "/go", "a" * 64, "/shen", (("x.shen", "c" * 64),))
+        rt = shen.Runtime("/b", "/go", "a" * 64, "/shen", (("x.shen", "c" * 64),), "shen-go")
         self.assertEqual(list(rt.as_dict()), ["bifrost", "impl", "shen_go", "shen_go_sha256", "shen_dir",
                                               "library_sha256", "invocation"])
         self.assertEqual(rt.sha256, "a" * 64)
-        mc = modelcheck.Runtime("/b", "b" * 64, "/go", "a" * 64, "/mc", ())
+        mc = modelcheck.Runtime("/b", "b" * 64, "/go", "a" * 64, "/mc", (), "shen-go")
         self.assertEqual(mc.as_dict(), {"impl": "shen-go", "bifrost_sha256": "b" * 64, "shen_go_sha256": "a" * 64,
                                         "checker_binary": "a" * 64,
                                         "invocation": ["bifrost", "run", "--impl", "shen-go", "--raw",
@@ -276,6 +283,58 @@ class TextContractTest(unittest.TestCase):
                 result = shen.evaluate(self.bundle, None, "named", row)
                 self.assertEqual(result.outcome, "positive")
                 self.assertEqual(result.certificate, certificate.certify(self.bundle, self.relations, "named", row))
+
+
+def _under(impl: str):
+    return mock.patch.dict(os.environ, {shen_runtime.SETTING: impl})
+
+
+@unittest.skipUnless(BOTH_PRESENT, BOTH_REASON)
+class RuntimeDifferentialTest(unittest.TestCase):
+    """shen-go beside shen-scheme: the answers, never the provenance, must match."""
+
+    RUNTIMES = ("shen-go", "shen-scheme")
+
+    def each(self, call):
+        answers = {}
+        for impl in self.RUNTIMES:
+            with _under(impl):
+                answers[impl] = call()
+        return answers
+
+    def assert_same(self, answers) -> None:
+        go, scheme = (answers[impl] for impl in self.RUNTIMES)
+        self.assertEqual(scheme, go)
+
+    def test_authority_verdicts_and_elaboration_agree(self) -> None:
+        from .static_rules import go_app
+        bundle, _ = go_app.go_app_bundle()
+
+        def call():
+            report = shen.authority(bundle)
+            return report.ok, report.rules, report.pack, report.elaborated, report.elaborated_checksum
+        self.assert_same(self.each(call))
+
+    def test_certificates_agree(self) -> None:
+        from .static_rules import go_app
+        cases = []
+        bundle, _ = go_app.go_app_bundle()
+        rows = certificate.normalize_relations(evaluate(bundle).relations)["static_reaches"]
+        cases.extend((bundle, "static_reaches", row) for row in rows[:2])
+        numbers, texts = numeric_bundle(), text_bundle()
+        cases.extend((numbers, "big", [INDEX, n]) for n in (LIMIT, THRESHOLD))
+        cases.extend((texts, "named", [INDEX, t]) for t in TEXTS)
+        for bundle, relation, row in cases:
+            with self.subTest(relation=relation, row=row[1:]):
+                self.assert_same(self.each(lambda: shen.evaluate(bundle, None, relation, row).certificate))
+
+    def test_a_g5_system_evaluation_agrees(self) -> None:
+        from capcov.operations.system import evaluate as evaluate_system
+        from .test_v1_compatibility import INPUTS, evaluate_input
+        fixture = Path(__file__).parent / "fixtures/systems/outbox.ops"
+        requests = evaluate_input(INPUTS[fixture.name])
+        source = fixture.read_text()
+        self.assert_same(self.each(lambda: evaluate_system(source, requests)["results"]))
 
 
 if __name__ == "__main__":

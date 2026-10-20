@@ -17,7 +17,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from capcov.claims import bundle_from_json
 from capcov.claims import shen
 

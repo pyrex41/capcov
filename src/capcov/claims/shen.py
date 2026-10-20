@@ -26,8 +26,8 @@ Recorded provenance (section 18): sha256 of the canonical JSON input, of the
 generated Shen file, of the runtime binary and of the elaborated pack the
 Shen side printed back, plus the Shen side's own checksum of that pack.
 
-The runtime is shen-go unless ``CAPCOV_SHEN_IMPL`` names another one
-(``capcov.shen_runtime``); the runtime record then names it and its files.
+The runtime is shen-scheme unless ``CAPCOV_SHEN_IMPL`` names another one
+(``capcov.claims.shen_runtime``); the runtime record then names it and its files.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ import tempfile
 import time
 from typing import Any, Mapping, Sequence
 
-from .. import shen_runtime
+from . import shen_runtime
 from .ir import (Aggregation, Atom, Bundle, BundleIngestionError, Comparison, Constant,
                  Rule, Variable, bundle_from_json, canonical_dict, canonical_json, digest)
 from .validation import ValidationError, assert_valid
@@ -54,6 +54,7 @@ DEFAULT_TIMEOUT = 60.0
 # loaded host); its default deadline is separate so ordinary runs keep theirs.
 TYPED_TIMEOUT = 900.0
 IMPL = shen_runtime.DEFAULT_IMPL
+_LEGACY = shen_runtime.LEGACY_SHAPE_IMPL
 LIBRARY_FILES = ("claim-workbench.shen", "rule-authority.shen", "certificate-output.shen", "evidence-authority-v2.shen", "spec-elaborator.shen",
                  "spec-templates.shen")
 # The typed authority (roadmap W2): its primitive predicates, one datatype per
@@ -135,11 +136,11 @@ class Runtime:
         return shen_runtime.identity_sha256(self.binary_sha256, self.support_sha256)
 
     def as_dict(self) -> dict[str, Any]:
-        if self.impl == IMPL:
-            return {"bifrost": self.bifrost, "impl": IMPL, "shen_go": self.binary,
+        if self.impl == _LEGACY:
+            return {"bifrost": self.bifrost, "impl": _LEGACY, "shen_go": self.binary,
                     "shen_go_sha256": self.binary_sha256, "shen_dir": self.shen_dir,
                     "library_sha256": dict(self.library_sha256),
-                    "invocation": shen_runtime.invocation(shen_runtime.IMPLS[IMPL])}
+                    "invocation": shen_runtime.invocation(shen_runtime.IMPLS[_LEGACY])}
         return {"bifrost": self.bifrost, "impl": self.impl, "binary": self.binary,
                 "binary_sha256": self.binary_sha256, "support_sha256": dict(self.support_sha256),
                 "runtime_sha256": self.sha256, "shen_dir": self.shen_dir,

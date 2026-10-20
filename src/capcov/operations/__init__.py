@@ -16,7 +16,7 @@ import subprocess
 import tempfile
 from importlib import resources
 
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from capcov.claims.spec.parser import parse, Symbol
 
 TAGS = frozenset({'operation', 'live', 'named', 'delete-related', 'set-target',
@@ -31,7 +31,7 @@ class OperationError(ValueError):
 
 
 def _native_shen():
-    """The selected Shen runtime (``capcov.shen_runtime``), its launcher and binary."""
+    """The selected Shen runtime (``capcov.claims.shen_runtime``), its launcher and binary."""
     try:
         impl = shen_runtime.selected()
     except shen_runtime.UnknownImpl as exc:
@@ -212,11 +212,11 @@ def execute(source: str, request: dict, *, timeout: float = 30) -> dict:
         except (ValueError, TypeError) as exc:
             raise OperationError('malformed native operation response') from exc
     # For shen-go exactly the binary's digest; another runtime is named, with
-    # its identity digest (capcov.shen_runtime.runtime_record).
+    # its identity digest (capcov.claims.shen_runtime.runtime_record).
     record = shen_runtime.runtime_record(impl, binary)
     return {'format':'capcov-operation-result-v1', 'basis':'bounded-operation-model',
             'spec_sha256':_sha(source.encode('utf-8')), 'request_sha256':_sha(raw),
-            **({'runtime_impl':impl.name} if impl.name != shen_runtime.DEFAULT_IMPL else {}),
+            **({'runtime_impl':impl.name} if impl.name != shen_runtime.LEGACY_SHAPE_IMPL else {}),
             'runtime_sha256':record['shen'], 'launcher_sha256':_sha(Path(launcher).read_bytes()),
             'libraries':{n:_sha(b) for n,b in libs.items()},
             'analysis':analysis, 'transition':result, 'admissible':alternatives,

@@ -24,7 +24,7 @@ import unittest.mock
 from pathlib import Path
 from unittest.mock import patch
 
-from capcov import shen_runtime
+from capcov.claims import shen_runtime
 from capcov.claims import modelcheck
 
 HERE = Path(__file__).resolve().parent

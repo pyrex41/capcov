@@ -71,7 +71,8 @@ The following parts are **not** checked by the type checker:
   (`Component`), the stratification (`stratified-negation`) and the frozen
   checksum (`frozen-pack-mismatch`). The last two report basis
   `trusted-elaborator`.
-* **The checker itself:** shen-go's sequent-calculus checker and the
+* **The checker itself:** the runtime's sequent-calculus checker (shen-scheme
+  by default, kernel 43.1; shen-go S42 gives the same verdicts) and the
   workbench parser and elaborator that produce the rule records.
 * **Aggregation.** It has no sort, so a rule that uses it fails every check
   with basis `unsupported`.
@@ -85,6 +86,12 @@ predicates are correct. Function signatures (`{A --> B}`) are not used for
 any judgement.
 
 ## Measured constraints (shen-go c12933d)
+
+These were measured on shen-go. The default runtime is now shen-scheme v0.52
+(kernel 43.1). Its typed batch decides the same 3148 units with the same
+verdicts in about 14 s against about 355 s
+([shen-runtime-choice](shen-runtime-choice.md)). The inference-count notes
+below are kernel-level and were not re-measured separately.
 
 * A goal costs inferences linear in the hypotheses in scope. Keeping one
   hypothesis per relation made pack-sized units quadratic, so declarations
@@ -108,9 +115,11 @@ any judgement.
   guards (`cc.same-at?`) keep "same" and "authorized" from both deriving
   one join.
 * Compiling the datatypes dominates start-up (tens of seconds of CPU).
-  `bifrost run` kills shen-go after a fixed 60 s. Typed runs and batches
+  `bifrost run` kills the runtime after a fixed 60 s. Typed runs and batches
   therefore invoke the pinned binary directly, with the argv of bifrost's
-  shen-go adapter (`{bin} script {file}`), under the Python-side deadline.
+  adapters (`{bin} script {file}`), under the Python-side deadline. On
+  shen-scheme a typed batch takes seconds, but the direct path is kept for
+  every runtime.
   `shen.authority_batch(..., typed=True)` judges many bundles in one
   process.
 

@@ -44,9 +44,7 @@
           shen-go = values.shenGo;
           shen-c = values.shenC;
           bifrost = values.bifrost;
-        } // nixpkgs.lib.optionalAttrs values.families.shen.schemeAvailable {
           shen-scheme = values.shenScheme;
-        } // {
           scip-python = values.scipPython;
           scip-php = values.scipPhp;
           default = values.capcov;
@@ -100,7 +98,7 @@
         # runs only the tests of one family.
         { default = mkShellOf everything; }
         // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ]))
-        # The shen family plus the candidate runtimes CAPCOV_SHEN_IMPL selects.
+        # The shen family plus shen-c, the third runtime CAPCOV_SHEN_IMPL selects.
         // {
           shen-runtimes =
             let shen = shellOf [ "shen" ] values.families.shen.candidates.packages;
@@ -130,10 +128,10 @@
               exit 1
             fi
           '';
-        } // pkgs.lib.optionalAttrs values.families.shen.schemeAvailable {
-          # The candidate runtime CAPCOV_SHEN_IMPL=shen-scheme selects: it evaluates,
-          # refuses malformed input, and prints a UTF-8 literal as its own bytes
-          # (pyrex41/shen-scheme#11). Building it compiles Chez (minutes).
+
+          # The default runtime: it evaluates, refuses malformed input, and prints
+          # a UTF-8 literal as its own bytes (patches/shen-scheme-byte-strings.patch).
+          # Building it compiles Chez (minutes without a cache).
           shen-scheme-smoke = pkgs.runCommand "shen-scheme-smoke" {
             nativeBuildInputs = [ values.shenScheme ];
           } ''
@@ -150,7 +148,7 @@
             shen-scheme script text.shen > "$out/text.out"
             cmp expected "$out/text.out"
           '';
-        } // {
+
           souffle-recursive-typed-smoke = pkgs.runCommand "souffle-recursive-typed-smoke" {
             nativeBuildInputs = [ pkgs.souffle ];
           } ''

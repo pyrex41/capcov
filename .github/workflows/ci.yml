@@ -11,7 +11,9 @@ on:
 permissions:
   contents: read
 
-# Every job has the same twelve-minute limit. The suite runs once, split by tool
+# Every job has a twelve-minute limit, except the flake checks and the Shen shards:
+# with a cold Nix cache they compile Chez Scheme for shen-scheme, the default Shen
+# runtime, which takes several minutes. The suite runs once, split by tool
 # family: tests/tool-families.json says which test classes need souffle, the Shen
 # runtime or the SCIP indexers, and each shard job enters the dev shell of its
 # family, which has that family's tools and no other. The gate job judges the
@@ -20,7 +22,7 @@ jobs:
   flake:
     name: Flake checks
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -30,19 +32,19 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a # v6.1.3
         with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-all-${{ hashFiles('flake.lock', '**/*.nix', 'tests/souffle/**') }}
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-all-${{ hashFiles('flake.lock', '**/*.nix', 'nix/**/*.patch', 'tests/souffle/**') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-all-
           gc-max-store-size-linux: 2G
 
-      # Builds the package and every pinned tool, and runs the Shen and Souffle smokes
-      # and the scip-go index golden.
+      # Builds the package and every pinned tool, and runs the Shen (shen-go and
+      # shen-scheme) and Souffle smokes and the scip-go index golden.
       - name: Flake checks
         run: nix flake check --no-update-lock-file
 
   shard:
     name: Unit suite, ${{ matrix.family }} ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: ${{ matrix.family == 'shen' && 25 || 12 }}
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +66,7 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a # v6.1.3
         with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ matrix.family }}-${{ hashFiles('flake.lock', '**/*.nix', 'tests/souffle/**') }}
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ matrix.family }}-${{ hashFiles('flake.lock', '**/*.nix', 'nix/**/*.patch', 'tests/souffle/**') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-${{ matrix.family }}-
           gc-max-store-size-linux: 2G
 
@@ -100,7 +102,7 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a # v6.1.3
         with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-base-${{ hashFiles('flake.lock', '**/*.nix', 'tests/souffle/**') }}
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-base-${{ hashFiles('flake.lock', '**/*.nix', 'nix/**/*.patch', 'tests/souffle/**') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-base-
           gc-max-store-size-linux: 2G
 
@@ -131,7 +133,7 @@ jobs:
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@135667ec418502fa5a3598af6fb9eb733888ce6a # v6.1.3
         with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-indexers-${{ hashFiles('flake.lock', '**/*.nix', 'tests/souffle/**') }}
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-indexers-${{ hashFiles('flake.lock', '**/*.nix', 'nix/**/*.patch', 'tests/souffle/**') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-indexers-
           gc-max-store-size-linux: 2G
 

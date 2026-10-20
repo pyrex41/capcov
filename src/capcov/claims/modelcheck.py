@@ -7,8 +7,8 @@ from producer class ``modelcheck`` (``schema_replay_v1``).  This module is that
 producer.  It does not judge replays and it does not trust the model host.
 
 What "well formed" means here is decided by Shen's type checker, not by a
-Python walker.  The pinned Shen runtime (shen-go unless ``CAPCOV_SHEN_IMPL``
-names another, ``capcov.shen_runtime``) loads the model untyped, asks it a
+Python walker.  The pinned Shen runtime (shen-scheme unless ``CAPCOV_SHEN_IMPL``
+names another, ``capcov.claims.shen_runtime``) loads the model untyped, asks it a
 fixed set of questions (``shen/modelcheck/prelude.shen``), writes each answer
 as a Shen literal into a one-form unit, and then, under ``(tc +)``, loads the
 datatypes in ``shen/modelcheck/types/`` and each unit in turn.  A unit whose
@@ -62,7 +62,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from .. import shen_runtime
+from . import shen_runtime
 from .ir import canonical_json
 
 CHECKER = "capcov-modelcheck"
@@ -70,6 +70,7 @@ CHECKER_VERSION = "1.2.0"
 CERTIFICATE_KIND = "capcov-modelcheck-certificate-v1"
 PRODUCER_CLASS = "modelcheck"
 IMPL = shen_runtime.DEFAULT_IMPL
+_LEGACY = shen_runtime.LEGACY_SHAPE_IMPL
 DEFAULT_TIMEOUT = 300.0
 
 @dataclass(frozen=True)
@@ -190,7 +191,7 @@ class Runtime:
     def as_dict(self) -> dict[str, Any]:
         # Host paths and executable names are not evidence and may leak a
         # machine's layout; the executable digests identify the runtime.
-        binary_key = "shen_go_sha256" if self.impl == IMPL else "binary_sha256"
+        binary_key = "shen_go_sha256" if self.impl == _LEGACY else "binary_sha256"
         return {"impl": self.impl,
                 "bifrost_sha256": self.bifrost_sha256,
                 binary_key: self.binary_sha256,
@@ -210,7 +211,7 @@ def _runtime_keys(impl: str) -> set[str] | None:
     if impl not in shen_runtime.IMPLS:
         return None
     keys = {"impl", "bifrost_sha256", "checker_binary", "invocation",
-            "shen_go_sha256" if impl == IMPL else "binary_sha256"}
+            "shen_go_sha256" if impl == _LEGACY else "binary_sha256"}
     return keys | ({"support_sha256"} if shen_runtime.IMPLS[impl].support else set())
 
 

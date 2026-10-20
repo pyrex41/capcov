@@ -7,7 +7,15 @@ provides Python, uv, Go, jq, git, Souffle, scip, scip-go and Shen; uv still
 resolves capcov itself from the checked-in lockfile. The tools are defined once,
 by family, under `nix/tools`: `base` (Python, uv, git), `souffle`, `shen` and
 `indexers` (Go, PHP and the SCIP indexers). The default shell has every family;
-`nix develop .#souffle` has `base` and that one. To exercise capcov against a
+`nix develop .#souffle` has `base` and that one.
+
+The Shen runtime is shen-scheme (upstream tizoc/shen-scheme v0.52 with one
+patch, `nix/tools/shen/patches/shen-scheme-byte-strings.patch`, pending
+upstream). The `shen` family also carries shen-go, the earlier runtime, and
+`CAPCOV_SHEN_IMPL=shen-go` selects it; `RuntimeDifferentialTest` runs both on
+every suite run. `nix develop .#shen-runtimes` adds shen-c as a third choice.
+[`shen-runtime-choice.md`](shen-runtime-choice.md) records the choice and the
+measurements. To exercise capcov against a
 real non-Python process, run:
 
 ```sh
