@@ -28,6 +28,8 @@
           go = families.indexers.go;
           python = families.base.python;
           shenGo = families.shen.shenGo;
+          shenScheme = families.shen.shenScheme;
+          shenC = families.shen.shenC;
           bifrost = families.shen.bifrost;
           scipPython = families.indexers.scipPython;
           scipPhp = families.indexers.scipPhp;
@@ -40,7 +42,9 @@
           capcov = values.capcov;
           capcov-treesitter = values.capcov.override { withTreesitter = true; };
           shen-go = values.shenGo;
+          shen-c = values.shenC;
           bifrost = values.bifrost;
+          shen-scheme = values.shenScheme;
           scip-python = values.scipPython;
           scip-php = values.scipPhp;
           default = values.capcov;
@@ -93,7 +97,13 @@
         # `shen` and `indexers` have the base family and that one, for a job that
         # runs only the tests of one family.
         { default = mkShellOf everything; }
-        // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ])));
+        // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ]))
+        # The shen family plus shen-c, the third runtime CAPCOV_SHEN_IMPL selects.
+        // {
+          shen-runtimes =
+            let shen = shellOf [ "shen" ] values.families.shen.candidates.packages;
+            in mkShellOf (shen // { environment = shen.environment // values.families.shen.candidates.env; });
+        });
 
       checks = eachSystem (system:
         let
@@ -117,6 +127,26 @@
               echo "malformed Shen unexpectedly succeeded" >&2
               exit 1
             fi
+          '';
+
+          # The default runtime: it evaluates, refuses malformed input, and prints
+          # a UTF-8 literal as its own bytes (the fork release's byte-strings change).
+          # Building it compiles Chez (minutes without a cache).
+          shen-scheme-smoke = pkgs.runCommand "shen-scheme-smoke" {
+            nativeBuildInputs = [ values.shenScheme ];
+          } ''
+            mkdir -p "$out"
+            shen-scheme --version | tee "$out/version.txt"
+            shen-scheme eval -e '(+ 20 22)' | tee "$out/evaluation.txt"
+            grep -Fx '42' "$out/evaluation.txt"
+            if shen-scheme eval -e '(+ 1' >"$out/malformed.stdout" 2>"$out/malformed.stderr"; then
+              echo "malformed Shen unexpectedly succeeded" >&2
+              exit 1
+            fi
+            printf '\316\273\351\233\252 caf\303\251' > expected
+            printf '(pr "%s" (stoutput))\n' "$(cat expected)" > text.shen
+            shen-scheme script text.shen > "$out/text.out"
+            cmp expected "$out/text.out"
           '';
 
           souffle-recursive-typed-smoke = pkgs.runCommand "souffle-recursive-typed-smoke" {

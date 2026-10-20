@@ -2,13 +2,12 @@
 
 import json
 import math
-import os
 from pathlib import Path
-import shutil
 import tempfile
 from importlib import resources
 
-from . import OperationError, _sha, _string
+from capcov.claims import shen_runtime
+from . import OperationError, _native_shen, _sha, _string
 from .process import run
 
 
@@ -30,17 +29,12 @@ def invoke(expression, libraries, *, timeout=60):
         raise OperationError("timeout must be finite and positive")
     if len(expression.encode()) > 8 * 1024 * 1024:
         raise OperationError("native expression exceeds 8 MiB")
-    launcher = shutil.which("bifrost")
-    binary = os.environ.get("BIFROST_SHEN_GO", "")
-    if not launcher or not os.path.isfile(binary) or not os.access(binary, os.X_OK):
-        raise OperationError(
-            "native Shen unavailable: require bifrost and BIFROST_SHEN_GO"
-        )
+    impl, launcher, binary = _native_shen()
     root = resources.files("capcov.operations").joinpath("shen")
     libs = {n: root.joinpath(n).read_bytes() for n in libraries}
     identity = {
         "runtime": {
-            "shen": _sha(Path(binary).read_bytes()),
+            **shen_runtime.runtime_record(impl, binary),
             "bifrost": _sha(Path(launcher).read_bytes()),
         },
         "libraries": {n: _sha(b) for n, b in libs.items()},
@@ -57,9 +51,10 @@ def invoke(expression, libraries, *, timeout=60):
             + ")\n"
         )
         code, stdout, stderr = run(
-            [launcher, "run", "--impl", "shen-go", "--raw", str(driver)],
+            shen_runtime.bifrost_argv(launcher, impl, driver),
             cwd=directory,
             timeout=timeout,
+            env=shen_runtime.child_env(impl, binary),
         )
     marker = b"CAPCOV-OPERATION-RESULT "
     lines = [

@@ -10,7 +10,7 @@ import time
 from . import OperationError
 
 
-def run(command, *, timeout, cwd=None, input_bytes=b"", max_output=16 * 1024 * 1024):
+def run(command, *, timeout, cwd=None, input_bytes=b"", max_output=16 * 1024 * 1024, env=None):
     # A file avoids a stdin/stdout pipe deadlock for adapters that write early.
     with tempfile.TemporaryFile() as incoming:
         incoming.write(input_bytes)
@@ -18,6 +18,7 @@ def run(command, *, timeout, cwd=None, input_bytes=b"", max_output=16 * 1024 * 1
         proc = subprocess.Popen(
             command,
             cwd=cwd,
+            env=env,
             stdin=incoming,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

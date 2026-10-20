@@ -24,6 +24,7 @@ import unittest.mock
 from pathlib import Path
 from unittest.mock import patch
 
+from capcov.claims import shen_runtime
 from capcov.claims import modelcheck
 
 HERE = Path(__file__).resolve().parent
@@ -182,7 +183,7 @@ class RecipeTest(unittest.TestCase):
         wrapper.write_text("#!/bin/sh\nexec /some/other/shen-go \"$@\"\n", encoding="utf-8")
         wrapper.chmod(0o755)
         with patch("capcov.claims.modelcheck.shutil.which", return_value=str(root / "bifrost")), \
-                patch.dict(os.environ, {"BIFROST_SHEN_GO": str(wrapper)}):
+                patch.dict(os.environ, {"CAPCOV_SHEN_IMPL": "shen-go", "BIFROST_SHEN_GO": str(wrapper)}):
             with self.assertRaisesRegex(modelcheck.ModelcheckUnavailable, "actual pinned shen-go binary"):
                 modelcheck.runtime()
 
@@ -192,10 +193,10 @@ class RecipeTest(unittest.TestCase):
         alias = root / "shen-go-alias"
         alias.symlink_to(native)
         with patch("capcov.claims.modelcheck.shutil.which", return_value=str(native)), \
-                patch.dict(os.environ, {"BIFROST_SHEN_GO": str(alias)}):
+                patch.dict(os.environ, {"CAPCOV_SHEN_IMPL": "shen-go", "BIFROST_SHEN_GO": str(alias)}):
             resolved = modelcheck.runtime()
-        self.assertEqual(resolved.shen_go, str(native.resolve()))
-        self.assertEqual(resolved.shen_go_sha256, modelcheck._sha256_file(native))
+        self.assertEqual(resolved.binary, str(native.resolve()))
+        self.assertEqual(resolved.binary_sha256, modelcheck._sha256_file(native))
 
     def test_loader_cannot_escape_the_model_directory(self) -> None:
         root = Path(tempfile.mkdtemp(prefix="capcov-contained-model-"))
@@ -365,11 +366,14 @@ class CheckerTest(unittest.TestCase):
         certificate = json.loads((self.out / "modelcheck-certificate.json").read_text())
         self.assertEqual(certificate, r.certificate)
         self.assertEqual(certificate["model_files"], [{"path": p, "sha256": s} for p, s in r.model_files])
-        self.assertEqual(certificate["runtime"]["impl"], "shen-go")
+        impl = shen_runtime.selected().name
+        self.assertEqual(certificate["runtime"]["impl"], impl)
         self.assertNotIn("bifrost", certificate["runtime"])
         self.assertEqual(len(certificate["runtime"]["checker_binary"]), 64)
         self.assertNotIn("shen_go", certificate["runtime"])
-        self.assertEqual(len(certificate["runtime"]["shen_go_sha256"]), 64)
+        self.assertNotIn("binary", certificate["runtime"])
+        self.assertEqual(set(certificate["runtime"]), modelcheck._runtime_keys(impl))
+        self.assertEqual(len(certificate["runtime"]["shen_go_sha256" if impl == "shen-go" else "binary_sha256"]), 64)
         self.assertEqual([e["path"] for e in certificate["checker_sources"]][:2], ["prelude.shen", "types/table-list.shen"])
         transcript = (self.out / "modelcheck-transcript.txt").read_text()
         self.assertEqual(hashlib.sha256(transcript.encode()).hexdigest(), r.transcript_sha256)
@@ -488,7 +492,7 @@ class PreflightTest(unittest.TestCase):
     """The profile entry never raises and names what is missing."""
 
     def test_unavailable_runtime_is_a_named_refusal(self) -> None:
-        with unittest.mock.patch.dict(os.environ, {"BIFROST_SHEN_GO": ""}):
+        with unittest.mock.patch.dict(os.environ, {shen_runtime.selected().env: ""}):
             report = modelcheck.preflight(MODEL_MIN)
         self.assertEqual(report["status"], "unavailable")
         self.assertIsNone(report["fact"])

@@ -10,7 +10,7 @@ PROJECT millstonehq/capcov
 #
 #   base      Python, uv, git and the locked Python environment
 #   souffle   base and Souffle with its C++ compiler
-#   shen      base and the Shen runtime with bifrost
+#   shen      base and the Shen runtimes (shen-scheme default, shen-go) with bifrost
 #   indexers  base and Go, PHP, scip, scip-go, scip-php, scip-python
 #
 # tests/tool-families.json says which test classes need which family. A shard of
@@ -221,7 +221,7 @@ test-pinned:
     ARG SHEN_IMAGE=
     ARG INDEXERS_IMAGE=
     ARG SOUFFLE_SHARDS=3
-    ARG SHEN_SHARDS=2
+    ARG SHEN_SHARDS=1
     FROM +src-pinned --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE}
     WAIT
         BUILD +test-shard --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE}
@@ -299,7 +299,7 @@ flake-checks:
     BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE}
     BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE} --CHECKS=capcov-package
     BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=souffle --IMAGE=${SOUFFLE_IMAGE} --CHECKS=souffle-recursive-typed-smoke
-    BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=shen --IMAGE=${SHEN_IMAGE} --CHECKS="shen-package shen-evaluator-smoke"
+    BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=shen --IMAGE=${SHEN_IMAGE} --CHECKS="shen-package shen-evaluator-smoke shen-scheme-smoke"
     BUILD +flake-check --SRC_PATH=${SRC_PATH} --FAMILY=indexers --IMAGE=${INDEXERS_IMAGE} --CHECKS=scip-go-index-smoke
 
 # all runs lint, test and build on the plain Python install

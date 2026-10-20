@@ -17,7 +17,8 @@ workflow. They are not implementations of a particular production service.
 
 ## Commands
 
-Use `nix develop .#shen` (or the repository's pinned bifrost/shen-go binaries):
+Use `nix develop .#shen` (or the repository's pinned bifrost and shen-scheme
+binaries; `CAPCOV_SHEN_IMPL=shen-go` selects shen-go):
 
 ```sh
 capcov system evaluate --spec model.ops --input requests.json

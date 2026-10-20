@@ -36,7 +36,8 @@ judgements all pass. A skipped or failing operation has no row and cannot
 borrow another operation's result. The modelcheck certificate digest includes
 stable semantic inputs and judgements; it excludes nonce, elapsed time, and
 other run-envelope values. Its `checker_binary` is the SHA-256 of the resolved
-native Shen executable. The Bifrost launcher hash remains a separate input to
+native Shen executable or, for shen-scheme (the default), of that executable
+together with the boot files and runtime object it loads. The Bifrost launcher hash remains a separate input to
 the semantic certificate.
 
 Reviewer authority is supplied separately to the exporter. Each

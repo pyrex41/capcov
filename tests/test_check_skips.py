@@ -375,12 +375,26 @@ class ParallelShardTest(unittest.TestCase):
             (tests / f"test_m{module}.py").write_text(textwrap.dedent(f"""
                 import os
                 import tempfile
+                import time
                 import unittest
 
                 class Base(unittest.TestCase):
                     @classmethod
                     def setUpClass(cls):
                         cls.pid = os.getpid()
+                        # With WAIT_FOR_WORKERS, hold each class until that many worker
+                        # processes have started one, so the first worker to boot cannot
+                        # drain the queue alone on a loaded machine. It gives up after
+                        # 60 s, and the test's own assertion then reports the shortfall.
+                        wanted = int(os.environ.get("WAIT_FOR_WORKERS") or 0)
+                        if wanted:
+                            pids = os.environ["WHERE_LOG"] + ".pids"
+                            print(cls.pid, file=open(pids, "a"))
+                            deadline = time.monotonic() + 60
+                            while time.monotonic() < deadline:
+                                if len(set(open(pids).read().split())) >= wanted:
+                                    break
+                                time.sleep(0.05)
 
                     def _check(self):
                         self.assertEqual(os.getpid(), self.pid)
@@ -420,7 +434,7 @@ class ParallelShardTest(unittest.TestCase):
     def test_the_workers_run_each_test_once_and_record_what_one_process_records(self) -> None:
         serial = self._shard("serial.json", "--jobs", "1")
         self.where.unlink()
-        parallel = self._shard("parallel.json", "--jobs", "3")
+        parallel = self._shard("parallel.json", "--jobs", "3", WAIT_FOR_WORKERS="2")
         self.assertIn("in 3 worker processes", self.stderr)
         for key in ("ran", "skipped", "discovered", "successful", "family", "index", "count", "version"):
             self.assertEqual(parallel[key], serial[key], key)

@@ -161,9 +161,12 @@ def compile_spec(source, timeout=60) -> CompiledSpec:
     manifest = dict(format='capcov-spec-manifest-v1', language_version=LANGUAGE_VERSION,
         bundle_schema_version=bundle.schema_version, pack_id=pack['id'], bundle_digest=digest(bundle),
         sources=dict(closure.digests), compiler=compiler,
-        runtime=dict(implementation=shen.IMPL, sha256=rt.shen_go_sha256, libraries=dict(rt.library_sha256),
+        runtime=dict(implementation=rt.impl, sha256=rt.sha256, libraries=dict(rt.library_sha256),
                      launcher_sha256=hashlib.sha256(Path(rt.bifrost).read_bytes()).hexdigest(),
-                     python=dict(implementation=sys.implementation.name, version=list(sys.version_info[:3]))),
+                     python=dict(implementation=sys.implementation.name, version=list(sys.version_info[:3])),
+                     # shen-go and shen-c are one file; shen-scheme names the files it loads.
+                     **(dict(binary_sha256=rt.binary_sha256, support=dict(rt.support_sha256))
+                        if rt.support_sha256 else {})),
         artifacts={name:_sha(text) for name,text in sorted(artifacts.items())})
     artifacts['manifest.json'] = _json(manifest)
     return CompiledSpec(bundle, tuple(sorted(artifacts.items())))

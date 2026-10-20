@@ -35,24 +35,24 @@ repository. The existing specifications are valuable input, not presumed truth.
 
 ## 2. What exists and what is still missing
 
-| Area | Code present @ `e5bf644` | Validated @rev (family, run) | Remaining |
+| Area | Code present @ `f7c1d3c` | Validated @rev (family, run) | Remaining |
 | --- | --- | --- | --- |
-| Executable systems | Shen construction judgments, transactional action semantics, state/effect observations | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Broader value/error semantics; application models and refinement |
-| Propositional proofs | Search plus independent sequent checking | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Quantifiers, equality, richer arithmetic and structural induction |
-| History induction | Explicit Boolean transition systems | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Derive/check abstraction from concrete operations; wider state theories |
-| Loop invariants | Initiation, preservation, continuation; nested invariant loops | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Stronger relational invariants and compiler-refinement evidence |
-| Loop completion | Processed/remaining partition rule for row-local, current-key updates | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Cross-key writes, insert/delete, nested completion and global selectors |
-| Typing | Operation/model datatypes; completion formula/context/judgment datatypes; typed claim authority deciding v2 packs with `shen.typecheck`, differential against the Python and untyped Shen checkers, disagreements recorded | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Typed claim elaboration over checked contract rules (R04/R06); checker-function typing is separate |
-| Behavior IR | R02 PR 1: outcomes `ok`/`fail`/`info`, effect records with intent and attempt identity, named assumptions with R-ASSUME, the v1 bridge with byte-identical v1 output (gate G5), assumption-conditional claim export; draft overlay and fixtures for PRs 2 to 5 | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Operations, outbox and delivery, channels with R-INTENT-DISJOINT, `info` alternatives, histories and observations (IR spec section 8) |
-| Migration probe | Worked outbox migration model and decision record on the v1 IR; IR gaps as expected failures mapped to the R02 PRs that flip them | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Retarget each gap test to the R02 model as its PR lands |
-| Evidence | Source anchors, identities, dependency invalidation, claim distinctions; readable observation and static claim specifications elaborated to schema-2 bundles under v2 authority (v1 remains the default profile) | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Full route inventory, richer producers, durable lineage and admission policy |
-| Soufflé | Existing translation, compiled cache and differential closure checks; `operations/evidence.dl` source-evidence invalidation closure | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Current full validation, extended relation schemas and dependency maintenance |
-| Relational search | Finite Shen Prolog DSL with modes, cardinalities and affine capabilities | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Better model integration, scoped symbolic generation and search guidance |
-| Adapters | Lifecycle SDK, HTTP control-plane client, synthetic HTTP/SQLite tests | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Enforced leases, service mappings, actual DB/queue barriers and fault hooks |
-| Replay | Whole-history execution, explicit outcome choice, repeated observation comparison | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Controlled time, entropy, scheduling and I/O; causal histories and durable replay bundles |
-| Antithesis | Property catalog and SDK publication bridge | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Provisioned campaigns, actual environment control and result ingestion |
-| Runtime | Bifrost/Shen-Go process per request | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Batching, measured caches, isolated workers, then justified incremental reuse |
-| Release | CI workflow, flake, skip-accounting gate and wheel check scripts | `e5bf644`, all four families, gate passed ([report](validation/e5bf644.md)) | Full pinned CI run, installation/upgrade tests and consuming-system qualification |
+| Executable systems | Shen construction judgments, transactional action semantics, state/effect observations | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Broader value/error semantics; application models and refinement |
+| Propositional proofs | Search plus independent sequent checking | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Quantifiers, equality, richer arithmetic and structural induction |
+| History induction | Explicit Boolean transition systems | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Derive/check abstraction from concrete operations; wider state theories |
+| Loop invariants | Initiation, preservation, continuation; nested invariant loops | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Stronger relational invariants and compiler-refinement evidence |
+| Loop completion | Processed/remaining partition rule for row-local, current-key updates | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Cross-key writes, insert/delete, nested completion and global selectors |
+| Typing | Operation/model datatypes; completion formula/context/judgment datatypes; typed claim authority deciding v2 packs with `shen.typecheck`, differential against the Python and untyped Shen checkers, disagreements recorded | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Typed claim elaboration over checked contract rules (R04/R06); checker-function typing is separate |
+| Behavior IR | R02 PR 1: outcomes `ok`/`fail`/`info`, effect records with intent and attempt identity, named assumptions with R-ASSUME, the v1 bridge with byte-identical v1 output (gate G5), assumption-conditional claim export; draft overlay and fixtures for PRs 2 to 5 | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Operations, outbox and delivery, channels with R-INTENT-DISJOINT, `info` alternatives, histories and observations (IR spec section 8) |
+| Migration probe | Worked outbox migration model and decision record on the v1 IR; IR gaps as expected failures mapped to the R02 PRs that flip them | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Retarget each gap test to the R02 model as its PR lands |
+| Evidence | Source anchors, identities, dependency invalidation, claim distinctions; readable observation and static claim specifications elaborated to schema-2 bundles under v2 authority (v1 remains the default profile) | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Full route inventory, richer producers, durable lineage and admission policy |
+| Soufflé | Existing translation, compiled cache and differential closure checks; `operations/evidence.dl` source-evidence invalidation closure | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Current full validation, extended relation schemas and dependency maintenance |
+| Relational search | Finite Shen Prolog DSL with modes, cardinalities and affine capabilities | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Better model integration, scoped symbolic generation and search guidance |
+| Adapters | Lifecycle SDK, HTTP control-plane client, synthetic HTTP/SQLite tests | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Enforced leases, service mappings, actual DB/queue barriers and fault hooks |
+| Replay | Whole-history execution, explicit outcome choice, repeated observation comparison | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Controlled time, entropy, scheduling and I/O; causal histories and durable replay bundles |
+| Antithesis | Property catalog and SDK publication bridge | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Provisioned campaigns, actual environment control and result ingestion |
+| Runtime | Bifrost/shen-scheme process per request: the pyrex41 fork release v0.52-pyrex41.1 (upstream v0.52 plus the byte-strings fix, proposed upstream); shen-go selectable and run as a differential ([shen-runtime-choice](shen-runtime-choice.md)) | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Batching, measured caches, isolated workers, then justified incremental reuse |
+| Release | CI workflow, flake, skip-accounting gate and wheel check scripts | `f7c1d3c`, all four families, gate passed, CI green ([report](validation/f7c1d3c.md)) | Full pinned CI run, installation/upgrade tests and consuming-system qualification |
 
 "Code present" means the code exists at that revision. The validation column
 names the full pinned gate run at that revision: every row's tests ran there
@@ -721,7 +721,13 @@ Executors name what an exit artifact executes:
    records the first baseline and its failures F1 to F3. F1 and F2 are fixed.
    The rerun at `e5bf644` passed every family, the gate and the flake checks
    ([`docs/validation/e5bf644.md`](validation/e5bf644.md)) on a developer
-   machine; the first GitHub Actions run supersedes it.
+   machine. The run at `7aa4f75`, where shen-scheme became the default Shen
+   runtime, passed every family, the gate, the CI scripts and the flake checks
+   ([`docs/validation/7aa4f75.md`](validation/7aa4f75.md)), and its GitHub
+   Actions run on x86_64-linux passed too. The run at `f7c1d3c`, with
+   shen-scheme pinned to the fork release v0.52-pyrex41.1, passed the same
+   gate ([`docs/validation/f7c1d3c.md`](validation/f7c1d3c.md)), and so did
+   its GitHub Actions run.
 3. Done: worked migration model on the current IR (PR #3,
    `tests/claim_semantics/test_migration_probe.py`). Cases the current IR cannot
    express are expected failures; each flips with the R02 PR named in
