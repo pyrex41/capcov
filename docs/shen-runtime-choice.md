@@ -4,7 +4,7 @@ Status: **shen-scheme is the default runtime.**
 - It is upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) v0.52 with one patch, pending upstream.
 - shen-go, the earlier runtime, stays selectable and runs beside it as a differential on every suite run.
 - shen-c is a third, optional choice.
-- [`validation/`](validation/) holds the full gate run at the switching revision.
+- [`validation/7aa4f75.md`](validation/7aa4f75.md) holds the full gate run at the switching revision. CI on x86_64-linux passed there too.
 
 ## Selection
 
@@ -124,9 +124,21 @@ The `shen` family, one shard, `CAPCOV_SHEN_REQUIRED=1`, one runtime at a time. T
 - Typed authority verdicts were identical on all three: 3148 units and the same disagreement set.
 - Before the fix (fork `d037ae6`), shen-scheme failed the 3 text tests.
 
-### At the switch
+### At the switch (revision `7aa4f75`)
 
-See the validation report. Since the switch, every suite run checks both runtimes:
+The full gate passed ([validation/7aa4f75.md](validation/7aa4f75.md)):
+
+| Family | Summary |
+|---|---|
+| base | `Ran 1885 tests in 59.690s`, `OK (expected failures=2)` |
+| souffle | `Ran 165 tests in 163.989s`, `OK` |
+| shen (shen-scheme) | `Ran 155 tests in 64.419s`, `OK (skipped=1, expected failures=4)`; typed differential 13.6 s (typed batch 10.8 s / untyped 2.6 s) |
+| indexers | `Ran 31 tests in 3.808s`, `OK` |
+| merge | 2236 of 2236 ran once; 1 accepted skip |
+
+The CI scripts, ruff, `uv build`, `check-wheel.sh` and `nix flake check` all passed. GitHub Actions on x86_64-linux was green.
+
+Since the switch, every suite run checks both runtimes:
 - the `shen` family runs under shen-scheme;
 - `RuntimeDifferentialTest` re-runs shen-go beside it on:
   - authority over go_app (verdicts, elaboration, checksum);
