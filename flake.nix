@@ -130,7 +130,7 @@
           '';
 
           # The default runtime: it evaluates, refuses malformed input, and prints
-          # a UTF-8 literal as its own bytes (patches/shen-scheme-byte-strings.patch).
+          # a UTF-8 literal as its own bytes (the fork release's byte-strings change).
           # Building it compiles Chez (minutes without a cache).
           shen-scheme-smoke = pkgs.runCommand "shen-scheme-smoke" {
             nativeBuildInputs = [ values.shenScheme ];

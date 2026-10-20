@@ -221,7 +221,7 @@ test-pinned:
     ARG SHEN_IMAGE=
     ARG INDEXERS_IMAGE=
     ARG SOUFFLE_SHARDS=3
-    ARG SHEN_SHARDS=2
+    ARG SHEN_SHARDS=1
     FROM +src-pinned --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE}
     WAIT
         BUILD +test-shard --SRC_PATH=${SRC_PATH} --FAMILY=base --IMAGE=${BASE_IMAGE}
