@@ -77,11 +77,11 @@
         7
       ]
     },
-    "sha256": "b7f14091f043e3d6a2dc4a54776ddba93bb1ed6074f8fac04d461557f3a32c4f",
+    "sha256": "f0b8f2e6ead4ef1e123107a9d500f2ad7815b57984437a347cc150d2f5c0c0fd",
     "support": {
-      "petite.boot": "9af229fd62c6aefabe88e8b914d3dfe7566d8eeefa750ac876518bf8a515c7f7",
-      "scheme.boot": "a1d79d60e6b52b15785061dd72229186b7fa2ec94c2f38f5492dd9a1bdfbef83",
-      "shen-scheme/runtime.so": "0203a1b874ca3778b001f8deb05b8bb9955f1a8e8104a7a597648e817aac5ad5"
+      "petite.boot": "2736debd573998eab4334624f377a3edca62fbfd1fe3ca136c46412668cbcc18",
+      "scheme.boot": "33406fc898386283f595b328bd23a755346ecaee633ddbf217b2492f558a415b",
+      "shen-scheme/runtime.so": "ef1366a6d448891f823d553ee87ac524bccd180bc38ce2e13983bb0afbc6364b"
     }
   },
   "sources": {
