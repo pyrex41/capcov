@@ -1,11 +1,14 @@
 # The Shen runtime: shen-scheme (default), shen-go, shen-c
 
 Status: **shen-scheme is the default runtime.**
-- It is release [v0.52-pyrex41.1](https://github.com/pyrex41/shen-scheme/releases/tag/v0.52-pyrex41.1) of the pyrex41/shen-scheme fork: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) v0.52 plus the fork commits listed in its FORK.md.
-- The one capcov needs, byte strings written as bytes, is proposed upstream as a draft, [tizoc/shen-scheme#43](https://github.com/tizoc/shen-scheme/pull/43).
+- It is release [v0.52-pyrex41.2](https://github.com/pyrex41/shen-scheme/releases/tag/v0.52-pyrex41.2) of the pyrex41/shen-scheme fork: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) `05cf325` (v0.52 plus upstream's own byte-string fix, [#44](https://github.com/tizoc/shen-scheme/pull/44)) plus the fork commits listed in its FORK.md.
+- One of those is a kernel patch that makes the type checker dereference the checked term once ([Shen-Language/shen-sources#117](https://github.com/Shen-Language/shen-sources/pull/117)). It takes about 40% off the typed authority.
 - shen-go, the earlier runtime, stays selectable and runs beside it as a differential on every suite run.
 - shen-c is a third, optional choice.
-- [`validation/`](validation/) holds the full gate runs: [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file) and [`f7c1d3c.md`](validation/f7c1d3c.md) on the fork release. GitHub Actions on x86_64-linux passed at both.
+- [`validation/`](validation/) holds the full gate runs:
+  - [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file);
+  - [`f7c1d3c.md`](validation/f7c1d3c.md) on fork release `.1`;
+  - [`8c491b5.md`](validation/8c491b5.md) on fork release `.2`.
 
 ## Selection
 
@@ -46,9 +49,9 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 ## The shen-scheme package
 
 `nix/tools/shen/shen-scheme.nix` builds the **fork release's source tarball**.
-- `shen-scheme-v0.52-pyrex41.1-src.tar.gz`: tag `v0.52-pyrex41.1` on fork master `dce21e383c550c1644d069710b683b22cddbfe91`, `sha256-dwinxRr/pecpAY9km9YXQVkuI8KJmHh1HTKxpzc0uTE=` (hex `7708a7c51affa5e729018f649bd61741592e23c2899878751d32b1a73734b931`), kernel S43.1.
+- `shen-scheme-v0.52-pyrex41.2-src.tar.gz`: tag `v0.52-pyrex41.2` on fork master `cd32c9b60ba0659466bd5e6182cdeca9a783ad9a`, `sha256-R9ipObeFxSF6wOPn3oHF2+Jf+itwPLRWJx6SH+AEzac=` (hex `47d8a939b785c5217ac0e3e7de81c5dbe25ffa2b703cb456271e921fe004cda7`), kernel S43.1 with the type-checker patch.
 - It builds on Chez Scheme 10.3.0 (`sha256-0jfZh0xuiwzPd1jaqChqboJVKLE847K8pW6x9zzdvCw=`), the version the Makefile pins (nixpkgs' chez is 10.4.1).
-- No patch file is carried.
+- No patch file is carried in capcov.
 
 **No bootstrap.**
 - The tarball ships the kernel already compiled to Scheme (`compiled/*.scm`, `shen-scheme.scm`, `shen-scheme-runtime.ss`), so the build is Chez plus `make all`.
@@ -61,9 +64,9 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 
 | System | Result |
 |---|---|
-| aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/diafx2fxkfidmn4k89xl01bsqq6v86g6-shen-scheme-0.52-pyrex41.1` |
-| aarch64-linux | package and `shen-scheme-smoke` built and pass, natively, in a `nixos/nix:2.24.10` container on OrbStack (`/nix/store/qbqs33qq…-shen-scheme-0.52-pyrex41.1`) |
-| x86_64-linux | package and `shen-scheme-smoke` built and pass under Rosetta emulation (`linux/amd64` container, `filter-syscalls = false`; `/nix/store/xnx99w2l…-shen-scheme-0.52-pyrex41.1`), and natively in GitHub Actions on `ubuntu-latest` (see the validation report) |
+| aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/91fsxyc7adlr45dv9k0xhvk6qdq5z838-shen-scheme-0.52-pyrex41.2` |
+| aarch64-linux | package and `shen-scheme-smoke` built and pass natively in a `nixos/nix:2.24.10` container on OrbStack (`/nix/store/fnrkjkn2…-shen-scheme-0.52-pyrex41.2`) |
+| x86_64-linux | natively in GitHub Actions on `ubuntu-latest`: flake checks, including `shen-scheme-smoke`, and the Shen shard (see the validation report) |
 
 Each build prints `λ雪 café` as its own 11 bytes.
 
@@ -72,44 +75,51 @@ Each build prints `λ雪 café` as its own 11 bytes.
 ### The fork release
 
 **How it was made.**
-- The tag `v0.52-pyrex41.1` names the upstream release it is based on (0.52) and the fork's release number on it (1). It matches upstream's `v*.*` tag scheme without taking a name upstream could use.
-- The tarball was made at the tag with upstream's release recipe, the commands of its `release.yml`:
-  - `make fetch-kernel`, `make fetch-prebuilt`, `make precompile-with-prebuilt`;
-  - `make`, `make test` (`passed ... 134` / `failed ... 0`, 419 `[OK]` lines);
+- The tag `v0.52-pyrex41.<n>` names the upstream release it is based on (0.52) and the fork's release number on it. It matches upstream's `v*.*` tag scheme without taking a name upstream could use.
+- Each tarball was made at its tag with upstream's release recipe, the commands of its `release.yml`:
+  - `make fetch-kernel` (in the fork, it also applies and sha-checks the kernel patch), `make fetch-prebuilt`, `make precompile-with-prebuilt`;
+  - `make`, `make test`;
   - `make source-release`, plus `make binary-release` for the attached macOS-arm64 binary.
 - It ran locally. The fork's Actions token is read-only, so the tag-triggered release workflow stops at "Create Release".
-- **Checks on the result:**
-  - The tarball's `compiled/` has the same 30 files as upstream's v0.52 tarball.
-  - `compiled/overrides.scm`'s `pr` writes `(shen-string->bytevector …)` and gates `*hush*` to stdout.
-  - Everything else equals the tag's git tree, minus `.github` and `.gitignore`.
 
-**The bug the fork fixes for capcov.** Upstream v0.52 double-encodes text outside ASCII.
-- The kernel's reader makes one character of each byte of a source file, and the kernel's own `pr` (writer.kl) writes each character back with `write-byte`.
-- shen-scheme's faster `pr` override (upstream 95b5e16, 2018, "Override `pr` with a more performant version") writes `(string->utf8 String)` instead, so `(pr "λ雪 café")` writes 18 bytes for the literal's 11.
-- In capcov that gave a positive certificate with the wrong strings, and a wrong operations result. `TextContractTest` and `test_transport_unicode_quotes_and_determinism` catch it.
-
-**The fix** (fork PR [#12](https://github.com/pyrex41/shen-scheme/pull/12); upstream draft [#43](https://github.com/tizoc/shen-scheme/pull/43)):
-- `pr` writes each character below 256 as that byte. A character at or above 256 (Scheme-side only) is written as UTF-8.
-- File names, command-line arguments and `read-file-as-string` are converted at the OS boundary.
-- `make test-byte-strings` checks it down to the bytes on stdout.
-
-**The rest of the fork:**
-- the REPL exits on stdin EOF instead of looping;
-- `*hush*` gates only stdout;
-- dead pattern-factorisation code is removed;
-- an optional Nix flake.
-
-capcov uses none of these: it runs `script` with stdin closed and never sets `*hush*`.
+**`.2` (current pin): fork master `cd32c9b`.**
+- **Rebased onto upstream `05cf325`.** Upstream's [#44](https://github.com/tizoc/shen-scheme/pull/44) makes `pr` and `read-file-as-string` byte-exact, so the fork's own commits for those were dropped.
+- **Changed rule:** a character at or above 256 follows upstream, so `pr` writes nothing for it, where `.1` wrote UTF-8. capcov transports bytes, so it never makes one.
+- **Kept fork commits:**
+  - byte strings at the OS boundary: file names, command-line arguments, native compile and load paths;
+  - the REPL stdin-EOF exit;
+  - `*hush*` gating only stdout;
+  - dead-code removal;
+  - the Nix flake.
+- **New: the kernel patch** `patches/kernel-43.1/t-star-deref-once.patch` (Shen-Language/shen-sources#117).
+  - `shen.search-user-datatypes` and `shen.by-hypothesis` dereference the checked term once per call, not once per datatype rule or hypothesis.
+  - `make fetch-kernel` applies it and checks the patched `t-star.kl` (`a0cedbb0…`).
+- **Tarball checks:**
+  - `compiled/` holds 30 files;
+  - `compiled/t-star.scm` has the hoisted `-h` defuns;
+  - `compiled/overrides.scm`'s `pr` uses upstream's Latin-1 `shen-string->bytevector` with the fork's stdout-only hush gate.
 
 **shen-scheme's own suite on aarch64-darwin:**
 
 | | `make test` | kernel 43.1 tests | `[OK]` | `make test-external-runtime` |
 |---|---|---|---|---|
 | upstream v0.52 (fa07173) | rc 0 | `passed ... 134` / `failed ... 0` | 400 | rc 0 |
-| fork master before the fix (cfa084c) | rc 0 | 134 / 0 | 405 | rc 0 |
-| release v0.52-pyrex41.1 (dce21e3) | rc 0 | 134 / 0 | 419 | rc 0 (at the PR head) |
+| release v0.52-pyrex41.1 (dce21e3) | rc 0 | 134 / 0 | 419 | rc 0 |
+| upstream 05cf325 | rc 0 | 134 / 0 | 415 | rc 0 |
+| release v0.52-pyrex41.2 (cd32c9b) | rc 0 | 134 / 0 | 432 | rc 0 |
 
-The byte-string tests fail on v0.52 and pass under the full and the Petite runtimes. The fork PR's CI passed on macOS, ubuntu and Windows.
+- **The fork's own byte-string tests on plain upstream `05cf325`:**
+  - **No double encoding remains:** `pr` to stdout and to files is byte-exact.
+  - **Still failing** are the boundary checks the fork keeps: an `eval -e` argument, `load` of a non-ASCII path named by a literal, and a file name on disk.
+  - **The ≥256 case** differs by design (above).
+- **Fork CI at `cd32c9b`:** ubuntu and Windows passed. The macOS job was cancelled twice after 15 minutes waiting for a runner, so it is not executed.
+
+**The workload payloads.** On the eight shen workloads every payload is byte-identical to shen-go 1f587de for `.1`, `.2` (local build), and `.2` (capcov's nix build).
+
+**Timing, `.1` against `.2`** (aarch64-darwin, load 30–55, interleaved rounds):
+- **b-typed CPU:** median about 8.8 s against 4.7 s (−46%).
+- **capcov's typed authority batch:** 11.7/13.0/15.2 s against 7.8/7.9/9.8 s (median −39%).
+- **d-g5:** CPU ranged 13.2–16.5 s against 15.7–16.9 s. The ranges overlap, so a change of up to about 10% is within noise and not established.
 
 ## shen-c
 
@@ -165,6 +175,7 @@ Since the switch, every suite run checks both runtimes:
    - Every artifact digest, every bundle digest and `launcher_sha256` are unchanged.
    - The installed `rules-*-v2.json`, `schema_*_v2.json` and `stubs-*-v2.json` are byte-identical to the build output.
    - At the move to the fork release (`dafdfd1`), exactly 4 keys moved in each manifest: `runtime.sha256` and the three `runtime.support` digests. The executable digest, the implementation, the compiler block, every artifact and bundle digest, and the installed pack files are unchanged.
+   - At the move to `.2` (`e64a668`), the same 4 keys moved and nothing else. The patched type checker elaborates exactly what it did before.
 3. **Modelcheck facts.** Nothing to re-mint. The committed `model_well_formed` fixtures are synthetic (`checker_binary` all `b`, checker `0.1-pending`), not runtime-minted, and tests mint their facts at run time.
 4. **CI.**
    - **Unit suite:** the `shen` shards run in `.#shen`, so under shen-scheme, with shen-go for the differential.
@@ -179,6 +190,9 @@ Since the switch, every suite run checks both runtimes:
 
 ## Remaining work
 
-- **Upstream.** [tizoc/shen-scheme#43](https://github.com/tizoc/shen-scheme/pull/43) is open as a draft. If upstream releases the fix, capcov can pin that release.
+- **Upstream.**
+  - tizoc merged his own byte-string fix (#44), and our draft #43 is closed.
+  - The fork still differs from upstream at the OS boundary and in the kernel patch.
+  - If upstream releases the boundary conversions and a kernel release contains Shen-Language/shen-sources#117, capcov can pin an upstream release again.
 - **Fork releases.** Each upstream release needs a fork rebase and a new `v<upstream>-pyrex41.<n>` release before capcov can follow it.
 - **Binary cache.** The builds are not bit-reproducible. A binary cache (or reproducible Chez boot files) would let a manifest digest name the build CI uses.

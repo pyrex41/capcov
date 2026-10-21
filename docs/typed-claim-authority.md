@@ -87,9 +87,12 @@ any judgement.
 
 ## Measured constraints (shen-go c12933d)
 
-These were measured on shen-go. The default runtime is now shen-scheme v0.52
-(kernel 43.1). Its typed batch decides the same 3148 units with the same
-verdicts in about 14 s against about 355 s
+These were measured on shen-go. The default runtime is now shen-scheme (fork
+release v0.52-pyrex41.2, kernel 43.1 with the type-checker patch
+Shen-Language/shen-sources#117, which dereferences the checked term once per
+call rather than once per datatype rule or hypothesis). Its typed batch
+decides the same 3148 units with the same verdicts in about 8 s, against
+about 13 s without the patch and about 355 s on shen-go
 ([shen-runtime-choice](shen-runtime-choice.md)). The inference-count notes
 below are kernel-level and were not re-measured separately.
 

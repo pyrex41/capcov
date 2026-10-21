@@ -9,9 +9,10 @@ by family, under `nix/tools`: `base` (Python, uv, git), `souffle`, `shen` and
 `indexers` (Go, PHP and the SCIP indexers). The default shell has every family;
 `nix develop .#souffle` has `base` and that one.
 
-The Shen runtime is shen-scheme, release `v0.52-pyrex41.1` of the
-pyrex41/shen-scheme fork (upstream tizoc/shen-scheme v0.52 plus the fork's
-byte-strings fix, proposed upstream as tizoc/shen-scheme#43). The `shen` family also carries shen-go, the earlier runtime, and
+The Shen runtime is shen-scheme, release `v0.52-pyrex41.2` of the
+pyrex41/shen-scheme fork (upstream tizoc/shen-scheme 05cf325, which carries
+upstream's byte-string fix, plus the fork's OS-boundary conversions and a
+kernel type-checker patch, Shen-Language/shen-sources#117). The `shen` family also carries shen-go, the earlier runtime, and
 `CAPCOV_SHEN_IMPL=shen-go` selects it; `RuntimeDifferentialTest` runs both on
 every suite run. `nix develop .#shen-runtimes` adds shen-c as a third choice.
 [`shen-runtime-choice.md`](shen-runtime-choice.md) records the choice and the
