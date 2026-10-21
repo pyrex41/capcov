@@ -9,7 +9,7 @@ Status: **shen-scheme is the default runtime.**
   - [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file);
   - [`f7c1d3c.md`](validation/f7c1d3c.md) on fork release `.1`;
   - [`8c491b5.md`](validation/8c491b5.md) on `.2` (kernel 43.1 plus a KLambda patch);
-  - the run on `.3`, which the roadmap names.
+  - [`1ce541f.md`](validation/1ce541f.md) on `.3` (kernel 43.1.1).
 
 ## Selection
 
