@@ -129,7 +129,10 @@ Each build prints `λ雪 café` as its own 11 bytes.
 
 - **Medians:** the typed batch drops 37% (10.6 → 6.7 s) and b-typed CPU 43% (9.95 → 5.70 s).
 - **`.2` and `.3` are the same** within noise, as expected for the same fix.
-- **d-g5:** `.2` and `.3` overlap (16.4–17.7 s and 16.2–17.6 s). Against `.1`, a change of up to about 10% was within noise at load 30–55 and is not established.
+- **d-g5 is unresolved.**
+  - Over 6 interleaved rounds of capcov's nix builds (load 26–41), the CPU medians were 15.39 s for `.1`, 14.47 s for `.2` and 15.94 s for `.3`. `.3` was slower than `.2` in 5 of 6 pairs (about +9%, p ≈ 0.09).
+  - Startup and library loading are identical, so any difference lies in d-g5's type checking.
+  - It needs a measurement on a quiet host ([validation/1ce541f.md](validation/1ce541f.md)).
 
 ## shen-c
 
