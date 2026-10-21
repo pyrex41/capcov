@@ -8,7 +8,7 @@ Status: **shen-scheme is the default runtime.**
 - [`validation/`](validation/) holds the full gate runs:
   - [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file);
   - [`f7c1d3c.md`](validation/f7c1d3c.md) on fork release `.1`;
-  - the run on fork release `.2`, which the roadmap names.
+  - [`8c491b5.md`](validation/8c491b5.md) on fork release `.2`.
 
 ## Selection
 
