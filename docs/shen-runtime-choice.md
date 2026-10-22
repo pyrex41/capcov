@@ -10,7 +10,7 @@ Status: **shen-scheme is the default runtime.**
   - [`f7c1d3c.md`](validation/f7c1d3c.md) on fork release `.1`;
   - [`8c491b5.md`](validation/8c491b5.md) on `.2` (kernel 43.1 plus a KLambda patch);
   - [`1ce541f.md`](validation/1ce541f.md) on `.3` (kernel 43.1.1);
-  - VALIDATION_LINK_4 on `.4` (kernel 43.1.2).
+  - [`031035a.md`](validation/031035a.md) on `.4` (kernel 43.1.2).
 
 ## Selection
 
