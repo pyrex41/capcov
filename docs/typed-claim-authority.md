@@ -88,8 +88,8 @@ any judgement.
 ## Measured constraints (shen-go c12933d)
 
 These were measured on shen-go. The default runtime is now shen-scheme (fork
-release v0.52-pyrex41.4) on kernel ShenOSKernel 43.1.2: 43.1 plus
-Shen-Language/shen-sources#117, which dereferences the checked term once per
+release v0.52-pyrex41.5) on an unmodified build of upstream
+Shen-Language/shen-sources `ec16a9f`, the merge of #117, which dereferences the checked term once per
 call rather than once per datatype rule or hypothesis, and not at all when
 there is no hypothesis or datatype to try. Its typed batch
 decides the same 3148 units with the same verdicts in about 7 s, against
