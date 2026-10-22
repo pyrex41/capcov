@@ -13,7 +13,7 @@ Status: **shen-scheme is the default runtime.**
   - [`8c491b5.md`](validation/8c491b5.md) on `.2` (kernel 43.1 plus a KLambda patch);
   - [`1ce541f.md`](validation/1ce541f.md) on `.3` (kernel 43.1.1);
   - [`031035a.md`](validation/031035a.md) on `.4` (kernel 43.1.2);
-  - VALIDATION_LINK_5 on `.5` (upstream `ec16a9f`).
+  - [`dc4eb40.md`](validation/dc4eb40.md) on `.5` (upstream `ec16a9f`).
 
 ## Selection
 
