@@ -1,15 +1,16 @@
 # The Shen runtime: shen-scheme (default), shen-go, shen-c
 
 Status: **shen-scheme is the default runtime.**
-- It is release [v0.52-pyrex41.3](https://github.com/pyrex41/shen-scheme/releases/tag/v0.52-pyrex41.3) of the pyrex41/shen-scheme fork: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) `05cf325` (v0.52 plus upstream's own byte-string fix, [#44](https://github.com/tizoc/shen-scheme/pull/44)) plus the fork commits listed in its FORK.md.
-- It runs kernel **ShenOSKernel 43.1.1** ([pyrex41/shen-sources release `shen-43.1.1`](https://github.com/pyrex41/shen-sources/releases/tag/shen-43.1.1)): community 43.1 plus [Shen-Language/shen-sources#117](https://github.com/Shen-Language/shen-sources/pull/117), which makes the type checker dereference the checked term once. It takes about 40% off the typed authority. 43.1.1 is not an official Shen-Language release.
+- It is release [v0.52-pyrex41.4](https://github.com/pyrex41/shen-scheme/releases/tag/v0.52-pyrex41.4) of the pyrex41/shen-scheme fork: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) `05cf325` (v0.52 plus upstream's own byte-string fix, [#44](https://github.com/tizoc/shen-scheme/pull/44)) plus the fork commits listed in its FORK.md.
+- It runs kernel **ShenOSKernel 43.1.2** ([pyrex41/shen-sources release `shen-43.1.2`](https://github.com/pyrex41/shen-sources/releases/tag/shen-43.1.2)): community 43.1 plus [Shen-Language/shen-sources#117](https://github.com/Shen-Language/shen-sources/pull/117), which makes the type checker dereference the checked term once, with the empty-list guard from its review. It takes about 40% off the typed authority. 43.1.2 is not an official Shen-Language release.
 - shen-go, the earlier runtime, stays selectable and runs beside it as a differential on every suite run.
 - shen-c is a third, optional choice.
 - [`validation/`](validation/) holds the full gate runs:
   - [`7aa4f75.md`](validation/7aa4f75.md) at the switch (upstream v0.52 plus a patch file);
   - [`f7c1d3c.md`](validation/f7c1d3c.md) on fork release `.1`;
   - [`8c491b5.md`](validation/8c491b5.md) on `.2` (kernel 43.1 plus a KLambda patch);
-  - [`1ce541f.md`](validation/1ce541f.md) on `.3` (kernel 43.1.1).
+  - [`1ce541f.md`](validation/1ce541f.md) on `.3` (kernel 43.1.1);
+  - [`031035a.md`](validation/031035a.md) on `.4` (kernel 43.1.2).
 
 ## Selection
 
@@ -50,7 +51,7 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 ## The shen-scheme package
 
 `nix/tools/shen/shen-scheme.nix` builds the **fork release's source tarball**.
-- `shen-scheme-v0.52-pyrex41.3-src.tar.gz`: tag `v0.52-pyrex41.3` on fork master `839dfac1bc819c5fcacbfbe60bc6667e35f46300`, `sha256-81IYl+yxNEuzllxtvGigNxW3BvsDd1aYiPZgH3jdnp0=` (hex `f3521897ecb1344bb3965c6dbc68a03715b706fb0377569888f6601f78dd9e9d`), kernel 43.1.1.
+- `shen-scheme-v0.52-pyrex41.4-src.tar.gz`: tag `v0.52-pyrex41.4` on fork master `4366e3d0affbfc592b298ab3199ca275c76cb974`, `sha256-GF4UmvOe8eqw23Gg9loUqRG4wu88o3pkJxL4u8LcGq0=` (hex `185e149af39ef1eab0db71a0f65a14a911b8c2ef3ca37a642712f8bbc2dc1aad`), kernel 43.1.2.
 - It builds on Chez Scheme 10.3.0 (`sha256-0jfZh0xuiwzPd1jaqChqboJVKLE847K8pW6x9zzdvCw=`), the version the Makefile pins (nixpkgs' chez is 10.4.1).
 - No patch file is carried in capcov.
 
@@ -65,8 +66,8 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 
 | System | Result |
 |---|---|
-| aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/7cnyabhnwa3ybdjqw1p7ij9yrvy6drqj-shen-scheme-0.52-pyrex41.3` |
-| aarch64-linux | package and `shen-scheme-smoke` built and pass natively in a `nixos/nix:2.24.10` container on OrbStack (`/nix/store/3xrpimpx…-shen-scheme-0.52-pyrex41.3`) |
+| aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/jhxgbvbk40mph0qaby8b3srfmf18gm9g-shen-scheme-0.52-pyrex41.4` |
+| aarch64-linux | package and `shen-scheme-smoke` built and pass natively in a `nixos/nix:2.24.10` container on OrbStack (`/nix/store/804g0hs6…-shen-scheme-0.52-pyrex41.4`) |
 | x86_64-linux | natively in GitHub Actions on `ubuntu-latest`: flake checks, including `shen-scheme-smoke`, and the Shen shard (see the validation report) |
 
 Each build prints `λ雪 café` as its own 11 bytes.
@@ -83,7 +84,13 @@ Each build prints `λ雪 café` as its own 11 bytes.
   - `make source-release`, plus `make binary-release` for the attached macOS-arm64 binary.
 - It ran locally. The fork's Actions token is read-only, so the tag-triggered release workflow stops at "Create Release".
 
-**`.3` (current pin): fork master `839dfac`.**
+**`.4` (current pin): fork master `4366e3d`.** It is `.3` with kernel 43.1.2 instead of 43.1.1.
+- **Kernel 43.1.2** adds the guard from review on #117: on an empty hypothesis or datatype list, `shen.by-hypothesis` and `shen.search-user-datatypes` fail at once, as in 43.1, instead of copying the checked term.
+  - Its KLambda differs from 43.1.1 only in those two defuns of `t-star.kl` (`a1d2fa6f…`) and in the version string; the gensym numbering is unchanged.
+  - `make fetch-kernel` checks `ShenOSKernel-43.1.2.tar.gz` against `c7ec855c…`. `(version)` is `"43.1.2"`.
+- **Tarball checks:** `compiled/t-star.scm` is byte-identical to the one from a clean build at the tag, and `compiled/init.scm` has `"43.1.2"`.
+
+**`.3`: fork master `839dfac`.**
 - **Rebased onto upstream `05cf325`** (since `.2`). Upstream's [#44](https://github.com/tizoc/shen-scheme/pull/44) makes `pr` and `read-file-as-string` byte-exact, so the fork's own commits for those were dropped.
 - **Changed rule:** a character at or above 256 follows upstream, so `pr` writes nothing for it, where `.1` wrote UTF-8. capcov transports bytes, so it never makes one.
 - **Kept fork commits:**
@@ -111,14 +118,15 @@ Each build prints `λ雪 café` as its own 11 bytes.
 | upstream 05cf325 | rc 0 | 134 / 0 | 415 | rc 0 |
 | release v0.52-pyrex41.2 (cd32c9b, 43.1 plus patch) | rc 0 | 134 / 0 | 432 | rc 0 |
 | release v0.52-pyrex41.3 (839dfac, 43.1.1) | rc 0 | 134 / 0 | 432 | rc 0 |
+| release v0.52-pyrex41.4 (4366e3d, 43.1.2) | rc 0 | 134 / 0 | 432 | rc 0 |
 
 - **The fork's own byte-string tests on plain upstream `05cf325`:**
   - **No double encoding remains:** `pr` to stdout and to files is byte-exact.
   - **Still failing** are the boundary checks the fork keeps: an `eval -e` argument, `load` of a non-ASCII path named by a literal, and a file name on disk.
   - **The ≥256 case** differs by design (above).
-- **Fork CI at `839dfac`:** macOS, ubuntu and Windows passed. At `cd32c9b` (`.2`), macOS could not get a runner.
+- **Fork CI at `4366e3d` and `839dfac`:** macOS, ubuntu and Windows passed. At `cd32c9b` (`.2`), macOS could not get a runner.
 
-**The workload payloads.** On the eight shen workloads every payload is byte-identical to shen-go 1f587de for `.1`, `.2` and `.3`, both the fork's local builds and capcov's nix builds.
+**The workload payloads.** On the eight shen workloads every payload is byte-identical to shen-go 1f587de for `.1`, `.2`, `.3` and `.4`, both the fork's local builds and capcov's nix builds.
 
 **Timing** (aarch64-darwin, interleaved rounds, load 20–55):
 
@@ -132,6 +140,20 @@ Each build prints `λ雪 café` as its own 11 bytes.
 - **d-g5:** no difference between `.2` and `.3` in instructions retired: the median is −0.05%, over 6 interleaved pairs of capcov's nix builds.
   - CPU time at load 22–41 cannot settle it: the median `.3`/`.2` CPU ratio was +9% in one run and −3.5% in the next.
   - The two kernels differ only in gensym numbering and `*version*` ([validation/1ce541f.md](validation/1ce541f.md)).
+
+**`.3` against `.4`, instructions retired** (`/usr/bin/time -l` on each shen-scheme process, capcov's nix builds, 5 interleaved rounds alternating the order):
+
+| Workload | `.3` (43.1.1) | `.4` (43.1.2) | `.4`/`.3`, median of pairs |
+|---|---|---|---|
+| b-typed | 65.01 G | 65.04 G | −0.02% |
+| d-g5 | 180.45 G | 180.46 G | −0.04% |
+| a0-bare | 1.930 G | 1.923 G | −0.37% |
+| capcov typed-authority batch (the typed `script` call) | 64.79 G | 64.74 G | −0.07% |
+| guard117 `mb-terms`: `shen.typecheck` with no hypotheses and no datatypes | 99.53 G | 67.06 G | **−32.6%** |
+| guard117 `mb-defs`: 400 loads of 25 typed defines | 66.58 G | 66.57 G | −0.03% |
+
+- **Medians** of 5 runs each. On every capcov workload `.4` is within ±0.4% of `.3`, with identical payloads.
+- **The guard pays off** only when a typecheck starts with no hypothesis or no datatype. That is where 43.1.1 copied the term for nothing; `mb-terms` is built for that case.
 
 ## shen-c
 
@@ -204,7 +226,7 @@ Since the switch, every suite run checks both runtimes:
 
 - **Upstream.**
   - tizoc merged his own byte-string fix (#44), and our draft #43 is closed.
-  - The fork still differs from upstream at the OS boundary and in its kernel (43.1.1 instead of 43.1).
+  - The fork still differs from upstream at the OS boundary and in its kernel (43.1.2 instead of 43.1).
   - If upstream releases the boundary conversions and a kernel release contains Shen-Language/shen-sources#117, capcov can pin an upstream release again.
 - **Fork releases.** Each upstream release needs a fork rebase and a new `v<upstream>-pyrex41.<n>` release before capcov can follow it.
 - **Binary cache.** The builds are not bit-reproducible. A binary cache (or reproducible Chez boot files) would let a manifest digest name the build CI uses.
