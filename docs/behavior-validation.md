@@ -38,3 +38,7 @@ suite also encountered failures and slow-running classes; its result must not be
 reported as a clean regression run. A fully equipped runner must execute the
 normal repository gate and the example's integrated check plan before this branch
 is treated as ready for production use.
+
+Implementation completion and remaining validation/production work are mapped in
+[the follow-up record](behavior-follow-ups.md). The runtime failure remains an
+unresolved qualification result; documenting a follow-up does not waive it.

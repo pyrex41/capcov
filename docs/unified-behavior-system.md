@@ -114,6 +114,8 @@ rollout and rollback. No live application has been cut over by this branch.
 The [method](behavior-effects.md), [Reversa comparison](comparison-reversa.md),
 [capcov baseline comparison](comparison-capcov-baseline.md) and
 [validation record](behavior-validation.md) describe these boundaries in detail.
+[Follow-up work](behavior-follow-ups.md) maps the remaining tasks to the existing
+R-series, with component ownership and concrete acceptance criteria.
 
 ## One protocol lane, one result
 
