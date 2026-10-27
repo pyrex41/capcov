@@ -266,12 +266,21 @@ v1 claim packs stay the default.
 - **`capcov reason`.** Adds source-linked evidence, proof obligations,
   independently checked Shen sequent derivations, typed relational modes,
   Prolog-generated scenarios, stateful replay and counterexample minimization.
+- **`capcov behavior`.** Connects recovery claims, four-layer store contracts,
+  access paths, Shen Step handlers/workers and scoped execution evidence. Includes
+  a synthetic publication example with replay, SQLite coexistence checks and TLA+
+  protocol checks. This is an experimental fragment, not a production cutover.
 - **Typed behavior IR.** Under construction (R02). Outcomes, effect identity and
   named assumptions have landed; operations, outbox delivery, histories and
   observations follow the specification.
 
 | Document | What it is |
 | --- | --- |
+| [Unified behavior system](docs/unified-behavior-system.md) | Commands, shared artifacts and implemented scope |
+| [Behavior and effects method](docs/behavior-effects.md) | Recovery, state, typed target execution and qualification |
+| [Reversa comparison](docs/comparison-reversa.md) | Recovery specifications versus executable obligations |
+| [capcov baseline comparison](docs/comparison-capcov-baseline.md) | Upstream, the existing fork, and everything this branch adds |
+| [Publication example](examples/behavior-publication/README.md) | Runnable route, worker, stateful adapter, replay and protocol model |
 | [Typed behavior architecture](docs/typed-behavior-architecture.md) | The design: legacy, intended and migration contracts as typed Shen behaviors |
 | [Production roadmap](docs/production-roadmap.md) and [`roadmap-deps.json`](docs/roadmap-deps.json) | The R-series, its dependency graph (one source; tables generated), current status and issue homes |
 | [IR specification](docs/ir-specification.md) | The R02 grammar, semantics, rules, fixtures and gates; decided and open questions |

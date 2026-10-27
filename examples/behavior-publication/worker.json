@@ -1,0 +1,166 @@
+{
+  "format": "capcov-step-program-v1",
+  "phase": "worker",
+  "row": [
+    "load-intent",
+    "notify",
+    "settle"
+  ],
+  "entry": "load",
+  "operations": [
+    {
+      "id": "load-intent",
+      "kind": "Ask",
+      "inputs": [
+        "tenant",
+        "intent"
+      ],
+      "results": {
+        "pending": [
+          "intent.issue"
+        ],
+        "complete": [],
+        "absent": []
+      }
+    },
+    {
+      "id": "notify",
+      "kind": "External",
+      "inputs": [
+        "tenant",
+        "intent",
+        "issue"
+      ],
+      "results": {
+        "ok": [],
+        "unknown": [],
+        "failed": []
+      }
+    },
+    {
+      "id": "settle",
+      "kind": "Commit",
+      "inputs": [
+        "tenant",
+        "intent"
+      ],
+      "results": {
+        "ok": [],
+        "missing": []
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "load",
+      "kind": "Ask",
+      "operation": "load-intent",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "intent": [
+          "ref",
+          "request.intent"
+        ]
+      },
+      "next": {
+        "pending": "notify",
+        "complete": "success",
+        "absent": "missing"
+      }
+    },
+    {
+      "id": "notify",
+      "kind": "External",
+      "operation": "notify",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "intent": [
+          "ref",
+          "request.intent"
+        ],
+        "issue": [
+          "ref",
+          "intent.issue"
+        ]
+      },
+      "next": {
+        "ok": "settle",
+        "unknown": "unknown",
+        "failed": "failed"
+      }
+    },
+    {
+      "id": "settle",
+      "kind": "Commit",
+      "operation": "settle",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "intent": [
+          "ref",
+          "request.intent"
+        ]
+      },
+      "next": {
+        "ok": "success",
+        "missing": "missing"
+      }
+    },
+    {
+      "id": "success",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "success"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "unknown",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "unknown"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "failed",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "failed"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "missing",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "missing"
+        ]
+      },
+      "next": {}
+    }
+  ]
+}

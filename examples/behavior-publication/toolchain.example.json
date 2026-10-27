@@ -1,0 +1,7 @@
+{
+  "format": "capcov-behavior-toolchain-v1",
+  "shencheck_root": "/absolute/path/to/shencheck",
+  "vor_root": "/absolute/path/to/vor",
+  "tlc_jar": "/absolute/path/to/tla2tools.jar",
+  "java": "/absolute/path/to/java"
+}

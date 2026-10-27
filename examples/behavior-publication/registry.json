@@ -1,0 +1,340 @@
+{
+  "format": "capcov-behaviors-v1",
+  "baseline": "synthetic-publication-v1; fork 64d6ad9729a21ab1520219aee6970e51895a0a68",
+  "artifacts": [
+    {
+      "id": "route",
+      "path": "examples/behavior-publication/route.json",
+      "sha256": "252509bd8a3c2cce225d8f9fc88e75d5cfaf265ff310810fa5bba1255bb67030"
+    },
+    {
+      "id": "worker",
+      "path": "examples/behavior-publication/worker.json",
+      "sha256": "12ef17a6e00f5989ec2faad359c3f33c69189d7f19bd120b465a4933c906ef9d"
+    },
+    {
+      "id": "adapter",
+      "path": "examples/behavior-publication/backend.py",
+      "sha256": "53634561f319d4ac3f3805a7b72539c06116e3e7f734476b5c6445c19ccb7f60"
+    },
+    {
+      "id": "legacy-model",
+      "path": "examples/behavior-publication/legacy.ops",
+      "sha256": "4d98d864ba5064bf233c7ee62aade2c184e60101595759828107297afa1a1bc0"
+    },
+    {
+      "id": "store-contract",
+      "path": "examples/behavior-publication/store.md",
+      "sha256": "9af8e32e2e37bafd910fcee9adc7f7bf4ee04f557195358c81b00631e6b97bf2"
+    },
+    {
+      "id": "behavior-tests",
+      "path": "tests/test_behaviors.py",
+      "sha256": "0c7f7f079c444c3ff586dd285298fb18cbc6b778201b92917cfa460ab7d96056"
+    },
+    {
+      "id": "check-runner",
+      "path": "scripts/check-skips.py",
+      "sha256": "7e1932a6a12ee69584b675dd594741253fed14ccf4772423df4963fe2879188e"
+    },
+    {
+      "id": "no-skips",
+      "path": "examples/behavior-publication/no-skips.json",
+      "sha256": "221ecd3b909c02c6fb43072dc2b37ab44f6137e9969331e4434b80dc03434e61"
+    },
+    {
+      "id": "nix-pins",
+      "path": "flake.lock",
+      "sha256": "d078f9fba512323fd35b24afc6a81aa3bb95c63caa1d00acf700e0827f9e6bac"
+    },
+    {
+      "id": "shen-pins",
+      "path": "nix/tools/shen/default.nix",
+      "sha256": "8c9124da6cc21b1f2a1adf212c6de5592bf747193444e563d1939bb1e0992653"
+    },
+    {
+      "id": "kernel",
+      "path": "src/capcov/operations/shen/kernel.shen",
+      "sha256": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480"
+    },
+    {
+      "id": "step-kernel",
+      "path": "src/capcov/operations/shen/behavior-step.shen",
+      "sha256": "4683fff5be4c5025b8a6aff99c548f2bd631d74580e9e8099538344c4f2eefd2"
+    },
+    {
+      "id": "impact-rules",
+      "path": "src/capcov/operations/evidence.dl",
+      "sha256": "b641381746f37d1c682ed964f5486d1ae0384f564615e3146c2d99b99515ffed"
+    },
+    {
+      "id": "host---init--",
+      "path": "src/capcov/behaviors/__init__.py",
+      "sha256": "0541928da7408d4dbf96bb09651a19b1644298a15959027fad47381589e86c0d"
+    },
+    {
+      "id": "host---main--",
+      "path": "src/capcov/behaviors/__main__.py",
+      "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d"
+    },
+    {
+      "id": "host-cli",
+      "path": "src/capcov/behaviors/cli.py",
+      "sha256": "6bf2ca3dfb5ad521e0d86ca61d83ae22ec73aadcab3655e631ff71aaa5a3b66e"
+    },
+    {
+      "id": "host-qualification",
+      "path": "src/capcov/behaviors/qualification.py",
+      "sha256": "7978db23191d393fd87fc2b55849e1cb6444994cf9d47337f49d6844d9376057"
+    },
+    {
+      "id": "host-recovery",
+      "path": "src/capcov/behaviors/recovery.py",
+      "sha256": "bc6b3f195960b6466b7d9c44920e4a2df0e7f0a3320bee3368ff58e148847d19"
+    },
+    {
+      "id": "host-registry",
+      "path": "src/capcov/behaviors/registry.py",
+      "sha256": "df0a93f3a483900eb2e0b0f7028253677abb1cb571dfceba97f1fd587b123301"
+    },
+    {
+      "id": "host-target",
+      "path": "src/capcov/behaviors/target.py",
+      "sha256": "b77641e34ae216c927246fcdb75d1e0ec3718a40ea9df0c4cd42120a3d06a111"
+    },
+    {
+      "id": "existing-native",
+      "path": "src/capcov/operations/native.py",
+      "sha256": "fe68c726ca2bcdcf013c2db2655c80fb2c9bba7634cc7632d8fb503f49579869"
+    },
+    {
+      "id": "existing-system",
+      "path": "src/capcov/operations/system.py",
+      "sha256": "c341040d1fe1ac89cab5a4a4b6e6475709464305fc2d312128f81896516d6978"
+    },
+    {
+      "id": "existing-process",
+      "path": "src/capcov/operations/process.py",
+      "sha256": "16cc60275b19b63a78762a305581eb3aca7ed3cf366640c878689e8bc7232541"
+    },
+    {
+      "id": "shencheck-bridge",
+      "path": "src/capcov/behaviors/shencheck.py",
+      "sha256": "8dbdaed75fc2c64290788995b57d27fbf10be2053e02419d84ac90d186594041"
+    },
+    {
+      "id": "shencheck-pins",
+      "path": "src/capcov/behaviors/shencheck-effects-pins.json",
+      "sha256": "faf3e43160be9c43cb73aa76592d2496f4e3238c87144007e2762504fc8244b3"
+    },
+    {
+      "id": "publication-observer",
+      "path": "examples/behavior-publication/observe.py",
+      "sha256": "1edd56aae0434349f64ea21f5998e6ec99642710145b1bf59922a93e4f33a885"
+    },
+    {
+      "id": "integration-tests",
+      "path": "tests/test_behavior_shencheck.py",
+      "sha256": "0348de0c3bc19e7eea5d8d73a794c80cfc823ca47564ddf1cdc75572b2486dd0"
+    }
+  ],
+  "stores": [
+    {
+      "id": "publication-store",
+      "physical": [
+        "store-contract",
+        "adapter"
+      ],
+      "representation": [
+        "store-contract",
+        "adapter"
+      ],
+      "access": [
+        "store-contract",
+        "adapter"
+      ],
+      "domain": [
+        "store-contract",
+        "adapter"
+      ],
+      "ambiguities": []
+    }
+  ],
+  "access_paths": [
+    {
+      "id": "target-transaction",
+      "store": "publication-store",
+      "mode": "read-write",
+      "writer": "target",
+      "hooks": [
+        "identifier update and outbox insert in the transaction"
+      ],
+      "scopes": [
+        "tenant composite keys",
+        "authorization rechecked at commit"
+      ],
+      "bypasses": [],
+      "artifacts": [
+        "adapter"
+      ]
+    },
+    {
+      "id": "legacy-versioned",
+      "store": "publication-store",
+      "mode": "write",
+      "writer": "synthetic-legacy",
+      "hooks": [
+        "increments version"
+      ],
+      "scopes": [
+        "tenant key"
+      ],
+      "bypasses": [
+        "does not use target observer machinery"
+      ],
+      "artifacts": [
+        "behavior-tests",
+        "store-contract"
+      ]
+    }
+  ],
+  "behaviors": [
+    {
+      "id": "publication",
+      "purpose": "Synthetic draft publication with identifier and notification intent",
+      "priority": 100,
+      "entries": [
+        "POST /issues/{id}/publish",
+        "worker:publication-notification"
+      ],
+      "depends_on": [],
+      "access_paths": [
+        "target-transaction",
+        "legacy-versioned"
+      ],
+      "artifacts": [
+        "route",
+        "worker",
+        "adapter",
+        "legacy-model",
+        "store-contract",
+        "behavior-tests",
+        "check-runner",
+        "no-skips",
+        "nix-pins",
+        "shen-pins",
+        "kernel",
+        "step-kernel",
+        "impact-rules",
+        "host---init--",
+        "host---main--",
+        "host-cli",
+        "host-qualification",
+        "host-recovery",
+        "host-registry",
+        "host-target",
+        "existing-native",
+        "existing-system",
+        "existing-process",
+        "shencheck-bridge",
+        "shencheck-pins",
+        "publication-observer",
+        "integration-tests"
+      ],
+      "legacy": "legacy-model",
+      "target": "route",
+      "obligations": [
+        {
+          "id": "publication-authorization",
+          "category": "authorization",
+          "method": "execution",
+          "description": "Exercise synthetic authorization assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-tenant-isolation",
+          "category": "tenant-isolation",
+          "method": "execution",
+          "description": "Exercise synthetic tenant-isolation assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-representation",
+          "category": "representation",
+          "method": "execution",
+          "description": "Exercise synthetic representation assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-durable-effects",
+          "category": "durable-effects",
+          "method": "execution",
+          "description": "Exercise synthetic durable-effects assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-coexistence",
+          "category": "coexistence",
+          "method": "execution",
+          "description": "Exercise synthetic coexistence assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-recovery",
+          "category": "recovery",
+          "method": "execution",
+          "description": "Exercise synthetic recovery assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-compatibility",
+          "category": "compatibility",
+          "method": "execution",
+          "description": "Exercise synthetic compatibility assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "publication-target-contract",
+          "category": "target-contract",
+          "method": "execution",
+          "description": "Exercise synthetic target-contract assertions in NativeBehaviorTests."
+        },
+        {
+          "id": "protocol-safety",
+          "category": "durable-effects",
+          "method": "model-check",
+          "description": "Pinned ShenCheck/Vor finite protocol qualification, generated TLC/reference agreement and all four defect controls; not application refinement."
+        },
+        {
+          "id": "evidence-impact",
+          "category": "evidence",
+          "method": "execution",
+          "description": "Receipt failures and Souffle transitive invalidation agree with scope inspection."
+        }
+      ]
+    }
+  ],
+  "claims": [],
+  "decisions": [
+    {
+      "id": "durable-intent-decision",
+      "behavior": "publication",
+      "disposition": "correct",
+      "rationale": "The toy legacy abstraction makes no outbox guarantee; the target requires an atomic durable intent.",
+      "status": "approved",
+      "owner": "synthetic-example-policy",
+      "artifacts": [
+        "store-contract",
+        "shencheck-pins"
+      ],
+      "obligations": [
+        "publication-durable-effects",
+        "protocol-safety"
+      ],
+      "differences": [
+        {
+          "scenario": "durable-intent",
+          "path": [
+            "durable_intent"
+          ],
+          "legacy": false,
+          "target": true
+        }
+      ]
+    }
+  ],
+  "gaps": []
+}

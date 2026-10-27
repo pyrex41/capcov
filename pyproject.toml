@@ -101,6 +101,7 @@ where = ["src"]
 # (tests/claim_semantics/test_observation_pack_package_data.py fails if the
 # entry is dropped).
 [tool.setuptools.package-data]
+"capcov.behaviors" = ["*.json"]
 "capcov.operations" = ["shen/*.shen", "shen/types/*.shen", "*.dl"]
 "capcov.claims.static" = ["*.json"]
 "capcov.claims.replay" = ["*.json"]

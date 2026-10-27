@@ -651,6 +651,10 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     actual = sys.argv[1:] if argv is None else argv
+    if actual and actual[0] == "behavior":
+        from .behaviors.cli import main as behavior_main
+
+        return behavior_main(actual[1:])
     if actual and actual[0] == "reason":
         from .operations.workbench import main as reason_main
 
@@ -689,6 +693,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="capcov", description=__doc__)
     parser.add_argument("--quiet", action="store_true")
     sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("behavior", help="recovery, store contracts, Step admission and cutover checks")
     sub.add_parser("system", help="typed Shen systems, simulation, campaigns and conformance checks")
     sub.add_parser("reason", help="source evidence, sequent proofs, relational modes and replay")
     sub.add_parser("flows", help="source obligations, flow planning, and browser outcome evidence")
