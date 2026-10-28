@@ -31,7 +31,8 @@
     "tests.claim_semantics.test_static_spec.NativeStaticSpecTests",
     "tests.test_claim_souffle.SouffleBackendTests",
     "tests.test_faults_checker.EngineTest",
-    "tests.claim_semantics.test_reasoning.SouffleSourceTests"
+    "tests.claim_semantics.test_reasoning.SouffleSourceTests",
+    "tests.test_behaviors.SouffleBehaviorTests"
    ]
   },
   "shen": {
@@ -64,7 +65,8 @@
     "tests.claim_semantics.test_r02_bridge.BridgeTests",
     "tests.claim_semantics.test_shen_runtime_choice.NumericContractTest",
     "tests.claim_semantics.test_shen_runtime_choice.TextContractTest",
-    "tests.claim_semantics.test_shen_runtime_choice.RuntimeDifferentialTest"
+    "tests.claim_semantics.test_shen_runtime_choice.RuntimeDifferentialTest",
+    "tests.test_behaviors.NativeBehaviorTests"
    ]
   },
   "indexers": {

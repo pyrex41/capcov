@@ -1,0 +1,9 @@
+{
+  "scenario": "durable-intent",
+  "legacy": {
+    "durable_intent": false
+  },
+  "target": {
+    "durable_intent": true
+  }
+}

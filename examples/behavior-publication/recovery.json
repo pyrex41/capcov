@@ -1,0 +1,16 @@
+{
+  "format": "capcov-recovery-v1",
+  "claims": [
+    {
+      "id": "publication-observer",
+      "behavior": "publication",
+      "statement": "The synthetic adapter derives ISSUE- plus issue ID in its publication transaction.",
+      "confidence": "confirmed",
+      "artifacts": [
+        "adapter"
+      ],
+      "depends_on": []
+    }
+  ],
+  "gaps": []
+}

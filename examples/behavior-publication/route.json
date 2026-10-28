@@ -1,0 +1,203 @@
+{
+  "format": "capcov-step-program-v1",
+  "phase": "route",
+  "row": [
+    "load-issue",
+    "authorize",
+    "publish"
+  ],
+  "entry": "load",
+  "operations": [
+    {
+      "id": "load-issue",
+      "kind": "Ask",
+      "inputs": [
+        "tenant",
+        "issue"
+      ],
+      "results": {
+        "found": [
+          "issue.version",
+          "issue.status"
+        ],
+        "absent": [],
+        "ambiguous": []
+      }
+    },
+    {
+      "id": "authorize",
+      "kind": "Ask",
+      "inputs": [
+        "tenant",
+        "principal"
+      ],
+      "results": {
+        "allowed": [],
+        "denied": []
+      }
+    },
+    {
+      "id": "publish",
+      "kind": "Commit",
+      "inputs": [
+        "tenant",
+        "principal",
+        "issue",
+        "version",
+        "request"
+      ],
+      "results": {
+        "ok": [],
+        "conflict": [],
+        "denied": [],
+        "unknown": []
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "load",
+      "kind": "Ask",
+      "operation": "load-issue",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "issue": [
+          "ref",
+          "request.issue"
+        ]
+      },
+      "next": {
+        "found": "auth",
+        "absent": "missing",
+        "ambiguous": "ambiguous"
+      }
+    },
+    {
+      "id": "auth",
+      "kind": "Ask",
+      "operation": "authorize",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "principal": [
+          "ref",
+          "context.principal"
+        ]
+      },
+      "next": {
+        "allowed": "publish",
+        "denied": "denied"
+      }
+    },
+    {
+      "id": "publish",
+      "kind": "Commit",
+      "operation": "publish",
+      "input": {
+        "tenant": [
+          "ref",
+          "context.tenant"
+        ],
+        "principal": [
+          "ref",
+          "context.principal"
+        ],
+        "issue": [
+          "ref",
+          "request.issue"
+        ],
+        "version": [
+          "ref",
+          "request.version"
+        ],
+        "request": [
+          "ref",
+          "request.id"
+        ]
+      },
+      "next": {
+        "ok": "success",
+        "conflict": "conflict",
+        "denied": "denied",
+        "unknown": "unknown"
+      }
+    },
+    {
+      "id": "success",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "200"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "missing",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "404"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "denied",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "403"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "conflict",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "409"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "unknown",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "unknown"
+        ]
+      },
+      "next": {}
+    },
+    {
+      "id": "ambiguous",
+      "kind": "Done",
+      "operation": "",
+      "input": {
+        "status": [
+          "literal",
+          "representation-gap"
+        ]
+      },
+      "next": {}
+    }
+  ]
+}

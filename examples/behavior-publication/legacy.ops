@@ -1,0 +1,10 @@
+; Synthetic, intentionally incomplete abstraction: publishing a draft changes
+; status. Its absence of outbox guarantees is an explicit target decision.
+[system "legacy-publication"
+ [[table "issue" [[column "status" [enum ["draft" "published"]]]] [] []]]
+ [[command "publish" ["id"]
+   [both [exists "issue" [argument "id"]]
+         [equal [lookup "issue" [argument "id"] "status"] [literal "draft"]]]
+   [[named "publish" [update "issue" [argument "id"] "status" [literal "published"]]]]
+   [equal [lookup "issue" [argument "id"] "status"] [literal "published"]]]]
+ []]

@@ -230,6 +230,28 @@
         "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_negative_gates_are_rejected",
         "tests.claim_semantics.test_typed_authority.TypedAuthorityDifferentialTest.test_verdicts_have_the_untyped_shape"
       ]
+    },
+    {
+      "reason": "Needs native Shen/Bifrost or Souffle; runs without skips in its assigned pinned tool family.",
+      "tests": [
+        "tests.test_behaviors.NativeBehaviorTests.test_publish_and_idempotent_retry",
+        "tests.test_behaviors.NativeBehaviorTests.test_wrong_tenant_and_denied_have_no_effect",
+        "tests.test_behaviors.NativeBehaviorTests.test_unknown_commit_reconciles_through_retry",
+        "tests.test_behaviors.NativeBehaviorTests.test_payload_reuse_and_unknown_representation_refused",
+        "tests.test_behaviors.NativeBehaviorTests.test_authorization_revoked_between_ask_and_commit",
+        "tests.test_behaviors.NativeBehaviorTests.test_cooperating_legacy_writer_causes_version_conflict",
+        "tests.test_behaviors.NativeBehaviorTests.test_worker_unknown_then_retry_uses_provider_deduplication",
+        "tests.test_behaviors.NativeBehaviorTests.test_phase_row_and_missing_outcome_rejected_in_unreachable_nodes_too",
+        "tests.test_behaviors.NativeBehaviorTests.test_resume_correlation_checkpoint_and_no_automatic_resend",
+        "tests.test_behaviors.NativeBehaviorTests.test_legacy_model_runs_in_existing_system_engine",
+        "tests.test_behaviors.NativeBehaviorTests.test_record_replay_matches_requests_before_reusing_replies"
+      ]
+    },
+    {
+      "reason": "Needs native Shen/Bifrost or Souffle; runs without skips in its assigned pinned tool family.",
+      "tests": [
+        "tests.test_behaviors.SouffleBehaviorTests.test_graph_matches_transitive_invalidation"
+      ]
     }
   ]
 }

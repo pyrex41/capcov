@@ -1,7 +1,7 @@
 # The Shen runtime: shen-scheme (default), shen-go, shen-c
 
 Status: **shen-scheme is the default runtime.**
-- It is release [v0.52-pyrex41.5](https://github.com/pyrex41/shen-scheme/releases/tag/v0.52-pyrex41.5) of the pyrex41/shen-scheme fork: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) `05cf325` (v0.52 plus upstream's own byte-string fix, [#44](https://github.com/tizoc/shen-scheme/pull/44)) plus the fork commits listed in its FORK.md.
+- Host: upstream [tizoc/shen-scheme](https://github.com/tizoc/shen-scheme) commit [`8d261518db17fbfec32d1b268b40ed216b925c74`](https://github.com/tizoc/shen-scheme/commit/8d261518db17fbfec32d1b268b40ed216b925c74), latest `master` checked on 2026-10-28. The pin is immutable. This includes the string-boundary fixes after the latest release, `v0.52`.
 - Its kernel is an **unmodified build of upstream [Shen-Language/shen-sources `ec16a9f`](https://github.com/Shen-Language/shen-sources/commit/ec16a9fa4fc2e87e2aa336fb1ae30e8ac2266394)**, the merge of [Shen-Language/shen-sources#117](https://github.com/Shen-Language/shen-sources/pull/117), which makes the type checker dereference the checked term once, and not at all on an empty hypothesis or datatype list. It takes about 40% off the typed authority.
   - No Shen-Language release contains `ec16a9f` yet, so the build is published as [pyrex41/shen-sources release `upstream-ec16a9f`](https://github.com/pyrex41/shen-sources/releases/tag/upstream-ec16a9f).
   - `(version)` is `"43.1"`, as on upstream master.
@@ -53,31 +53,43 @@ The selection lives in `src/capcov/claims/shen_runtime.py`, inside `claims/` so 
 
 ## The shen-scheme package
 
-`nix/tools/shen/shen-scheme.nix` builds the **fork release's source tarball**.
-- `shen-scheme-v0.52-pyrex41.5-src.tar.gz`: tag `v0.52-pyrex41.5` on fork master `680e2e95ed9dd0ca6d2f688453efca2a37e50021`, `sha256-xX9HWGiUU0uXl9r1wMxlxY3G+4nW6m8MK0isZN5m0BA=` (hex `c57f47586894534b9797daf5c0cc65c58dc6fb89d6ea6f0c2b48ac64de66d010`), kernel upstream `ec16a9f`.
-- It builds on Chez Scheme 10.3.0 (`sha256-0jfZh0xuiwzPd1jaqChqboJVKLE847K8pW6x9zzdvCw=`), the version the Makefile pins (nixpkgs' chez is 10.4.1).
-- No patch file is carried in capcov.
+`nix/tools/shen/shen-scheme.nix` fetches upstream commit `8d26151`, archive
+SHA-256 `adf1a2274638e2c8cc5b14cea511e6da6b28383d935911cba322b03e9fffeefd`.
+The offline [build recipe](../scripts/build-upstream-shen.sh) generates Scheme
+from the current upstream sources and the independently pinned kernel, then
+runs upstream `scripts/build-runtime.ss` with the bootstrap's embedded Chez
+10.3.0 compiler. No host-language patch or replacement typechecker is introduced.
 
-**No bootstrap.**
-- The tarball ships the kernel already compiled to Scheme (`compiled/*.scm`, `shen-scheme.scm`, `shen-scheme-runtime.ss`), so the build is Chez plus `make all`.
-- No bootstrap Shen and no prebuilt binary, which is what makes aarch64-linux possible.
-- A git checkout of the fork has no `compiled/`, so pinning the fork's git revision would need a bootstrap binary again (the only prebuilts are x86_64-linux and macOS). That is why capcov pins the release tarball.
+**Bootstrap inputs.** Linux x64 and macOS ARM use checksum-verified upstream
+v0.52 binary releases. These supply Chez and its boot files, not the final Shen
+runtime object. The current upstream C launcher has the same source as v0.52;
+the recipe checks that digest before copying the executable. Linux ARM has no
+upstream binary, so it builds the upstream v0.52 precompiled source release and
+Chez 10.3.0 first. All input hashes are in the Nix expression and Vör lock.
 
-**`dontStrip`.** `strip` rewrites the boot files, which then fail Chez's version check.
+This avoids the observed Chez source-build fixed-point failure on this Linux
+x64 host. It does not skip or relax Chez's check. The kernel remains an unmodified
+build of upstream `ec16a9f`, distributed by the existing `pyrex41/shen-sources`
+release; that separate kernel package is not the Shen-Scheme host fork.
 
-**Platforms.**
+**Identity.** The executable still reports port version `0.52`. Its banner does
+not identify the compiled source revision; use the source pin and hashes of the
+executable, both boot files, and runtime object. Vör also records its full PR117
+overlay and includes both build recipes in exported evidence. Capcov pins that
+integration's source manifest, so an old runtime receipt cannot qualify this pin.
 
-| System | Result |
-|---|---|
-| aarch64-darwin | package, `shen-scheme-smoke` and the full gate; store path `/nix/store/hmayq6j3nmg2rg68r0bkda1i8k58d9h1-shen-scheme-0.52-pyrex41.5` |
-| aarch64-linux | package and `shen-scheme-smoke` built and pass natively in a `nixos/nix:2.24.10` container on OrbStack (`/nix/store/4h9cdqsn…-shen-scheme-0.52-pyrex41.5`) |
-| x86_64-linux | natively in GitHub Actions on `ubuntu-latest`: flake checks, including `shen-scheme-smoke`, and the Shen shard (see the validation report) |
+**Validation and platforms.** The fresh Linux x64 build passes upstream byte-string
+and Unicode-boundary checks and all 76,900 Vör checks, including the 11 effects
+protocol controls. See [the integration validation record](behavior-validation.md)
+for capcov's current results. The Nix derivation and ARM/macOS builds have not
+been executed in this environment; earlier fork-platform results below are
+historical, not validation of the new pin.
 
-Each build prints `λ雪 café` as its own 11 bytes.
+`dontStrip` remains required: stripping boot files or the runtime object corrupts
+them. Builds are not claimed to be byte-reproducible; each receipt names the
+actual runtime files used.
 
-**Not reproducible.** `nix build --rebuild` reports differing outputs for every shen-scheme build tried, and for shen-c. A recorded digest names one build; a binary cache keeps it stable.
-
-### The fork release
+### Historical fork releases (superseded)
 
 **How it was made.**
 - The tag `v0.52-pyrex41.<n>` names the upstream release it is based on (0.52) and the fork's release number on it. It matches upstream's `v*.*` tag scheme without taking a name upstream could use.
@@ -87,7 +99,7 @@ Each build prints `λ雪 café` as its own 11 bytes.
   - `make source-release`, plus `make binary-release` for the attached macOS-arm64 binary.
 - It ran locally. The fork's Actions token is read-only, so the tag-triggered release workflow stops at "Create Release".
 
-**`.5` (current pin): fork master `680e2e9`.** It is `.4` with the unmodified upstream build of `ec16a9f` instead of 43.1.2.
+**`.5` (previous pin): fork master `680e2e9`.** It is `.4` with the unmodified upstream build of `ec16a9f` instead of 43.1.2.
 - **The same code as `.4`.** Upstream merged #117 unchanged, so the build's KLambda is byte-identical to 43.1.2's except `init.kl`, whose version string is `"43.1"`.
   - Of the 30 files in `compiled/`, only `init.scm` differs from `.4`, again only in the version string.
 - **Fetch.** `make fetch-kernel` takes `ShenOSKernel-43.1-ec16a9f.tar.gz` from release `upstream-ec16a9f` (the new `kernel_tag` variable, which defaults to `shen-$(shenversion)`) and checks it against `060066a8…`.

@@ -100,6 +100,7 @@
         // lib.genAttrs familyNames (name: mkShellOf (shellOf [ name ] [ ]))
         # The shen family plus shen-c, the third runtime CAPCOV_SHEN_IMPL selects.
         // {
+          behavior = mkShellOf (shellOf [ "shen" "souffle" ] [ values.pkgs.tlaplus ]);
           shen-runtimes =
             let shen = shellOf [ "shen" ] values.families.shen.candidates.packages;
             in mkShellOf (shen // { environment = shen.environment // values.families.shen.candidates.env; });

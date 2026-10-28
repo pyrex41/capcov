@@ -1,0 +1,76 @@
+{
+  "format": "capcov-behavior-checks-v1",
+  "checks": [
+    {
+      "id": "native-publication",
+      "behavior": "publication",
+      "obligations": [
+        "publication-authorization",
+        "publication-tenant-isolation",
+        "publication-representation",
+        "publication-durable-effects",
+        "publication-coexistence",
+        "publication-recovery",
+        "publication-compatibility",
+        "publication-target-contract"
+      ],
+      "method": "execution",
+      "argv": [
+        "python",
+        "scripts/check-skips.py",
+        "--allowlist",
+        "examples/behavior-publication/no-skips.json",
+        "tests.test_behaviors.NativeBehaviorTests"
+      ],
+      "timeout": 300,
+      "inputs": [
+        "scripts/check-skips.py",
+        "examples/behavior-publication/no-skips.json",
+        "tests/test_behaviors.py"
+      ]
+    },
+    {
+      "id": "impact-and-receipts",
+      "behavior": "publication",
+      "obligations": [
+        "evidence-impact"
+      ],
+      "method": "execution",
+      "argv": [
+        "python",
+        "scripts/check-skips.py",
+        "--allowlist",
+        "examples/behavior-publication/no-skips.json",
+        "tests.test_behaviors.RegistryTests",
+        "tests.test_behaviors.SouffleBehaviorTests",
+        "tests.test_behavior_shencheck"
+      ],
+      "timeout": 60,
+      "inputs": [
+        "scripts/check-skips.py",
+        "examples/behavior-publication/no-skips.json",
+        "tests/test_behaviors.py",
+        "tests/test_behavior_shencheck.py"
+      ]
+    },
+    {
+      "id": "bounded-protocol",
+      "behavior": "publication",
+      "obligations": [
+        "protocol-safety"
+      ],
+      "method": "model-check",
+      "engine": "shencheck-effects-v1",
+      "timeout": 900,
+      "inputs": [
+        "src/capcov/behaviors/shencheck-effects-pins.json",
+        "src/capcov/behaviors/shencheck.py",
+        "examples/behavior-publication/observe.py"
+      ],
+      "observe": [
+        "python",
+        "examples/behavior-publication/observe.py"
+      ]
+    }
+  ]
+}
