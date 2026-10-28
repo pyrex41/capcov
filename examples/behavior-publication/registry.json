@@ -125,7 +125,7 @@
     {
       "id": "shencheck-pins",
       "path": "src/capcov/behaviors/shencheck-effects-pins.json",
-      "sha256": "faf3e43160be9c43cb73aa76592d2496f4e3238c87144007e2762504fc8244b3"
+      "sha256": "8892613b389b5464e05038821f782e099be02c9cda8923e041b02819f00b80d5"
     },
     {
       "id": "publication-observer",
@@ -136,6 +136,16 @@
       "id": "integration-tests",
       "path": "tests/test_behavior_shencheck.py",
       "sha256": "0348de0c3bc19e7eea5d8d73a794c80cfc823ca47564ddf1cdc75572b2486dd0"
+    },
+    {
+      "id": "shen-runtime-source",
+      "path": "nix/tools/shen/shen-scheme.nix",
+      "sha256": "276236d5d92105e46cf4f2a532ca8bb154482694404f48b02caaace451c6e38c"
+    },
+    {
+      "id": "shen-runtime-build",
+      "path": "scripts/build-upstream-shen.sh",
+      "sha256": "16c23af2f64826afde73ca86735283438b38496991281630c0e475a52e04d0d2"
     }
   ],
   "stores": [
@@ -239,7 +249,9 @@
         "shencheck-bridge",
         "shencheck-pins",
         "publication-observer",
-        "integration-tests"
+        "integration-tests",
+        "shen-runtime-source",
+        "shen-runtime-build"
       ],
       "legacy": "legacy-model",
       "target": "route",

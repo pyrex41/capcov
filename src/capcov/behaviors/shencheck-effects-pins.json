@@ -11,7 +11,7 @@
     }
   },
   "vor": {
-    "commit": "80291c4c3f7c28266c9a133b869015ffe8a64b92",
+    "commit": "a197db255f531987d07b1290cf82fc1242911c16",
     "files": {
       "Makefile": "c989b9845e48bd3cec51c829df62c8208a85d633d442645926f5ef2fae3472fb",
       "adapters/fenced-profile.shen": "5c1f1855021a132d47d1d5253e8efcccbec36c902a57c922b01e34c6eacfae99",
@@ -40,9 +40,11 @@
       "proofs/induction.shen": "8a96eece33bdaabd713bc0076722d6196312c906aa1c95ed55a6b2d2189cdd2f",
       "runtime/compile.shen": "a3a817a8c7b0b7c2d12537afdd74b32c05fc8349620d8db7fda9ceb2e77b5ed5",
       "runtime/reference.shen": "9fe8068eca3d6816995be134776b904dd8f785eb77a8627f0a0dc16cdac160dd",
+      "scripts/bootstrap": "1e9ee78a538cfe282b4fe84499dfd97c7b7869747e65e4f63605061ee2a84d09",
+      "scripts/build-upstream-shen.sh": "16c23af2f64826afde73ca86735283438b38496991281630c0e475a52e04d0d2",
       "scripts/effects-export-supervisor.py": "06acff8b0c73f8162f42d94e7f3d288d99e54e5a5df3a76cab8bd02ca18df65d",
-      "scripts/export-effects-model": "749da2a9fd35d3cc88ce0c42f2243a24fe38b5026c00d70e344aa6e06728f57d",
-      "scripts/host.sh": "f8ca7cb8467445b3fb38cd4fbeb364cb13ffffd74a97072dea179eacfe4ed127",
+      "scripts/export-effects-model": "4c99626b20493bc40dea5d23a575e9631658103bff46e27b91e9008367000e96",
+      "scripts/host.sh": "b9a7315290c788611ed425a4a42b9766703dbf089432eaafba5038219122adcb",
       "scripts/shen": "3d796e68fc80a1e49a48730e360b21fcd74444c434b4b3be12360f3dec85702e",
       "service/async-checker.shen": "ff5cd0bad73b538ee68953034ae2d4c7ff2a974a4ba7a4c42a39f3f6a0942ec8",
       "service/async-config-example.shen": "fb48de2e87b9330ac24db925d271939237b46c91cbcfddbed1a1b0075b3a3d97",
@@ -81,7 +83,7 @@
       "tests/roadmap.shen": "14b81e4c0a6ec5a6070089cf905aac2af792350f63172abc3872b437bbf6834d",
       "tests/run.shen": "4d9c603ac129acab5526f4c3248c3b0b7038e8b2cbad627d038c819b3361a535",
       "tests/shencheck-mapper.shen": "a791b6271f7646ec693f8afa7a9aeb04548e91fc9436267e20583ada3b15f134",
-      "toolchain.lock.json": "496d74ffdd7f506ec10082a579a262b2b85041a7504add45d2ceb6246204ba7b",
+      "toolchain.lock.json": "01f9365d9c0a7c7056da877c5b285d4bffdb028d5c37effde3a3b2fb043edbbd",
       "vor.shen": "24c0266d2c5bea42ca1c6afd66ce7d77efc2f939757f346987e8d9bf083e2206"
     }
   },
