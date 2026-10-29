@@ -9,12 +9,13 @@ from .registry import read_json, validate, inspect, scope
 from .qualification import execute_checks, qualify, compare
 from .recovery import import_recovery, tasks, export_graph
 from .target import admit
+from .progress import build_progress
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("validate", "inspect", "import-recovery", "graph",
-                                            "check", "gate", "tasks", "compare", "admit"))
+                                            "check", "gate", "tasks", "compare", "admit", "progress"))
     parser.add_argument("--registry", type=Path)
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--scope", action="append")
@@ -22,12 +23,18 @@ def main(argv=None):
     parser.add_argument("--evidence", type=Path)
     parser.add_argument("--input", type=Path)
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--plan", type=Path)
+    parser.add_argument("--previous", type=Path)
     parser.add_argument("--cutover", action="store_true")
     parser.add_argument("--toolchain", type=Path, help="trusted ShenCheck/Vör/TLC locations; mandatory for enrolled engine checks")
     args = parser.parse_args(argv)
     try:
         status = 0
-        if args.command == "admit":
+        if args.command == "progress":
+            if not args.plan or not args.out:
+                parser.error("progress requires --plan PLAN.json and --out REPORT.json")
+            result = build_progress(read_json(args.plan), read_json(args.previous) if args.previous else None)
+        elif args.command == "admit":
             if not args.input:
                 parser.error("admit requires --input PROGRAM.json")
             result = admit(read_json(args.input))
