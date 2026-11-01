@@ -24,6 +24,9 @@ let
     nativeBuildInputs = lib.optionals (binaryBootstrap && !darwin) [ autoPatchelfHook ];
     buildInputs = lib.optionals (!darwin) [ libuuid stdenv.cc.cc.lib ];
     dontConfigure = true;
+    # Release archives carry the publisher's UID/GID. They are not build inputs
+    # and cannot be restored in a single-UID container.
+    TAR_OPTIONS = "--no-same-owner";
     dontStrip = true;
     enableParallelBuilding = false;
     buildPhase = if binaryBootstrap then "true" else ''
@@ -48,6 +51,7 @@ in stdenv.mkDerivation {
   pname = "shen-scheme";
   version = "0.52-unstable-8d26151";
   src = fetchurl {
+    name = "shen-scheme-${revision}.tar.gz";
     url = "https://codeload.github.com/tizoc/shen-scheme/tar.gz/${revision}";
     sha256 = "adf1a2274638e2c8cc5b14cea511e6da6b28383d935911cba322b03e9fffeefd";
   };
