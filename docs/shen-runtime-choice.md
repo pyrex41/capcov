@@ -81,9 +81,10 @@ integration's source manifest, so an old runtime receipt cannot qualify this pin
 **Validation and platforms.** The fresh Linux x64 build passes upstream byte-string
 and Unicode-boundary checks and all 76,900 Vör checks, including the 11 effects
 protocol controls. See [the integration validation record](behavior-validation.md)
-for capcov's current results. The Nix derivation and ARM/macOS builds have not
-been executed in this environment; earlier fork-platform results below are
-historical, not validation of the new pin.
+for capcov's current results. The full x86_64-linux Nix run now passes at `268fa67`; see its
+[validation report](validation/268fa67.md). All three platform definitions also
+evaluate, but native ARM/macOS builds have not been executed for this pin.
+Earlier fork-platform results below are historical, not validation of the new pin.
 
 `dontStrip` remains required: stripping boot files or the runtime object corrupts
 them. Builds are not claimed to be byte-reproducible; each receipt names the

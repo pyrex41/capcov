@@ -29,8 +29,8 @@ repository, not an assignment to an individual.
 
 | Existing work item | Owner | Concrete next work | Completion evidence |
 | --- | --- | --- | --- |
-| R01 — pinned baseline | Shen-Scheme runtime/build and capcov validation | Linux x64 runtime and integrated lane resolved; verify Nix and remaining supported platforms | Retained source/runtime identity; healthy result plus all four required defect controls and the concrete observation check; no UNKNOWN substitution |
-| R22 — release qualification | capcov CI/package maintenance | Run the full pinned Nix/Earthly checks against the feature revision; diagnose the broad unpinned-suite failures separately | Complete skip-accounted results, installed-package checks and current revision-bound logs |
+| R01 — pinned baseline | Shen-Scheme runtime/build and capcov validation | Linux x64 runtime, integrated lane and full Nix CI resolved; verify native ARM/macOS builds | Retained source/runtime identity; healthy result plus all four required defect controls and the concrete observation check; no UNKNOWN substitution |
+| R22 — release qualification | capcov CI/package maintenance | Full Linux x64 Nix CI passes at 268fa67; native ARM/macOS and Earthly execution remain | Complete skip-accounted results, installed-package checks and current revision-bound logs |
 | R02, R04, R06 — typed language and contracts | capcov semantic kernel | Relate the small Step fragment to the existing behavior IR and checked contract judgments before advertising richer domain typing | Explicit bridge/correspondence obligations, positive and negative admission cases, and checked domain derivations; phase admission alone is insufficient |
 | R07, R15, R16 — generation and replay | capcov with ShenCheck/Vör | When broader campaign generation/shrinking is needed, consume it through the same obligations and gate | Deterministic retained scenarios, bound counterexamples, replay/shrink checks and rejection of incomplete campaigns; no standalone verdict to reconcile |
 | R09, R14 — real adapters and observation | Consuming application | Implement and characterize SQL, cache, document-store and queue access paths, codecs, tenant selection and coherent observation boundaries | Corpus-backed adapter laws, malformed/sentinel cases, authorization and isolation tests, and mixed-writer tests against actual stores |
@@ -43,7 +43,8 @@ lane. A finite run cannot close them. Only require those stronger obligations
 where the advertised scope or consumer contract calls for them; never present
 the synthetic fixture as proof of a production system.
 
-The next release verification is the full pinned Nix/Earthly gate, including
-the existing `capcov behavior check` command on supported platforms. There is no second checker workflow to select
+The full Linux x64 Nix run is recorded in [validation/268fa67.md](validation/268fa67.md).
+Remaining platform and Earthly runs should retain their own revision-bound
+evidence, including the existing `capcov behavior check` where applicable. There is no second checker workflow to select
 or manually merge. `behavior gate` continues to reject absent, stale, failed or
 unknown evidence.
