@@ -14,7 +14,9 @@ from .target import admit
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("validate", "inspect", "import-recovery", "graph",
-                                            "check", "gate", "tasks", "compare", "admit"))
+                                            "check", "gate", "tasks", "compare", "admit",
+                                            "environment-claims", "environment-check", "environment-search",
+                                            "import-environment", "environment-plan"))
     parser.add_argument("--registry", type=Path)
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--scope", action="append")
@@ -24,10 +26,40 @@ def main(argv=None):
     parser.add_argument("--out", type=Path)
     parser.add_argument("--cutover", action="store_true")
     parser.add_argument("--toolchain", type=Path, help="trusted ShenCheck/Vör/TLC locations; mandatory for enrolled engine checks")
+    parser.add_argument("--mapping", help="source-node/Behavior and Shen search mapping, relative to --root")
+    parser.add_argument("--surface", help="surface to target with the mapped Shen search")
+    parser.add_argument("--engine", choices=("python", "souffle", "both"), default="both")
     args = parser.parse_args(argv)
     try:
         status = 0
-        if args.command == "admit":
+        if args.command.startswith("environment-") or args.command == "import-environment":
+            from . import environment
+            from capcov.claims.environment import check as check_environment
+            from capcov.claims.ir import canonical_dict
+            if not args.input or not args.mapping:
+                parser.error("environment commands require --input CAPABILITIES and --mapping")
+            input_file = str(args.input)
+            if args.command == "environment-search":
+                if not args.surface:
+                    parser.error("environment-search requires --surface")
+                result = environment.search_environment(args.root, input_file, args.mapping, args.surface)
+                status = int(result["search"]["status"] != "witness")
+            elif args.command in {"import-environment", "environment-plan"}:
+                if not args.registry:
+                    parser.error("environment import/plan requires --registry")
+                registry = read_json(args.registry)
+                if args.command == "import-environment":
+                    result = environment.import_environment(registry, args.root, input_file, args.mapping)
+                else:
+                    if not args.checks:
+                        parser.error("environment-plan requires --checks")
+                    result = environment.extend_plan(read_json(args.checks), registry, args.root,
+                        input_file, args.mapping, engine=args.engine)
+            else:
+                caps, _, bundle, _, _ = environment.load(args.root, input_file, args.mapping)
+                result = (canonical_dict(bundle) if args.command == "environment-claims"
+                          else check_environment(caps, engine=args.engine))
+        elif args.command == "admit":
             if not args.input:
                 parser.error("admit requires --input PROGRAM.json")
             result = admit(read_json(args.input))

@@ -371,6 +371,9 @@ def cmd_discover(args: argparse.Namespace) -> int:
         doc["unresolved"] = raw["unresolved"]
     if raw.get("environment_recovery"):
         doc["environment_recovery"] = raw["environment_recovery"]
+        from .claims.environment import export as export_environment
+        from .claims.ir import canonical_dict
+        doc["environment_claims"] = canonical_dict(export_environment(raw, manifest=snapshot.entries))
     rc = _emit(Path(args.out), dict(doc), args.check)
     if not args.quiet:
         bound_entities = {c["entity"] for c in capabilities}

@@ -87,7 +87,8 @@
         "tests.test_claim_souffle.SouffleBackendTests.test_supported_claim_does_not_mask_runtime_stale_status",
         "tests.test_claim_souffle.SouffleBackendTests.test_timeout_is_reported",
         "tests.test_faults_checker.EngineTest.test_python_and_souffle_agree_on_the_pack",
-        "tests.test_faults_checker.EngineTest.test_souffle_reports_the_same_closure_and_claims"
+        "tests.test_faults_checker.EngineTest.test_souffle_reports_the_same_closure_and_claims",
+        "tests.test_environment_integration.EnvironmentSouffleTests.test_real_interpreted_and_compiled_kernels"
       ]
     },
     {

@@ -189,6 +189,8 @@ def reconcile(capabilities: dict, observed: dict) -> dict:
         **flow_evidence,
         **({"environment_recovery": capabilities["environment_recovery"]}
            if capabilities.get("environment_recovery") else {}),
+        **({"environment_claims": capabilities["environment_claims"]}
+           if capabilities.get("environment_claims") else {}),
         # Repair the reconcile->coverage leak: residue and its summary were built
         # by discover and written to capabilities.json, then dropped here, so the
         # enumerated-but-unresolved call sites never reached the gate or the report.

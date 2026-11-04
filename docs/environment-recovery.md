@@ -179,13 +179,98 @@ against it before publication, rejecting observed changes during recovery.
 Concurrent editing is not a transactional filesystem snapshot; use an immutable
 checkout for qualification runs.
 
-Soufflé's existing claim pipeline can consume evidence through its established
-schemas; this change does not invent a new claim authority or silently promote
-recovered edges into proven relations. Shen remains the home for behavioral
-contracts, conditional outcomes, effect ordering and checked judgments. The
-current reachability projection loses branch correlations and therefore may
-include infeasible paths. Transaction, failure, delivery and refinement claims
-require their existing model and execution obligations.
+## Integration with the existing tools
+
+Discovery now embeds `environment_claims` alongside `environment_recovery`;
+reconciliation retains both. This is a normal validated `capcov.claims.ir.Bundle`,
+not a second claim authority. All facts share a static index digest over the
+recovery premises, source manifest and primitive graph. Different configurations
+have different contexts. Evidence cites source hashes and recovery analysis IDs.
+
+| Existing component | Integration |
+| --- | --- |
+| Claims IR and Python evaluator | Positive `env_entry`, `env_edge`, `env_touch`, `env_effect` and `env_unknown` premises derive `env_reaches`, `env_capability` and `env_capability_op`. |
+| Soufflé | The existing IR compiler emits the same recursive rules; `environment-check --engine both` compares Python/Soufflé closure and checks it against discovery's capability projection. Missing tools, bounds and disagreements fail. |
+| Behavior registry | Explicit node owners turn cross-owner calls into `depends_on` edges. Source/configuration/model/query artifacts enroll in the existing dependency graph. Cyclic Behavior dependencies are refused; consolidate mutually recursive bodies into one cutover unit. |
+| Qualification and tasks | Import adds static projection, extraction review, effect execution and mapped model-search obligations. Recovery gaps become registry gaps; existing task routing assigns their work. Static agreement cannot discharge execution or review. |
+| Shen scenario search | An explicit surface-to-model/query mapping invokes the existing `operations.search` implementation and witness validation. Its model witness does not establish real application behavior. |
+| ShenCheck / Vör / runtime probes | Existing execution/proof checks and runtime capture continue to supply their own evidence. Recovery adds candidates and obligations; it does not fabricate engine receipts or automatically enroll a model as a proven implementation. |
+
+`environment-check` reconstructs the canonical rule pack and rejects changed
+rules/evidence before evaluating it. This validates graph-relative consequences,
+not the truth or completeness of producer assertions. It intentionally creates
+no completeness predicates or negative facts. Branch correlations are lost, so
+reachable effects can still be infeasible. Delivery, transaction and failure
+semantics remain model and execution obligations.
+
+Create a reviewed mapping such as `environment-behaviors.json`:
+
+```json
+{
+  "format": "capcov-environment-behaviors-v1",
+  "source_root": "src",
+  "nodes": {
+    "app:route": "publish",
+    "app:publish": "publish",
+    "app:observer": "publish",
+    "app:worker": "report-worker"
+  },
+  "searches": {
+    "POST /publish": {
+      "spec": "models/publish.ops",
+      "input": "models/publish-search.json"
+    }
+  }
+}
+```
+
+Every reachable node needs an owner already present in the registry. Use actual
+surface and node IDs from discovery; they depend on the adapter. `source_root`,
+model/query paths, and the CLI's capabilities/mapping paths are canonical paths
+relative to `--root` (the default is the working directory). An empty `searches`
+object is allowed and produces model-mapping gaps. Each search query uses the
+existing Shen search JSON contract: required `initial`, `calls` and `goal`, with
+optional `depth`, `budget` and `fuel`. The mapping does not infer a business model,
+initial state, call domain or goal from a call graph.
+
+Starting with the project's existing Behavior registry and check plan:
+
+```sh
+capcov discover --target . --out capabilities.json
+capcov behavior environment-claims --input capabilities.json \
+  --mapping environment-behaviors.json --out environment-claims.json
+capcov behavior environment-check --input capabilities.json \
+  --mapping environment-behaviors.json --engine both
+capcov behavior import-environment --registry behaviors.json \
+  --input capabilities.json --mapping environment-behaviors.json \
+  --out behaviors-environment.json
+capcov behavior environment-plan --registry behaviors-environment.json \
+  --checks checks.json --input capabilities.json \
+  --mapping environment-behaviors.json --out checks-environment.json
+capcov behavior check --registry behaviors-environment.json \
+  --checks checks-environment.json --scope publish --evidence evidence
+capcov behavior tasks --registry behaviors-environment.json \
+  --checks checks-environment.json --scope publish --evidence evidence
+```
+
+The generated plan defaults to Python/Soufflé agreement. `--engine python` is an
+explicit development-only choice that does not claim Soufflé validation. Its
+commands use `python` from the qualification environment. A mapped search check
+succeeds only with a verified model witness; bounded exhaustion remains unresolved.
+Run one search directly with `behavior environment-search --input capabilities.json
+--mapping environment-behaviors.json --surface 'POST /publish'`. The returned
+`search.scenario` is the existing scenario format for subsequent replay.
+
+Imports are idempotent for unchanged inputs. They conservatively bind all source
+snapshot files to each affected Behavior, plus the capabilities, mapping and
+model/query files. The capabilities artifact carries an optional registry
+`source_snapshot` binding (`root`, `derived_from`); `behavior inspect` rechecks
+both source bytes and source membership. Adding a matching source file therefore
+invalidates qualification even when previously recorded files are unchanged.
+Existing graph export propagates this staleness through the Soufflé evidence graph.
+Changing an enrolled artifact never silently rebaselines it: regenerate from a
+reviewed baseline. Model mappings and successful search checks do not automatically
+close existing gaps. Review their closure explicitly in the ordinary workflow.
 
 ## Validation
 
@@ -205,3 +290,13 @@ The broader base-family suite was attempted but interrupted after Tree-sitter
 grammar loading stalled; it is not a passing full-suite result. Nix, Go, Soufflé,
 Shen and SCIP executables were unavailable in this environment, so the full
 pinned-toolchain gates and real-Go-flow check remain to be run in CI/Nix.
+
+Integration validation: 98 focused/adjacent tests pass, including 13 new
+integration tests for canonical claims, projection consistency, configuration
+contexts, Behavior dependency cycles, idempotence, source-file addition,
+qualification receipts, unclassified touches, CLI import/export/plans and Shen
+search dispatch. The native three-kernel test compares Python, interpreted
+Soufflé and compiled Soufflé for live/dry/unknown configurations; it is assigned
+to the existing Soufflé CI family and was skipped locally because Soufflé was
+unavailable. The Shen dispatch test mocks the native call and is not a native
+Shen validation result. Wheel build/install smoke and Ruff pass.
