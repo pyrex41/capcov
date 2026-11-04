@@ -187,6 +187,8 @@ def reconcile(capabilities: dict, observed: dict) -> dict:
         "unresolved": _merge_unresolved(capabilities, observed),
         # A passing route must not erase a failed required scenario on that route.
         **flow_evidence,
+        **({"environment_recovery": capabilities["environment_recovery"]}
+           if capabilities.get("environment_recovery") else {}),
         # Repair the reconcile->coverage leak: residue and its summary were built
         # by discover and written to capabilities.json, then dropped here, so the
         # enumerated-but-unresolved call sites never reached the gate or the report.

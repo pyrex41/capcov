@@ -123,6 +123,14 @@ and S3 (`capcov.vectors`).
 
 ## Capability lenses
 
+Static discovery can also recover configured handlers, callbacks and worker
+edges from source-bound adapter exports. The opt-in
+[environment recovery pass](docs/environment-recovery.md) tracks configuration
+assumptions and provenance, preserves unresolved targets, and feeds the existing
+capability graph and gate. It adapts techniques from K. Afonin's *Nock Compilation
+(Subject Knowledge Analysis II)*; it does not require a Nock runtime or claim
+general framework extraction.
+
 The same static-against-runtime reconciliation answers other questions:
 
 | Command | Question it answers | Guide |

@@ -170,6 +170,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     phase_started = time.perf_counter_ns()
     target = Path(args.target).resolve()
     source_dir, specs = _resolve(target, args.source, args.adapter)
+    patterns = _source_patterns(specs)
     # `plugin` (present only in an [[adapters]] entry that brings a bespoke reader)
     # routes `load` to import that callable instead of a registered module. Absent
     # from every existing config, so `plugin=None` and this stays today's load.
@@ -242,6 +243,29 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 )
             except scip_resolve.ScipToolsUnavailable as exc:
                 raise SystemExit(f"capcov discover --resolver scip: {exc}")
+    # Recover environment-dependent edges after canonical SCIP identities are
+    # available and before the existing capability fixed point. These facts are
+    # scoped assertions, never permission to erase the original blind spots.
+    environment_paths = [(config or {}).get("environment_facts") for _, config in specs]
+    for name, config in specs:
+        if not (config or {}).get("environment_python"):
+            continue
+        if name != "python-fastapi-sqlalchemy" or getattr(args, "resolver", "ast") != "ast":
+            raise SystemExit("capcov discover: environment_python requires python-fastapi-sqlalchemy "
+                             "with the ast resolver")
+        from .adapters.python_environment import recover_python
+
+        try:
+            raw = recover_python(raw, source_dir, config["environment_python"])
+        except (ValueError, OSError, SyntaxError) as exc:
+            raise SystemExit(f"capcov discover: Python environment recovery: {exc}") from None
+    for facts_path in dict.fromkeys(path for path in environment_paths if path):
+        from .adapters.environment import recover
+
+        try:
+            raw = recover(raw, source_dir, facts_path)
+        except (ValueError, OSError) as exc:
+            raise SystemExit(f"capcov discover: environment recovery: {exc}") from None
     direct, calls, ops = raw["_direct"], raw["_calls"], raw["_ops"]
 
     roots = [s["handler"] for s in raw["surfaces"]]
@@ -272,13 +296,23 @@ def cmd_discover(args: argparse.Namespace) -> int:
             )
     capabilities.sort(key=lambda c: (c["entity"], c["surface"]))
 
-    patterns = _source_patterns(specs)
     # The fast path.  A cache hit makes this digest PROVISIONAL, and the
     # artifact says so (`source_snapshot.verification`).  It cannot reach the
     # gate on its own: reconcile requires an EXACT observed digest over the
     # same tree to agree with it, which is what makes a cached discover
     # digest authoritative -- or refuses it.
-    snapshot = artifacts.snapshot_tree(source_dir, patterns)
+    snapshot = artifacts.snapshot_tree(source_dir, patterns,
+                                       trust_cache=not bool(raw.get("environment_recovery")))
+    # Every premise must belong to the SAME source snapshot observe will hash.
+    # Refuse missing globs or edits during analysis; do not publish stale edges.
+    manifest = dict(snapshot.entries)
+    for analysis in raw.get("environment_recovery", []):
+        for name, digest in analysis["input_sha256"].items():
+            if manifest.get(name) != digest:
+                raise SystemExit(
+                    f"capcov discover: environment input {name!r} changed or is outside "
+                    "the source patterns; include it in environment_inputs"
+                )
     blind = [b for b in raw["blind_spots"] if b["blind"]]
     extractor = "capcov " + (
         adapters[0].NAME
@@ -335,6 +369,8 @@ def cmd_discover(args: argparse.Namespace) -> int:
         doc["excluded_surfaces"] = raw["excluded_surfaces"]
     if "unresolved" in raw:
         doc["unresolved"] = raw["unresolved"]
+    if raw.get("environment_recovery"):
+        doc["environment_recovery"] = raw["environment_recovery"]
     rc = _emit(Path(args.out), dict(doc), args.check)
     if not args.quiet:
         bound_entities = {c["entity"] for c in capabilities}
