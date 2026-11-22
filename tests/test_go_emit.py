@@ -3,7 +3,7 @@ from pathlib import Path
 from capcov.go_emit import emit
 
 def test_emit_go_compiles_and_runs(tmp_path):
-    report = {"library": {"library": {"invented_000": {"params": ["x"], "body": {"op": "not", "args": [{"var": "x"}]}}}},
+    report = {"library": {"library": {"invented_000": {"params": ["$p0"], "body": {"op": "not", "args": [{"var": "$p0"}]}}}},
               "evaluation": {"selected_candidate": {"op": "call", "name": "invented_000", "args": [{"var": "flag"}]}}}
     out = tmp_path / "synth.go"
     emit(report, out)

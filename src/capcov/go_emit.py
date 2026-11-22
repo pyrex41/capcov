@@ -10,18 +10,21 @@ def _name(value: str) -> str:
         raise ValueError(f"invalid Go identifier: {value!r}")
     return value
 
-def _expr(node, variables: set[str], functions: dict[str, dict]) -> str:
+def _expr(node, variables: dict[str, str], functions: dict[str, dict]) -> str:
     if isinstance(node, bool): return "true" if node else "false"
     if isinstance(node, dict) and "lit" in node:
         if not isinstance(node["lit"], bool): raise ValueError("only boolean literals can be emitted")
         return "true" if node["lit"] else "false"
     if isinstance(node, dict) and "var" in node:
-        name = _name(node["var"])
+        name = node["var"]
         if name not in variables: raise ValueError(f"unknown variable: {name}")
-        return name
+        return variables[name]
     if not isinstance(node, dict): raise ValueError("invalid AST node")
     op = node.get("op")
     args = node.get("args", [])
+    if op == "if":
+        cond, yes, no = (_expr(node[key], variables, functions) for key in ("cond", "then", "else"))
+        return f"(({cond} && {yes}) || (!{cond} && {no}))"
     if op in {"and", "or"}:
         if len(args) != 2: raise ValueError(f"{op} expects two arguments")
         symbol = "&&" if op == "and" else "||"
@@ -48,17 +51,19 @@ def emit(report: dict, output: Path) -> None:
     if not isinstance(library, dict): raise ValueError("invalid library")
     functions = {_name(name): definition for name, definition in library.items()}
     variables = {_name(part["var"]) for part in _walk(candidate) if isinstance(part, dict) and "var" in part}
-    for definition in functions.values():
-        for param in definition.get("params", []): _name(param)
+    if functions.keys() & variables or "Synthesized" in functions or {"true", "false", "_", "bool"} & variables:
+        raise ValueError("identifier collides with a function, type or Boolean literal")
     lines = ["package synthesized", ""]
     for name, definition in sorted(functions.items()):
         params = definition.get("params", [])
-        local = set(_name(param) for param in params)
-        lines.append(f"func {name}({', '.join(param + ' bool' for param in params)}) bool {{")
+        if len(set(params)) != len(params):
+            raise ValueError("duplicate formal parameter")
+        local = {param: f"arg{i}" for i, param in enumerate(params)}
+        lines.append(f"func {name}({', '.join(arg + ' bool' for arg in local.values())}) bool {{")
         lines.append(f"\treturn {_expr(definition['body'], local, functions)}")
         lines.extend(["}", ""])
     signature = ", ".join(name + " bool" for name in sorted(variables))
-    lines.extend([f"func Synthesized({signature}) bool {{", f"\treturn {_expr(candidate, variables, functions)}", "}", ""])
+    lines.extend([f"func Synthesized({signature}) bool {{", f"\treturn {_expr(candidate, {v: v for v in variables}, functions)}", "}", ""])
     output.write_text("\n".join(lines))
 
 def _walk(node):
