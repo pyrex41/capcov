@@ -97,6 +97,17 @@ def _replace(node: Any, target: Any, replacement: Any) -> tuple[Any, bool]:
     return node, False
 
 
+def _binding_suffix(names):
+    """Shared trailing identifier tokens across the observed argument bindings."""
+    tokens = [name.split("_")[::-1] for name in sorted(set(names))]
+    parts = []
+    for column in zip(*tokens):
+        if len(set(column)) != 1:
+            break
+        parts.append(column[0])
+    return "_".join(reversed(parts))
+
+
 def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[str, Any]:
     counts = Counter(_key(_canonical(part)) for task in tasks for part in _walk(task["program"]) if isinstance(part, dict) and ("op" in part))
     candidates = [(count, key) for key, count in counts.items() if count >= 2]
@@ -112,6 +123,7 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
         name = f"invented_{index:03d}"
         before = current_total
         rewritten = []
+        bindings = []
         for original in current_programs:
             program, changed = original, False
             for part in list(_walk(original)):
@@ -119,6 +131,7 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
                 if _match(part, body, mapping):
                     call = {"op": "call", "name": name, "args": [mapping[param] for param in params]}
                     program, changed = _replace(original, part, call)
+                    bindings.append(mapping)
                     break
             rewritten.append(program)
         matches = sum(program != original for program, original in zip(rewritten, current_programs))
@@ -130,8 +143,11 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
         current_programs = rewritten
         current_total = after
         definition_cost += size(body) + 2
-        library[name] = {"params": params, "body": body, "support": count}
-        inventions.append({"name": name, "support": count, "body": body, "params": params, "compression": before - after})
+        suffixes = {param: _binding_suffix([m[param]["var"] for m in bindings])
+                    for param in params if all("var" in m[param] for m in bindings)}
+        library[name] = {"params": params, "body": body, "support": matches,
+                         "argument_suffixes": suffixes}
+        inventions.append({"name": name, "support": matches, "body": body, "params": params, "compression": before - after})
     return {"schema": "capcov/synthesis-library/v1", "library": library, "inventions": inventions}
 
 
@@ -199,25 +215,39 @@ def synthesize_target(target: dict[str, Any], library_doc: dict[str, Any], *, ma
 
 
 def run_synthesis(input_path: Path, output_path: Path, *, max_defs: int = 16, max_tasks: int = 100,
-                  max_terms: int = 100000, max_cost: int = 7) -> None:
+                  max_terms: int = 100000, max_cost: int = 7, induce_training: bool = False) -> None:
+    from .boolean_search import search
+
     document = json.loads(input_path.read_text())
     tasks = document.get("tasks", [])
+    if not 0 < len(tasks) <= max_tasks:
+        raise ValueError("training corpus must be nonempty and within max_tasks")
+    target = document.get("target")
+    ids = [task["id"] for task in tasks]
+    if len(set(ids)) != len(ids) or (target is not None and target["id"] in ids):
+        raise ValueError("training tasks and target must have distinct IDs")
+    if isinstance(target, dict) and "program" in target:
+        raise ValueError("target must not contain a solved program")
     valid_tasks = []
     invalid = []
+    wake = []
     for task in tasks:
         try:
-            if "program" not in task:
-                raise ValueError("training task has no solved program")
-            examples = task.get("examples", [])
+            examples = task["examples"]
+            if induce_training:
+                if "program" in task:
+                    raise ValueError("observation-only wake tasks must omit the program")
+                solution = search(examples, {}, max_terms=max_terms, max_cost=max_cost)
+                wake.append({"task": task["id"], **solution})
+                if solution["program"] is None:
+                    raise ValueError("no fit within sibling search budget")
+                task = {**task, "program": solution["program"]}
             if not examples or any(eval_program(task["program"], ex["input"], {}) != ex["output"] for ex in examples):
                 raise ValueError("solved program does not match all training examples")
             valid_tasks.append(task)
         except (KeyError, TypeError, ValueError) as error:
             invalid.append({"id": task.get("id"), "reason": str(error)})
     library = learn_library(valid_tasks, max_defs=max_defs)
-    target = document.get("target")
-    if isinstance(target, dict) and "program" in target:
-        raise ValueError("target must not contain a solved program")
     result = synthesize_target(target, library, max_terms=max_terms, max_cost=max_cost) if isinstance(target, dict) else synthesize(valid_tasks, library, max_tasks=max_tasks)
-    output_path.write_text(json.dumps({"library": library, "evaluation": result,
+    output_path.write_text(json.dumps({"library": library, "evaluation": result, "wake": wake,
                                        "invalid_training_tasks": invalid}, indent=2, sort_keys=True) + "\n")

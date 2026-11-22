@@ -11,10 +11,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-tasks", type=int, default=100)
     parser.add_argument("--max-terms", type=int, default=100000)
     parser.add_argument("--max-cost", type=int, default=7)
+    parser.add_argument("--induce-training", action="store_true", help="solve sibling tasks from observations before inventing the library")
     parser.add_argument("--library-in", type=Path, default=None)
     parser.add_argument("--library-out", type=Path, default=None)
     parser.add_argument("--emit-go", type=Path, default=None)
     args = parser.parse_args(argv)
+    if args.induce_training and args.library_in:
+        parser.error("--induce-training cannot be combined with --library-in")
     if args.library_in is not None:
         import json
         document = json.loads(args.input.read_text())
@@ -25,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
         args.out.write_text(json.dumps({"library": library, "evaluation": result}, indent=2, sort_keys=True) + "\n")
     else:
         run_synthesis(args.input, args.out, max_defs=args.max_defs, max_tasks=args.max_tasks,
-                      max_terms=args.max_terms, max_cost=args.max_cost)
+                      max_terms=args.max_terms, max_cost=args.max_cost, induce_training=args.induce_training)
     if args.library_out is not None:
         import json
         generated = json.loads(args.out.read_text())["library"]

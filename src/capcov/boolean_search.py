@@ -1,6 +1,5 @@
 """Cost-ordered Boolean program enumeration using fit-set truth vectors."""
 from dataclasses import dataclass
-from functools import lru_cache
 from itertools import product
 
 
@@ -10,14 +9,16 @@ class Term:
     ast: dict
 
 
-@lru_cache(maxsize=256)
-def partitions(total, slots):
-    """Positive integer partitions with order, one cost per argument."""
+def partitions(total, slots, levels):
+    """Yield argument costs lazily, skipping levels without any terms."""
     if slots == 0:
-        return ((),) if total == 0 else ()
-    return tuple((first, *tail)
-                 for first in range(1, total - slots + 2)
-                 for tail in partitions(total - first, slots - 1))
+        if total == 0:
+            yield ()
+        return
+    for first in range(1, total - slots + 2):
+        if levels[first]:
+            for tail in partitions(total - first, slots - 1, levels):
+                yield (first, *tail)
 
 
 def compile_body(node, params, mask, library):
@@ -79,8 +80,10 @@ def search(examples, library, *, max_terms, max_cost):
             return result(None, None, "term_budget")
         return None
 
+    variable_bits = {}
     for name in variables:
         bits = sum(int(row["input"][name]) << i for i, row in enumerate(examples))
+        variable_bits[name] = bits
         if found := consider(bits, lambda: {"var": name}, 1):
             return found
     for value in (False, True):
@@ -93,17 +96,32 @@ def search(examples, library, *, max_terms, max_cost):
         params = definition["params"]
         compiled[name] = compile_body(definition["body"], params, mask, compiled)
         operators.append((name, len(params), compiled[name], False))
-    operators.extend([
+        # A learned binding prior proposes a closed application when each
+        # argument role maps uniquely to a target field. It is one grammar
+        # production; unconstrained calls are still enumerated at normal cost.
+        bound = []
+        for param in params:
+            suffix = definition.get("argument_suffixes", {}).get(param)
+            matches = [v for v in variables if suffix and (v == suffix or v.endswith("_" + suffix))]
+            if len(matches) != 1:
+                break
+            bound.append(matches[0])
+        if bound and len(bound) == len(params):
+            ast = {"op": "call", "name": name, "args": [{"var": v} for v in bound]}
+            signature = compiled[name](tuple(variable_bits[v] for v in bound))
+            if found := consider(signature, lambda: ast, 1):
+                return found
+    primitives = [
         ("not", 1, lambda a: mask ^ a[0], False),
         ("and", 2, lambda a: a[0] & a[1], True),
         ("or", 2, lambda a: a[0] | a[1], True),
         ("eq", 2, lambda a: mask ^ (a[0] ^ a[1]), True),
-    ])
+    ]
     for cost in range(2, max_cost + 1):
         # First try composing earlier terms with primitives. Invented calls
         # at this same cost then introduce additional compositions.
-        for op, arity, apply, symmetric in operators[len(library):] + operators[:len(library)]:
-            for costs in partitions(cost - 1, arity):
+        for op, arity, apply, symmetric in primitives + operators:
+            for costs in partitions(cost - 1, arity, levels):
                 for terms in product(*(levels[c] for c in costs)):
                     bits = tuple(t.signature for t in terms)
                     if symmetric and bits[0] > bits[1]:
