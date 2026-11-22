@@ -163,58 +163,39 @@ def synthesize(tasks: list[dict[str, Any]], library_doc: dict[str, Any], *, max_
                        "baseline_pass": sum(r["baseline_heldout_pass"] for r in results)}}
 
 
-def enumerate_programs(examples: list[dict[str, Any]], variables: list[str], library: dict[str, dict[str, Any]],
-                       *, max_terms: int = 100000, max_cost: int = 7) -> list[dict[str, Any]]:
-    """Enumerate pure programs bottom-up, deduplicating by training outputs."""
-    by_cost: dict[int, list[Any]] = {1: [{"var": name} for name in variables] + [{"lit": value} for value in (True, False)]}
-    seen: dict[tuple[Any, ...], int] = {}
-    out: list[Any] = []
-    def add(node: Any):
-        if sum(len(v) for v in by_cost.values()) + len(out) >= max_terms: return
-        signature = tuple(eval_program(node, ex["input"], library) for ex in examples)
-        if signature in seen:
-            old = out[seen[signature]]
-            if any(isinstance(part, dict) and part.get("op") == "call" for part in _walk(node)) and not any(isinstance(part, dict) and part.get("op") == "call" for part in _walk(old)):
-                out[seen[signature]] = node
-            return
-        seen[signature] = len(out); out.append(node)
-    for cost in range(1, max_cost + 1):
-        for node in by_cost.get(cost, []): add(node)
-        for left_cost in range(1, cost - 1):
-            right_cost = cost - 1 - left_cost
-            for left in by_cost.get(left_cost, []):
-                for right in by_cost.get(right_cost, []):
-                    for op in ("and", "or", "eq"):
-                        node = {"op": op, "args": [left, right]}
-                        if sum(size(v) for v in node["args"]) + 1 == cost: add(node)
-        if cost > 1:
-            for child in by_cost.get(cost - 1, []): add({"op": "not", "args": [child]})
-        for name, definition in library.items():
-            args = [{"var": variable} for variable in variables[:len(definition["params"])] ]
-            node = {"op": "call", "name": name, "args": args}
-            if size(node) == cost: add(node)
-        by_cost[cost] = [node for node in out if size(node) == cost]
-    return out
-
-
 def synthesize_target(target: dict[str, Any], library_doc: dict[str, Any], *, max_terms: int = 100000,
-                      max_cost: int = 7) -> dict[str, Any]:
-    train = target.get("train_examples", [])
-    sealed = target.get("heldout_examples", [])
-    variables = sorted({key for ex in train for key in ex.get("input", {})})
-    library = library_doc.get("library", {})
-    candidate = enumerate_programs(train, variables, library, max_terms=max_terms, max_cost=max_cost)
-    baseline = enumerate_programs(train, variables, {}, max_terms=max_terms, max_cost=max_cost)
-    def heldout(program, lib):
-        return bool(sealed) and all(eval_program(program, ex["input"], lib) == ex["output"] for ex in sealed)
-    chosen = next((p for p in candidate if any(part.get("op") == "call" for part in _walk(p) if isinstance(part, dict))), None)
-    base = baseline[0] if baseline else None
-    return {"schema": "capcov/synthesis-target-evaluation/v1", "target_id": target.get("id"),
-            "selected_candidate": chosen, "baseline_candidate": base,
-            "candidate_heldout_pass": chosen is not None and heldout(chosen, library),
-            "baseline_heldout_pass": base is not None and heldout(base, {}),
-            "candidate_search_count": len(candidate), "baseline_search_count": len(baseline),
-            "sealed_count": len(sealed)}
+                      max_cost: int = 12) -> dict[str, Any]:
+    from .boolean_search import search
+
+    if "program" in target:
+        raise ValueError("synthesis target must not include a program")
+    fit = target["train_examples"]
+    sealed = target["heldout_examples"]
+    if not sealed:
+        raise ValueError("target needs sealed test examples")
+    library = library_doc["library"]
+    # Only fit examples cross the search interface. Score both frozen ASTs
+    # afterward, including a simpler solution that uses no learned calls.
+    candidate = search(fit, library, max_terms=max_terms, max_cost=max_cost)
+    baseline = search(fit, {}, max_terms=max_terms, max_cost=max_cost)
+
+    def score(run, definitions):
+        ast = run["program"]
+        if ast is None:
+            return None
+        if not all(eval_program(ast, row["input"], definitions) == row["output"] for row in fit):
+            raise RuntimeError("search interpreter and reference interpreter disagree on fit data")
+        return sum(eval_program(ast, row["input"], definitions) == row["output"] for row in sealed)
+
+    candidate_score = score(candidate, library)
+    baseline_score = score(baseline, {})
+    return {"schema": "capcov/synthesis-target-evaluation/v1", "target_id": target["id"],
+            "selected_candidate": candidate["program"], "baseline_candidate": baseline["program"],
+            "search": {"candidate": candidate, "baseline": baseline, "max_terms": max_terms, "max_cost": max_cost},
+            "candidate_heldout_pass": candidate_score == len(sealed),
+            "baseline_heldout_pass": baseline_score == len(sealed),
+            "candidate_correct": candidate_score, "baseline_correct": baseline_score,
+            "fit_count": len(fit), "sealed_count": len(sealed)}
 
 
 def run_synthesis(input_path: Path, output_path: Path, *, max_defs: int = 16, max_tasks: int = 100,

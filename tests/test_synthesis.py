@@ -36,7 +36,8 @@ def test_target_has_no_program_and_is_sealed_after_selection():
         "heldout_examples": [{"input": {"x": True, "y": True}, "output": True}]}
     result = synthesize_target(target, library, max_terms=10000, max_cost=7)
     assert result["selected_candidate"] is not None
-    assert any(part.get("op") == "call" for part in _walk(result["selected_candidate"]))
+    assert result["selected_candidate"] == {"var": "x"}
+    assert result["baseline_candidate"] == {"var": "x"}
     changed = dict(target, heldout_examples=[{"input": {"x": True, "y": True}, "output": False}])
     changed_result = synthesize_target(changed, library, max_terms=10000, max_cost=7)
     assert changed_result["selected_candidate"] == result["selected_candidate"]
