@@ -105,6 +105,7 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
     inventions = []
     current_programs = [task["program"] for task in tasks]
     current_total = sum(size(program) for program in current_programs)
+    definition_cost = 0
     for index, (count, key) in enumerate(candidates):
         body = json.loads(key)
         params = _variables(body)
@@ -120,11 +121,15 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
                     program, changed = _replace(original, part, call)
                     break
             rewritten.append(program)
-        after = sum(size(program) for program in rewritten) + size(body) + 2
+        matches = sum(program != original for program, original in zip(rewritten, current_programs))
+        if matches < 2:
+            continue
+        after = sum(size(program) for program in rewritten) + definition_cost + size(body) + 2
         if after >= before: continue
         if len(library) >= max_defs: break
         current_programs = rewritten
         current_total = after
+        definition_cost += size(body) + 2
         library[name] = {"params": params, "body": body, "support": count}
         inventions.append({"name": name, "support": count, "body": body, "params": params, "compression": before - after})
     return {"schema": "capcov/synthesis-library/v1", "library": library, "inventions": inventions}
