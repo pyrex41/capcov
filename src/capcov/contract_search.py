@@ -3,7 +3,7 @@ from .boolean_search import search
 from .synthesis import eval_program
 
 
-def evaluate(contract, library, *, max_terms, max_cost, max_probes):
+def evaluate(contract, library, *, max_terms, max_cost, max_probes, policy=None):
     known = contract["examples"]
     if not known or max_probes < 1:
         raise ValueError("contract requires known answers and a positive probe bound")
@@ -14,15 +14,15 @@ def evaluate(contract, library, *, max_terms, max_cost, max_probes):
             raise ValueError("known answers conflict on the supplied feature representation")
         labels[key] = example["output"]
     limits = {"max_terms": max_terms, "max_cost": max_cost}
-    def fit(examples, definitions):
-        run = search(examples, definitions, **limits)
+    def fit(examples, definitions, recognition=policy):
+        run = search(examples, definitions, policy=recognition, **limits)
         program = run["program"]
         if program is not None and any(eval_program(program, e["input"], definitions) != e["output"] for e in examples):
             raise RuntimeError("program failed independent acceptance interpreter")
         return run
 
     primary = fit(known, library)
-    baseline = fit(known, {})
+    baseline = fit(known, {}, None)
     report = {"schema": "capcov/full-contract/v1", "target_id": contract["id"],
               "known_examples": len(known), "distinct_known": len(labels), "limits": limits,
               "assisted": primary, "baseline": baseline, "selected_candidate": primary["program"], "probes": []}

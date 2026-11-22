@@ -266,6 +266,7 @@ v1 claim packs stay the default.
 - **`capcov reason`.** Adds source-linked evidence, proof obligations,
   independently checked Shen sequent derivations, typed relational modes,
   Prolog-generated scenarios, stateful replay and counterexample minimization.
+- **`capcov reason next` and `run`.** Agents can select an operation, induce programs from sibling observations, learn a reusable Boolean library, and search the known contract for a fit or a reachable disagreement. See the [agent workflow](docs/behavioral-synthesis.md#operation-scoped-agent-workflow) and [runnable examples](examples/search-projects/README.md).
 - **`capcov behavior`.** Connects recovery claims, four-layer store contracts,
   access paths, Shen Step handlers/workers and scoped execution evidence. Includes
   a synthetic publication example with replay, SQLite coexistence checks and TLA+

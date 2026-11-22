@@ -1,6 +1,7 @@
 """Cost-ordered Boolean program enumeration using fit-set truth vectors."""
 from dataclasses import dataclass
 from itertools import product
+from .recognition import for_examples, priority
 
 
 @dataclass
@@ -50,7 +51,7 @@ def compile_body(node, params, mask, library):
     raise ValueError(f"unknown Boolean operator {op}")
 
 
-def search(examples, library, *, max_terms, max_cost):
+def search(examples, library, *, max_terms, max_cost, policy=None):
     if not examples or max_terms < 1 or not 1 <= max_cost <= 32:
         raise ValueError("search requires fit examples, positive term budget and cost in 1..32")
     variables = sorted(examples[0]["input"])
@@ -58,6 +59,7 @@ def search(examples, library, *, max_terms, max_cost):
         if sorted(row["input"]) != variables or type(row["output"]) is not bool or any(
                 type(value) is not bool for value in row["input"].values()):
             raise ValueError("fit examples must share Boolean inputs and a Boolean output")
+    policy = for_examples(policy, examples)
     mask = (1 << len(examples)) - 1
     goal = sum(int(row["output"]) << i for i, row in enumerate(examples))
     levels = [[] for _ in range(max_cost + 1)]
@@ -117,10 +119,10 @@ def search(examples, library, *, max_terms, max_cost):
         ("or", 2, lambda a: a[0] | a[1], True),
         ("eq", 2, lambda a: mask ^ (a[0] ^ a[1]), True),
     ]
+    ordered = primitives + operators
+    ordered.sort(key=lambda row: priority(policy, row[0]), reverse=True)
     for cost in range(2, max_cost + 1):
-        # First try composing earlier terms with primitives. Invented calls
-        # at this same cost then introduce additional compositions.
-        for op, arity, apply, symmetric in primitives + operators:
+        for op, arity, apply, symmetric in ordered:
             for costs in partitions(cost - 1, arity, levels):
                 for terms in product(*(levels[c] for c in costs)):
                     bits = tuple(t.signature for t in terms)

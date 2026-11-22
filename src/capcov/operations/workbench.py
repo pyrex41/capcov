@@ -145,12 +145,16 @@ def main(argv=None):
     import json
     import sys
     from pathlib import Path
+    if argv and argv[0] in ("next", "run"):
+        from .search_workflow import main as search_workflow
+        return search_workflow(argv)
     from .proofs import prove
     from .relations import compile_relation, solve
     from .evidence import extract, bind
 
     parser = argparse.ArgumentParser(
-        description="Shen specifications, proofs, modes and source evidence"
+        description="Shen specifications, proofs, modes and source evidence",
+        epilog="For operation-scoped synthesis use capcov reason next --help or capcov reason run --help."
     )
     parser.add_argument(
         "mode",
