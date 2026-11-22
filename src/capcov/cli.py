@@ -754,7 +754,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser(
         "capabilities", help="reconcile specified, implemented and exercised capabilities"
     )
-    sub.add_parser("learn", help="mine bounded behavioral rules from incumbent observations")
+    sub.add_parser("learn", help="mine bounded behavioral rules; evaluate candidates on held-out operations")
     sub.add_parser("synthesize", help="invent Boolean functions from siblings and fit or challenge a full contract")
     sub.add_parser("synthesize-batch", help="summarize bounded observation-only family synthesis inputs")
     sub.add_parser("intent", help="prepare and adjudicate offline intent evidence packets")
