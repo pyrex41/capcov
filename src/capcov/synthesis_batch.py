@@ -59,7 +59,7 @@ def build(document, *, max_families=100, max_terms=100000, max_cost=7):
         baseline = search(fit, {}, max_terms=max_terms, max_cost=max_cost) if fit else {"program": None, "stop": "insufficient target fit"}
         candidate_ok = candidate.get("program") is not None and all(eval_program(candidate["program"], row["input"], library) == row["output"] for row in sealed)
         baseline_ok = baseline.get("program") is not None and all(eval_program(baseline["program"], row["input"], {}) == row["output"] for row in sealed)
-        used = bool(candidate.get("program") and any(part.get("op") == "call" for part in _walk(candidate["program"])))
+        used = bool(candidate.get("program") and any(isinstance(part, dict) and part.get("op") == "call" for part in _walk(candidate["program"])))
         report["families"].append({"family": family, "operation_count": len(members), "target_operation": target_id, "distinct_vectors": len(vectors), "training_examples": len(fit), "sealed": len(sealed), "status": "evaluated", "invention_success": bool(used and candidate_ok), "candidate_heldout_pass": candidate_ok, "baseline_heldout_pass": baseline_ok, "used_invented_call": used, "candidate_search": candidate, "baseline_search": baseline, "library": library, "training_failures": failures})
     report["included_operations"] = sum(item["operation_count"] for item in report["families"])
     report["excluded_operations"] = len(excluded)
