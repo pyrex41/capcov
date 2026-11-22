@@ -103,23 +103,28 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
     candidates.sort(key=lambda item: (-item[0], item[1]))
     library: dict[str, dict[str, Any]] = {}
     inventions = []
-    for index, (count, key) in enumerate(candidates[:max_defs]):
+    current_programs = [task["program"] for task in tasks]
+    current_total = sum(size(program) for program in current_programs)
+    for index, (count, key) in enumerate(candidates):
         body = json.loads(key)
         params = _variables(body)
         name = f"invented_{index:03d}"
-        before = sum(size(task["program"]) for task in tasks)
+        before = current_total
         rewritten = []
-        for task in tasks:
-            program, changed = task["program"], False
-            for part in list(_walk(task["program"])):
+        for original in current_programs:
+            program, changed = original, False
+            for part in list(_walk(original)):
                 mapping: dict[str, Any] = {}
                 if _match(part, body, mapping):
                     call = {"op": "call", "name": name, "args": [mapping[param] for param in params]}
-                    program, changed = _replace(task["program"], part, call)
+                    program, changed = _replace(original, part, call)
                     break
             rewritten.append(program)
         after = sum(size(program) for program in rewritten) + size(body) + 2
         if after >= before: continue
+        if len(library) >= max_defs: break
+        current_programs = rewritten
+        current_total = after
         library[name] = {"params": params, "body": body, "support": count}
         inventions.append({"name": name, "support": count, "body": body, "params": params, "compression": before - after})
     return {"schema": "capcov/synthesis-library/v1", "library": library, "inventions": inventions}
