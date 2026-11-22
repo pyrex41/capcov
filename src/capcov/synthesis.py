@@ -212,10 +212,26 @@ def synthesize_target(target: dict[str, Any], library_doc: dict[str, Any], *, ma
             "sealed_count": len(sealed)}
 
 
-def run_synthesis(input_path: Path, output_path: Path, *, max_defs: int = 16, max_tasks: int = 100) -> None:
+def run_synthesis(input_path: Path, output_path: Path, *, max_defs: int = 16, max_tasks: int = 100,
+                  max_terms: int = 100000, max_cost: int = 7) -> None:
     document = json.loads(input_path.read_text())
     tasks = document.get("tasks", [])
-    library = learn_library(tasks, max_defs=max_defs)
+    valid_tasks = []
+    invalid = []
+    for task in tasks:
+        try:
+            if "program" not in task:
+                raise ValueError("training task has no solved program")
+            examples = task.get("examples", [])
+            if not examples or any(eval_program(task["program"], ex["input"], {}) != ex["output"] for ex in examples):
+                raise ValueError("solved program does not match all training examples")
+            valid_tasks.append(task)
+        except (KeyError, TypeError, ValueError) as error:
+            invalid.append({"id": task.get("id"), "reason": str(error)})
+    library = learn_library(valid_tasks, max_defs=max_defs)
     target = document.get("target")
-    result = synthesize_target(target, library) if isinstance(target, dict) else synthesize(tasks, library, max_tasks=max_tasks)
-    output_path.write_text(json.dumps({"library": library, "evaluation": result}, indent=2, sort_keys=True) + "\n")
+    if isinstance(target, dict) and "program" in target:
+        raise ValueError("target must not contain a solved program")
+    result = synthesize_target(target, library, max_terms=max_terms, max_cost=max_cost) if isinstance(target, dict) else synthesize(valid_tasks, library, max_tasks=max_tasks)
+    output_path.write_text(json.dumps({"library": library, "evaluation": result,
+                                       "invalid_training_tasks": invalid}, indent=2, sort_keys=True) + "\n")
