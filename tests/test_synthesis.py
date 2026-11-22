@@ -1,5 +1,5 @@
 import json
-from capcov.synthesis import learn_library, synthesize
+from capcov.synthesis import learn_library, synthesize, synthesize_target
 
 
 def _task(i, heldout):
@@ -25,3 +25,28 @@ def test_negative_heldout_control_does_not_pass():
     result = synthesize(tasks, library)
     assert not result["results"][0]["candidate_heldout_pass"]
     json.dumps(result)
+
+
+def test_target_has_no_program_and_is_sealed_after_selection():
+    train = [_task(i, True) for i in range(4)]
+    library = learn_library(train)
+    target = {"id": "held-out", "train_examples": [
+        {"input": {"x": True, "y": True}, "output": True},
+        {"input": {"x": False, "y": True}, "output": False}],
+        "heldout_examples": [{"input": {"x": True, "y": True}, "output": True}]}
+    result = synthesize_target(target, library, max_terms=10000, max_cost=7)
+    assert result["selected_candidate"] is not None
+    assert any(part.get("op") == "call" for part in _walk(result["selected_candidate"]))
+    changed = dict(target, heldout_examples=[{"input": {"x": True, "y": True}, "output": False}])
+    changed_result = synthesize_target(changed, library, max_terms=10000, max_cost=7)
+    assert changed_result["selected_candidate"] == result["selected_candidate"]
+
+
+def _walk(node):
+    yield node
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from _walk(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _walk(value)
