@@ -2,6 +2,32 @@
 
 The experimental learner operates on finite, pure Boolean observations. A task supplies named Boolean inputs and an observed Boolean result. Its obligations apply only to the specified observation.
 
+## What makes this DreamCoder-style?
+
+DreamCoder learns two things that transfer to the next problem: **a language for expressing solutions** and **a policy for searching that language**. Its wake phase finds programs for tasks. During sleep it extracts reusable abstractions and trains a neural recognizer using solved and imagined tasks. Repeating the cycle lets later concepts build on earlier ones. [Ellis et al., DreamCoder](https://arxiv.org/abs/2006.08381)
+
+Follow one operation through the fork to see which parts it implements. From the repository root, run:
+
+```sh
+python -m capcov reason run --operation invention-demo \
+  --project examples/search-projects/invention.json --json > receipt.json
+jq '.search | {inventions, synthetic_tasks: .recognition_policy.synthetic_tasks,
+               baseline: .evaluation.baseline, assisted: .evaluation.assisted}' receipt.json
+```
+
+| Stage | What happens in this example | Evidence in the receipt |
+| --- | --- | --- |
+| Wake | Enumerate Boolean expressions against each sibling's observations. Keep one representative per distinct vector of outputs on that task. | `search.wake` contains the 20 search results. |
+| Invent | Find recurring expression trees up to variable renaming. Replace occurrences with calls if the rewritten programs plus the definition are smaller. | `search.inventions` records `invented_000(p0,p1,p2) = p0 OR (p1 AND p2)`, with 13 supporting tasks and a net saving of one size unit. |
+| Dream and learn a ranking | Sample 96 programs from the expanded grammar, execute them on small Boolean truth tables, and record each task's features and outermost operator. Similarity to these and the solved sibling tasks supplies votes for which operators to try first at a given cost. | `search.recognition_policy` contains the synthetic task count and labeled feature vectors. |
+| Use the learned language | Give the fresh target its full known contract. The original search builds the expression from primitives. The assisted search can also compose calls to the new function. Here the learned argument suffixes uniquely identify the target fields, making the bound call available at cost one. | `search.evaluation.assisted.program` has `op: "call"` and `name: "invented_000"`. The baseline AST has an `or` above an `and`. |
+
+**Which mechanism helped here?** With the fixture's bounds and example order, the primitive search took 185 attempts. Applying the learned ranking to primitives took 116. Giving the search the learned library took six attempts with either ranking: the bound call already fit before the enumerator needed to rank larger expressions. All four runs produced the same answers on the known cases. The example demonstrates transfer of a new instruction. Its attempt counts measure search work on this fixture, not port quality. [Enumerator](../src/capcov/boolean_search.py) · [Recognition policy](../src/capcov/recognition.py) · [End-to-end example test](../tests/test_search_examples.py)
+
+**How far does the analogy go?** The fork performs one wake, compression, synthetic-training, and target-search cycle per operation with sibling training. Its programs are finite Boolean expressions over caller-supplied features. Its compression matches recurring syntax with renamed variables, and its recognizer uses similarity-weighted votes over hand-written task features. DreamCoder uses a richer program language, Bayesian library learning, a neural recognizer and repeated learning cycles. Reusing a frozen Capcov library transfers earlier work; it does not automatically consolidate new solutions into a growing hierarchy. [Search action](../src/capcov/search_action.py) · [Library learner](../src/capcov/synthesis.py)
+
+**Where port quality enters.** Once a program fits every known requirement, Capcov can search for a second fitting program with the opposite prediction on a supplied reachable request. That disagreement gives the agent a concrete case to replay against PHP, Go, and an independent specification. A domain decision can then supply the desired output for the next search. This counterexample and intent workflow is Capcov's addition. The `reason run` path above exercises both library invention and synthetic recognition training; the standalone synthesis commands below expose narrower experiments.
+
 ## Invent a library from sibling workflows
 
     python -m capcov synthesize research.json --induce-training --library-out library.json --out report.json --max-cost 12 --max-terms 500000
