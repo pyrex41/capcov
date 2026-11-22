@@ -40,6 +40,36 @@ def _key(node: Any) -> str:
     return json.dumps(node, sort_keys=True, separators=(",", ":"))
 
 
+def _canonical(node: Any, names: dict[str, str] | None = None) -> Any:
+    names = {} if names is None else names
+    if isinstance(node, dict) and isinstance(node.get("var"), str):
+        name = node["var"]
+        names.setdefault(name, f"$p{len(names)}")
+        return {"var": names[name]}
+    if isinstance(node, dict): return {key: _canonical(value, names) for key, value in node.items()}
+    if isinstance(node, list): return [_canonical(value, names) for value in node]
+    return node
+
+
+def _instantiate(node: Any, mapping: dict[str, Any]) -> Any:
+    if isinstance(node, dict) and isinstance(node.get("var"), str) and node["var"].startswith("$p"):
+        return mapping[node["var"]]
+    if isinstance(node, dict): return {key: _instantiate(value, mapping) for key, value in node.items()}
+    if isinstance(node, list): return [_instantiate(value, mapping) for value in node]
+    return node
+
+
+def _match(node: Any, pattern: Any, mapping: dict[str, Any]) -> bool:
+    if isinstance(pattern, dict) and isinstance(pattern.get("var"), str) and pattern["var"].startswith("$p"):
+        prior = mapping.setdefault(pattern["var"], node)
+        return _key(prior) == _key(node)
+    if isinstance(node, dict) and isinstance(pattern, dict):
+        return node.keys() == pattern.keys() and all(_match(node[key], pattern[key], mapping) for key in node)
+    if isinstance(node, list) and isinstance(pattern, list):
+        return len(node) == len(pattern) and all(_match(left, right, mapping) for left, right in zip(node, pattern))
+    return node == pattern
+
+
 def _walk(node: Any):
     yield node
     if isinstance(node, dict):
@@ -68,7 +98,7 @@ def _replace(node: Any, target: Any, replacement: Any) -> tuple[Any, bool]:
 
 
 def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[str, Any]:
-    counts = Counter(_key(part) for task in tasks for part in _walk(task["program"]) if isinstance(part, dict) and ("op" in part))
+    counts = Counter(_key(_canonical(part)) for task in tasks for part in _walk(task["program"]) if isinstance(part, dict) and ("op" in part))
     candidates = [(count, key) for key, count in counts.items() if count >= 2]
     candidates.sort(key=lambda item: (-item[0], item[1]))
     library: dict[str, dict[str, Any]] = {}
@@ -80,8 +110,13 @@ def learn_library(tasks: list[dict[str, Any]], *, max_defs: int = 16) -> dict[st
         before = sum(size(task["program"]) for task in tasks)
         rewritten = []
         for task in tasks:
-            program, changed = _replace(task["program"], body, {"op": "call", "name": name,
-                                                                  "args": [{"var": param} for param in params]})
+            program, changed = task["program"], False
+            for part in list(_walk(task["program"])):
+                mapping: dict[str, Any] = {}
+                if _match(part, body, mapping):
+                    call = {"op": "call", "name": name, "args": [mapping[param] for param in params]}
+                    program, changed = _replace(task["program"], part, call)
+                    break
             rewritten.append(program)
         after = sum(size(program) for program in rewritten) + size(body) + 2
         if after >= before: continue
@@ -98,8 +133,13 @@ def synthesize(tasks: list[dict[str, Any]], library_doc: dict[str, Any], *, max_
         candidate = baseline
         used = []
         for name, definition in sorted(library.items()):
-            candidate, changed = _replace(candidate, definition["body"], {"op": "call", "name": name,
-                                                                              "args": [{"var": param} for param in definition["params"]]})
+            changed = False
+            for part in list(_walk(candidate)):
+                mapping: dict[str, Any] = {}
+                if _match(part, definition["body"], mapping):
+                    call = {"op": "call", "name": name, "args": [mapping[param] for param in definition["params"]]}
+                    candidate, changed = _replace(candidate, part, call)
+                    break
             if changed: used.append(name)
         train_ok = all(eval_program(candidate, ex["input"], library) == ex["output"] for ex in task.get("examples", []))
         sealed = task.get("heldout_examples", [])
