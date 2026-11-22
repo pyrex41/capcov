@@ -700,6 +700,9 @@ def main(argv: list[str] | None = None) -> int:
     if actual and actual[0] == "synthesize-batch":
         from .synthesis_batch import main as batch_main
         return batch_main(actual[1:])
+    if actual and actual[0] == "intent":
+        from .intent import main as intent_main
+        return intent_main(actual[1:])
     parser = argparse.ArgumentParser(prog="capcov", description=__doc__)
     parser.add_argument("--quiet", action="store_true")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -715,6 +718,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("learn", help="mine bounded behavioral rules from incumbent observations")
     sub.add_parser("synthesize", help="learn a bounded pure DSL library and evaluate held-out tasks")
     sub.add_parser("synthesize-batch", help="summarize bounded observation-only family synthesis inputs")
+    sub.add_parser("intent", help="prepare and adjudicate offline intent evidence packets")
     sub.add_parser("faults", help="judge a recorded fault-injection run against the invariant pack")
 
     def common(p: argparse.ArgumentParser) -> None:
