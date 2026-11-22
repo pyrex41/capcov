@@ -13,6 +13,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-cost", type=int, default=7)
     parser.add_argument("--library-in", type=Path, default=None)
     parser.add_argument("--library-out", type=Path, default=None)
+    parser.add_argument("--emit-go", type=Path, default=None)
     args = parser.parse_args(argv)
     if args.library_in is not None:
         import json
@@ -29,4 +30,8 @@ def main(argv: list[str] | None = None) -> int:
         import json
         generated = json.loads(args.out.read_text())["library"]
         args.library_out.write_text(json.dumps(generated, indent=2, sort_keys=True) + "\n")
+    if args.emit_go is not None:
+        from .go_emit import emit
+        import json
+        emit(json.loads(args.out.read_text()), args.emit_go)
     return 0
