@@ -2,6 +2,8 @@ from __future__ import annotations
 import argparse, hashlib, json
 from collections import defaultdict
 from pathlib import Path
+from .boolean_search import search
+from .synthesis import eval_program, learn_library
 
 def _vector(example):
     value = example.get("input")
@@ -35,15 +37,40 @@ def build(document, *, max_families=100, max_terms=100000, max_cost=7):
     for family in sorted(families)[:max_families]:
         members = families[family][:max_terms]
         vectors = sorted({vector for _, rows in members for vector in rows})
-        target_vector = vectors[-1]
-        train = []
-        for _, rows in members:
-            if target_vector not in rows: train.extend({"input": dict(vector), "output": output} for vector, output in rows.items())
-        sealed = [{"input": dict(target_vector), "output": next(rows[target_vector] for _, rows in members if target_vector in rows)}]
-        report["families"].append({"family": family, "operation_count": len(members), "distinct_vectors": len(vectors), "target_vector": dict(target_vector), "training_examples": len(train), "sealed": sealed, "status": "observation-only", "invention_success": False})
+        target_id, target_rows = members[-1]
+        target_vectors = sorted(target_rows)
+        target_vector = target_vectors[-1]
+        target_examples = [{"input": dict(vector), "output": output} for vector, output in target_rows.items()]
+        fit = [row for row in target_examples if _vector(row) != target_vector]
+        sealed = [row for row in target_examples if _vector(row) == target_vector]
+        solved = []
+        failures = []
+        for operation_id, rows in members[:-1]:
+            examples = [{"input": dict(vector), "output": output} for vector, output in rows.items()]
+            try:
+                solution = search(examples, {}, max_terms=max_terms, max_cost=max_cost)
+                if solution["program"] is None: raise ValueError(solution["stop"])
+                if not all(eval_program(solution["program"], row["input"], {}) == row["output"] for row in examples): raise ValueError("fit interpreter disagreement")
+                solved.append({"id": operation_id, "program": solution["program"], "examples": examples})
+            except (ValueError, KeyError) as error:
+                failures.append({"id": operation_id, "reason": str(error)})
+        library = learn_library(solved)
+        candidate = search(fit, library, max_terms=max_terms, max_cost=max_cost) if fit else {"program": None, "stop": "insufficient target fit"}
+        baseline = search(fit, {}, max_terms=max_terms, max_cost=max_cost) if fit else {"program": None, "stop": "insufficient target fit"}
+        candidate_ok = candidate.get("program") is not None and all(eval_program(candidate["program"], row["input"], library) == row["output"] for row in sealed)
+        baseline_ok = baseline.get("program") is not None and all(eval_program(baseline["program"], row["input"], {}) == row["output"] for row in sealed)
+        used = bool(candidate.get("program") and any(part.get("op") == "call" for part in _walk(candidate["program"])))
+        report["families"].append({"family": family, "operation_count": len(members), "target_operation": target_id, "distinct_vectors": len(vectors), "training_examples": len(fit), "sealed": len(sealed), "status": "evaluated", "invention_success": bool(used and candidate_ok), "candidate_heldout_pass": candidate_ok, "baseline_heldout_pass": baseline_ok, "used_invented_call": used, "candidate_search": candidate, "baseline_search": baseline, "library": library, "training_failures": failures})
     report["included_operations"] = sum(item["operation_count"] for item in report["families"])
     report["excluded_operations"] = len(excluded)
     return report
+
+def _walk(node):
+    yield node
+    if isinstance(node, dict):
+        for value in node.values(): yield from _walk(value)
+    elif isinstance(node, list):
+        for value in node: yield from _walk(value)
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="capcov synthesize-batch")
