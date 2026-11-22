@@ -708,7 +708,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("behavior", help="recovery, store contracts, Step admission and cutover checks")
     sub.add_parser("system", help="typed Shen systems, simulation, campaigns and conformance checks")
-    sub.add_parser("reason", help="source evidence, sequent proofs, relational modes and replay")
+    sub.add_parser("reason", help="proofs, replay and DreamCoder-style search for agents (reason next/run)")
     sub.add_parser("flows", help="source obligations, flow planning, and browser outcome evidence")
     sub.add_parser("outcomes", help="scoped behavior obligations and fresh pytest evidence")
     sub.add_parser("features", help="FODA feature-model validation, configuration check, coverage rollup")
@@ -716,7 +716,7 @@ def main(argv: list[str] | None = None) -> int:
         "capabilities", help="reconcile specified, implemented and exercised capabilities"
     )
     sub.add_parser("learn", help="mine bounded behavioral rules from incumbent observations")
-    sub.add_parser("synthesize", help="learn a bounded pure DSL library and evaluate held-out tasks")
+    sub.add_parser("synthesize", help="invent Boolean functions from siblings and fit or challenge a full contract")
     sub.add_parser("synthesize-batch", help="summarize bounded observation-only family synthesis inputs")
     sub.add_parser("intent", help="prepare and adjudicate offline intent evidence packets")
     sub.add_parser("faults", help="judge a recorded fault-injection run against the invariant pack")

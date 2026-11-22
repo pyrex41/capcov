@@ -280,21 +280,26 @@ def workflow(project, operation_id, execute, state):
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(prog="capcov reason")
-    parser.add_argument("command", choices=["next", "run"])
-    parser.add_argument("--project", type=Path, default=Path("capcov.search.json"))
-    parser.add_argument("--operation", required=True)
+    command = argv[0]
+    descriptions = {
+        "next": "Inspect an operation and return its next action as JSON. Dispatch next_action.argv when synthesis is due.",
+        "run": "Run DreamCoder-style Boolean search: solve siblings, invent reusable functions, train a search ranking on synthetic tasks, and fit the full target contract. A reachable disagreement becomes an intent or replay obligation.",
+    }
+    parser = argparse.ArgumentParser(prog=f"capcov reason {command}", description=descriptions[command],
+        epilog=f"Example: capcov reason {command} --operation invention-demo --project examples/search-projects/invention.json --json")
+    parser.add_argument("--project", type=Path, default=Path("capcov.search.json"), help="search project JSON (default: capcov.search.json)")
+    parser.add_argument("--operation", required=True, help="operation or projected corpus census ID")
     parser.add_argument(
         "--emit-go", type=Path, help="write the selected Boolean candidate as Go"
     )
-    parser.add_argument("--state-dir", type=Path)
+    parser.add_argument("--state-dir", type=Path, help="directory for reusable source-bound search receipts")
     parser.add_argument(
         "--json", action="store_true", help="emit machine-readable JSON (default)"
     )
-    args = parser.parse_args(argv)
+    args = parser.parse_args(argv[1:])
     try:
         state = args.state_dir or args.project.parent / ".capcov" / "search"
-        result = workflow(args.project, args.operation, args.command == "run", state)
+        result = workflow(args.project, args.operation, command == "run", state)
         if args.emit_go:
             from ..go_emit import emit
 

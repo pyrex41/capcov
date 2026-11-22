@@ -4,7 +4,7 @@ from pathlib import Path
 from .synthesis import run_synthesis
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="capcov synthesize")
+    parser = argparse.ArgumentParser(prog="capcov synthesize", description="Bounded Boolean library invention and contract search. For the complete DreamCoder-style wake/sleep workflow, use capcov reason next and capcov reason run.")
     parser.add_argument("input", type=Path)
     parser.add_argument("--full-contract", action="store_true", help="fit all target examples and search reachable unlabelled inputs for disagreement")
     parser.add_argument("--max-probes", type=int, default=64)

@@ -154,7 +154,7 @@ def main(argv=None):
 
     parser = argparse.ArgumentParser(
         description="Shen specifications, proofs, modes and source evidence",
-        epilog="For operation-scoped synthesis use capcov reason next --help or capcov reason run --help."
+        epilog="DreamCoder-style search: next selects an agent action; run learns from sibling tasks, fits a Boolean contract and searches for disagreement. Try capcov reason next --help."
     )
     parser.add_argument(
         "mode",
