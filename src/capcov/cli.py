@@ -54,7 +54,7 @@ def _resolve(
         data = tomllib.loads(config_path.read_text())
     capcov = data.get("capcov", {})
     adapters_list = data.get("adapters", [])
-    source_dir = target / (source or capcov.get("source", "src"))
+    source_dir = (target / (source or capcov.get("source", "src"))).resolve()
 
     specs: list[tuple[str, dict | None]]
     if adapter:

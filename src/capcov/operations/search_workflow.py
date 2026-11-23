@@ -280,6 +280,10 @@ def workflow(project, operation_id, execute, state):
 
 
 def main(argv):
+    if not argv or argv[0] not in ("next", "run"):
+        parser = argparse.ArgumentParser(prog="capcov reason", description="Orchestrate DreamCoder-style search and scoped replay.")
+        parser.add_argument("command", choices=["next", "run"], help="next selects the agent action; run executes wake/sleep search")
+        parser.parse_args(argv)
     command = argv[0]
     descriptions = {
         "next": "Inspect an operation and return its next action as JSON. Dispatch next_action.argv when synthesis is due.",

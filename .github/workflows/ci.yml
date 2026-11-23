@@ -83,6 +83,14 @@ jobs:
           nix develop --no-update-lock-file '.#${{ matrix.family }}' --command bash -lc \
             "PYTHONPATH=src uv run --frozen --extra probe-python --extra treesitter --extra faults-property --group packaging python scripts/check-skips.py --family ${{ matrix.family }} --shard ${{ matrix.shard }} --result ${result}"
 
+      # These search/learning modules use pytest functions and fixtures, which
+      # the unittest shard discovery cannot collect. Go emission compiles code.
+      - name: Learning and synthesis integration
+        if: matrix.family == 'indexers'
+        run: |
+          nix develop --no-update-lock-file '.#indexers' --command bash -lc \
+            'PYTHONPATH=src uv run --frozen --extra probe-python python -m pytest -q tests/test_{boolean_wake_sleep,contract_search,go_emit,intent,learning,search_action,search_examples,search_workflow,sleep_policy,synthesis,synthesis_batch}.py'
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: capcov-${{ steps.run.outputs.result }}

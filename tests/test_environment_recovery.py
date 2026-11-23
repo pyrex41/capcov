@@ -16,7 +16,7 @@ class EnvironmentRecoveryTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
+        self.root = Path(self.tmp.name).resolve()  # match cmd_discover's canonical target in the _resolve mock
         source = "# synthetic handler / observer / worker declarations\n"
         (self.root / "app.py").write_text(source)
         self.anchor = {"file": "app.py", "line": 1,

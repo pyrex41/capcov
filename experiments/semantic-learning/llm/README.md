@@ -19,7 +19,7 @@ Recorded run: the examples-only response failed JSON parsing. Repair produced fo
 From repository root in the Shen shell:
 
 ```
-PYTHONPATH=src python3 experiments/semantic-learning/llm/replay_repair.py
+CAPCOV_SHEN_IMPL=shen-go PYTHONPATH=src python3 experiments/semantic-learning/llm/replay_repair.py
 ```
 
 Replay rechecks the parent hash, native identity, and stored scores without contacting either provider. For **new paid sampling**, run `repair.py` in place of `replay_repair.py` with authenticated Pi and `JEV_API_KEY`. Copy the existing report first: currently the sampler writes `repair-result.json`. Prompts, rejected proposals, failure detail, selections and scores are retained in the report. Provider calls are not deterministic.

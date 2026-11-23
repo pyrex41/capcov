@@ -134,7 +134,9 @@ class EnvironmentIntegrationTests(unittest.TestCase):
         registry = self.enroll()
         plan = extend_plan(self.plan, registry, self.root, "caps.json", "mapping.json",
                            python=sys.executable, engine="python")
-        receipts = execute_checks(registry, plan, self.root, ["publish"], self.root / "receipts")
+        # The child runs from the consumer root, not the source checkout.
+        with patch.dict('os.environ', PYTHONPATH=str(Path(__file__).resolve().parents[1] / 'src')):
+            receipts = execute_checks(registry, plan, self.root, ["publish"], self.root / "receipts")
         report = qualify(registry, plan, self.root, ["publish"], receipts, self.root / "receipts")
         projection = [o for o in report["obligations"] if o["category"] == "environment-projection"]
         self.assertEqual(projection[0]["status"], "supported")
