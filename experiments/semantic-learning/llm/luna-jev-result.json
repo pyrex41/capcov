@@ -1,0 +1,726 @@
+{
+  "proposer": "openai-codex/gpt-6-luna",
+  "selector": "jev-latest",
+  "identity": {
+    "runtime": {
+      "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+      "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+    },
+    "model": "50a29aea6a53f7b6cb416f85ecd03a568e401e65717cf36e4267793e701b24ea",
+    "libraries": {
+      "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+      "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+      "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+    },
+    "requests": "9fe60c2e1081bb21f73cb447e95af5c0a27ac017ceede8e94cdb8b1599674d41"
+  },
+  "held_out": 96,
+  "rounds": [
+    {
+      "prompt": "Infer an executable behavioral concept for a hidden deterministic device. Each input event is a pair of strings. For each event predict one bit: does it signal? A history starts from reset. Return only JSON {\"concept\":\"your explanation\", \"expr\": E}. Invent the expression yourself. The generic history-query language is:\n\"x\",\"y\": current pair's first and second fields. \"px\",\"py\": fields of the record bound inside a selection. null: missing. [\"field\",record,0 or 1]: project a field (null for missing). [\"last\",sequence] or [\"first\",sequence]: record or null. \"past\": sequence of earlier input pairs, in order. [\"filter\",sequence,predicate]: select records, binding px,py for predicate. [\"eq\",a,b], [\"not\",a], [\"and\",a,b], [\"or\",a,b], true, false. Top expression must produce a boolean. Prefer simple laws consistent with observations. You cannot query the device directly. Examples list {h:input history, bits:observed bits}.\nInstead of one hypothesis, return {\"candidates\":[...]} with four distinct hypotheses in your preferred order, each with concept and expr. Observations: [{\"h\": [[\"a\", \"0\"]], \"bits\": [1]}, {\"h\": [[\"a\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 0]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"1\"]], \"bits\": [1, 1]}]",
+      "proposals": [
+        {
+          "concept": "Signals on the first event and whenever either field differs from the previous event.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "and",
+                [
+                  "eq",
+                  "x",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    0
+                  ]
+                ],
+                [
+                  "eq",
+                  "y",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals on the first event and whenever the second field differs from the previous event.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals on the first event and whenever the first field differs from the previous event.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals on the first event and whenever both fields differ from the previous event.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "and",
+              [
+                "not",
+                [
+                  "eq",
+                  "x",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    0
+                  ]
+                ]
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "y",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "eligible": [
+        "h0",
+        "h1",
+        "h2",
+        "h3"
+      ],
+      "jev": {
+        "type": "choice",
+        "choice": "h1",
+        "confidence": 0.43,
+        "probabilities": {
+          "h0": 0.28,
+          "h1": 0.57,
+          "h2": 0.08,
+          "h3": 0.07
+        }
+      },
+      "selected": "h1",
+      "held_out_by_candidate": {
+        "h0": 25,
+        "h1": 6,
+        "h2": 3,
+        "h3": 1
+      },
+      "witness": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "0"
+        ]
+      ]
+    },
+    {
+      "prompt": "Infer an executable behavioral concept for a hidden deterministic device. Each input event is a pair of strings. For each event predict one bit: does it signal? A history starts from reset. Return only JSON {\"concept\":\"your explanation\", \"expr\": E}. Invent the expression yourself. The generic history-query language is:\n\"x\",\"y\": current pair's first and second fields. \"px\",\"py\": fields of the record bound inside a selection. null: missing. [\"field\",record,0 or 1]: project a field (null for missing). [\"last\",sequence] or [\"first\",sequence]: record or null. \"past\": sequence of earlier input pairs, in order. [\"filter\",sequence,predicate]: select records, binding px,py for predicate. [\"eq\",a,b], [\"not\",a], [\"and\",a,b], [\"or\",a,b], true, false. Top expression must produce a boolean. Prefer simple laws consistent with observations. You cannot query the device directly. Examples list {h:input history, bits:observed bits}.\nInstead of one hypothesis, return {\"candidates\":[...]} with four distinct hypotheses in your preferred order, each with concept and expr. Observations: [{\"h\": [[\"a\", \"0\"]], \"bits\": [1]}, {\"h\": [[\"a\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 0]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"1\"]], \"bits\": [1, 1]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"0\"]], \"bits\": [1, 1]}]",
+      "proposals": [
+        {
+          "concept": "Signals unless the current pair exactly repeats the immediately previous pair.",
+          "expr": [
+            "not",
+            [
+              "and",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals unless the current first field matches the previous first field and the second field also matches.",
+          "expr": [
+            "not",
+            [
+              "and",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals on the first event and thereafter whenever either field differs from the immediately previous event.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "or",
+              [
+                "not",
+                [
+                  "eq",
+                  "x",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    0
+                  ]
+                ]
+              ],
+              [
+                "not",
+                [
+                  "eq",
+                  "y",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signals unless the current pair equals the immediately previous pair; with no previous event, it signals.",
+          "expr": [
+            "not",
+            [
+              "and",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "eligible": [
+        "h0",
+        "h1",
+        "h2",
+        "h3"
+      ],
+      "jev": {
+        "type": "choice",
+        "choice": "h3",
+        "confidence": 0.27,
+        "probabilities": {
+          "h0": 0.09,
+          "h1": 0.06,
+          "h2": 0.4,
+          "h3": 0.45
+        }
+      },
+      "selected": "h3",
+      "held_out_by_candidate": {
+        "h0": 25,
+        "h1": 25,
+        "h2": 25,
+        "h3": 25
+      },
+      "witness": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "0"
+        ],
+        [
+          "a",
+          "0"
+        ]
+      ]
+    },
+    {
+      "prompt": "Infer an executable behavioral concept for a hidden deterministic device. Each input event is a pair of strings. For each event predict one bit: does it signal? A history starts from reset. Return only JSON {\"concept\":\"your explanation\", \"expr\": E}. Invent the expression yourself. The generic history-query language is:\n\"x\",\"y\": current pair's first and second fields. \"px\",\"py\": fields of the record bound inside a selection. null: missing. [\"field\",record,0 or 1]: project a field (null for missing). [\"last\",sequence] or [\"first\",sequence]: record or null. \"past\": sequence of earlier input pairs, in order. [\"filter\",sequence,predicate]: select records, binding px,py for predicate. [\"eq\",a,b], [\"not\",a], [\"and\",a,b], [\"or\",a,b], true, false. Top expression must produce a boolean. Prefer simple laws consistent with observations. You cannot query the device directly. Examples list {h:input history, bits:observed bits}.\nInstead of one hypothesis, return {\"candidates\":[...]} with four distinct hypotheses in your preferred order, each with concept and expr. Observations: [{\"h\": [[\"a\", \"0\"]], \"bits\": [1]}, {\"h\": [[\"a\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 0]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"1\"]], \"bits\": [1, 1]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"0\"]], \"bits\": [1, 1]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 1, 0]}]",
+      "proposals": [
+        {
+          "concept": "Signal when the current pair has not appeared earlier in the history.",
+          "expr": [
+            "eq",
+            [
+              "first",
+              [
+                "filter",
+                "past",
+                [
+                  "and",
+                  [
+                    "eq",
+                    "px",
+                    "x"
+                  ],
+                  [
+                    "eq",
+                    "py",
+                    "y"
+                  ]
+                ]
+              ]
+            ],
+            null
+          ]
+        },
+        {
+          "concept": "Signal when the current first field has not appeared earlier.",
+          "expr": [
+            "eq",
+            [
+              "first",
+              [
+                "filter",
+                "past",
+                [
+                  "eq",
+                  "px",
+                  "x"
+                ]
+              ]
+            ],
+            null
+          ]
+        },
+        {
+          "concept": "Signal when the current pair differs from the first pair in the history; signal if there is no earlier pair.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "first",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "and",
+                [
+                  "eq",
+                  [
+                    "field",
+                    [
+                      "first",
+                      "past"
+                    ],
+                    0
+                  ],
+                  "x"
+                ],
+                [
+                  "eq",
+                  [
+                    "field",
+                    [
+                      "first",
+                      "past"
+                    ],
+                    1
+                  ],
+                  "y"
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signal when the current first field differs from the first pair\u2019s first field; signal if there is no earlier pair.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "first",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "eq",
+                [
+                  "field",
+                  [
+                    "first",
+                    "past"
+                  ],
+                  0
+                ],
+                "x"
+              ]
+            ]
+          ]
+        }
+      ],
+      "eligible": [
+        "h0",
+        "h1",
+        "h2",
+        "h3"
+      ],
+      "jev": {
+        "type": "choice",
+        "choice": "h2",
+        "confidence": 0.31,
+        "probabilities": {
+          "h0": 0.31,
+          "h1": 0.04,
+          "h2": 0.48,
+          "h3": 0.17
+        }
+      },
+      "selected": "h2",
+      "held_out_by_candidate": {
+        "h0": 28,
+        "h1": 3,
+        "h2": 7,
+        "h3": 5
+      },
+      "witness": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "a",
+          "1"
+        ],
+        [
+          "a",
+          "0"
+        ]
+      ]
+    },
+    {
+      "prompt": "Infer an executable behavioral concept for a hidden deterministic device. Each input event is a pair of strings. For each event predict one bit: does it signal? A history starts from reset. Return only JSON {\"concept\":\"your explanation\", \"expr\": E}. Invent the expression yourself. The generic history-query language is:\n\"x\",\"y\": current pair's first and second fields. \"px\",\"py\": fields of the record bound inside a selection. null: missing. [\"field\",record,0 or 1]: project a field (null for missing). [\"last\",sequence] or [\"first\",sequence]: record or null. \"past\": sequence of earlier input pairs, in order. [\"filter\",sequence,predicate]: select records, binding px,py for predicate. [\"eq\",a,b], [\"not\",a], [\"and\",a,b], [\"or\",a,b], true, false. Top expression must produce a boolean. Prefer simple laws consistent with observations. You cannot query the device directly. Examples list {h:input history, bits:observed bits}.\nInstead of one hypothesis, return {\"candidates\":[...]} with four distinct hypotheses in your preferred order, each with concept and expr. Observations: [{\"h\": [[\"a\", \"0\"]], \"bits\": [1]}, {\"h\": [[\"a\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 0]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"1\"]], \"bits\": [1, 1]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"0\"]], \"bits\": [1, 1]}, {\"h\": [[\"a\", \"0\"], [\"b\", \"0\"], [\"a\", \"0\"]], \"bits\": [1, 1, 0]}, {\"h\": [[\"a\", \"0\"], [\"a\", \"1\"], [\"a\", \"0\"]], \"bits\": [1, 1, 1]}]",
+      "proposals": [
+        {
+          "concept": "Signal on the first event and whenever the current pair differs from the immediately preceding pair.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "last",
+                "past"
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "and",
+                [
+                  "eq",
+                  "x",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    0
+                  ]
+                ],
+                [
+                  "eq",
+                  "y",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signal unless the immediately preceding event has the same first and second fields.",
+          "expr": [
+            "not",
+            [
+              "and",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ],
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signal if either field changes from the immediately preceding event; the first event signals because its previous fields are missing.",
+          "expr": [
+            "or",
+            [
+              "not",
+              [
+                "eq",
+                "x",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  0
+                ]
+              ]
+            ],
+            [
+              "not",
+              [
+                "eq",
+                "y",
+                [
+                  "field",
+                  [
+                    "last",
+                    "past"
+                  ],
+                  1
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "concept": "Signal when the previous event is missing or differs from the current pair.",
+          "expr": [
+            "or",
+            [
+              "eq",
+              [
+                "field",
+                [
+                  "last",
+                  "past"
+                ],
+                0
+              ],
+              null
+            ],
+            [
+              "not",
+              [
+                "and",
+                [
+                  "eq",
+                  "x",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    0
+                  ]
+                ],
+                [
+                  "eq",
+                  "y",
+                  [
+                    "field",
+                    [
+                      "last",
+                      "past"
+                    ],
+                    1
+                  ]
+                ]
+              ]
+            ]
+          ]
+        }
+      ],
+      "eligible": []
+    }
+  ]
+}

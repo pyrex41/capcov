@@ -36,6 +36,10 @@ Default to the provider's workhorse model for workers (Sol / Sonnet when availab
 with the selected capable parent orchestrating; resolve supported IDs in the host. For a single bounded capability,
 work directly without manufacturing orchestration overhead.
 
+## Counterexample-informed rewrite repairs
+
+When a real source and candidate disagree, reduce the workflow from identical initial state and retain both traces at their first observable divergence. Resolve compatibility from the rewrite brief, not a model vote. Give the implementer the discrepancy, then replay the repaired **whole program** on withheld workflows, including accepted controls that a blanket rejection would fail. Distinguish targeted follow-up after inspecting failures from a blind campaign. The [snapshot rewrite pilot](../../experiments/rewrite-snapshot/README.md) provides local replay commands and a paired ordinary-test baseline. That pilot supplies source to its proposer; do not do that in a clean-room engagement.
+
 ## Development target and stopping rule
 
 Drive usable end-to-end operations across the full product. “Fully qualified”

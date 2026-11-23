@@ -1,0 +1,83 @@
+{
+  "format": "capcov-finite-identification-v1",
+  "active_choice": "aa",
+  "observation": "ordered emissions only",
+  "trials": [
+    {
+      "target": "outbox.ops",
+      "challenge": "a",
+      "survivors": [
+        "outbox.ops",
+        "outbox-intended.ops"
+      ],
+      "held_out": {
+        "aba": "abstain",
+        "abba": "abstain",
+        "baab": "abstain"
+      }
+    },
+    {
+      "target": "outbox.ops",
+      "challenge": "ab",
+      "survivors": [
+        "outbox.ops",
+        "outbox-intended.ops"
+      ],
+      "held_out": {
+        "aba": "abstain",
+        "abba": "abstain",
+        "baab": "abstain"
+      }
+    },
+    {
+      "target": "outbox.ops",
+      "challenge": "aa",
+      "survivors": [
+        "outbox.ops"
+      ],
+      "held_out": {
+        "aba": "correct",
+        "abba": "correct",
+        "baab": "correct"
+      }
+    },
+    {
+      "target": "outbox-intended.ops",
+      "challenge": "a",
+      "survivors": [
+        "outbox.ops",
+        "outbox-intended.ops"
+      ],
+      "held_out": {
+        "aba": "abstain",
+        "abba": "abstain",
+        "baab": "abstain"
+      }
+    },
+    {
+      "target": "outbox-intended.ops",
+      "challenge": "ab",
+      "survivors": [
+        "outbox.ops",
+        "outbox-intended.ops"
+      ],
+      "held_out": {
+        "aba": "abstain",
+        "abba": "abstain",
+        "baab": "abstain"
+      }
+    },
+    {
+      "target": "outbox-intended.ops",
+      "challenge": "aa",
+      "survivors": [
+        "outbox-intended.ops"
+      ],
+      "held_out": {
+        "aba": "correct",
+        "abba": "correct",
+        "baab": "correct"
+      }
+    }
+  ]
+}

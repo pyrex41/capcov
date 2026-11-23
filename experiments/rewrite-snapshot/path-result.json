@@ -1,0 +1,1095 @@
+{
+  "design": "targeted after inspection of pilot; not a blind new domain",
+  "witnesses": [
+    {
+      "history": [
+        [
+          "blob",
+          "b",
+          "caf\u00e9"
+        ],
+        [
+          "publish",
+          "s",
+          [
+            [
+              "1:test",
+              "b"
+            ]
+          ],
+          null,
+          {}
+        ]
+      ],
+      "source": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "error": "manifest"
+        }
+      ],
+      "target": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "ok": "c7e2eca64a33d1dcbe290d7685ee847db51f00c7b925124a61832c05e3917db6"
+        }
+      ]
+    },
+    {
+      "history": [
+        [
+          "blob",
+          "b",
+          "caf\u00e9"
+        ],
+        [
+          "publish",
+          "s",
+          [
+            [
+              "\u00e9:x",
+              "b"
+            ]
+          ],
+          null,
+          {}
+        ]
+      ],
+      "source": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "error": "manifest"
+        }
+      ],
+      "target": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "ok": "ec75fbed08d5cb7c0317e4e5dfc98c51a9efb0e459c62f0c10856525b6ebc7aa"
+        }
+      ]
+    },
+    {
+      "history": [
+        [
+          "blob",
+          "b",
+          "caf\u00e9"
+        ],
+        [
+          "publish",
+          "s",
+          [
+            [
+              "_:foo",
+              "b"
+            ]
+          ],
+          null,
+          {}
+        ]
+      ],
+      "source": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "error": "manifest"
+        }
+      ],
+      "target": [
+        {
+          "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+        },
+        {
+          "ok": "030faa659a4c0810878c5f602542c8a263d91689d8b61d505e24abac78e886ba"
+        }
+      ]
+    }
+  ],
+  "scores": {
+    "initial": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "targeted": {
+        "passed": 6,
+        "total": 12,
+        "misses": [
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "9:abc",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "0057d5d0322a7bebf92cf575868278928382ec7fa759e5fe4a969c6dce049b09"
+              },
+              {
+                "ok": "{\"files\":{\"9:abc\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "\ud83d\ude00:ok",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "5b43211d8a974016b80a275c353b4cb69c3c0cfd97df7ab3f1ac34a510bef816"
+              },
+              {
+                "ok": "{\"files\":{\"\ud83d\ude00:ok\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "!:",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "0d7a70ec9b85466b78c8cf979d0915613c1ac126c0e70135512b87779e81068c"
+              },
+              {
+                "ok": "{\"files\":{\"!:\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "\n:abc",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "5e55c2e969dc97dbc2dd79a06aa7c19058c89001dbea35c6bed4845d07bc181f"
+              },
+              {
+                "ok": "{\"files\":{\"\\n:abc\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "::x",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "26b5501958fc2ddb1ab105043a00989c23860251f6f32b1b4707c3a97ab1bfdd"
+              },
+              {
+                "ok": "{\"files\":{\"::x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "./8:k",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "360c6074bc4da8a08d748da9c29ca6e147a32c6cb1a98b0013c593eee36b1bf2"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "360c6074bc4da8a08d748da9c29ca6e147a32c6cb1a98b0013c593eee36b1bf2"
+              },
+              {
+                "ok": "{\"files\":{\"8:k\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          }
+        ]
+      },
+      "old_holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    },
+    "path-unit": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "targeted": {
+        "passed": 6,
+        "total": 12,
+        "misses": [
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "9:abc",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "0057d5d0322a7bebf92cf575868278928382ec7fa759e5fe4a969c6dce049b09"
+              },
+              {
+                "ok": "{\"files\":{\"9:abc\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "\ud83d\ude00:ok",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "5b43211d8a974016b80a275c353b4cb69c3c0cfd97df7ab3f1ac34a510bef816"
+              },
+              {
+                "ok": "{\"files\":{\"\ud83d\ude00:ok\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "!:",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "0d7a70ec9b85466b78c8cf979d0915613c1ac126c0e70135512b87779e81068c"
+              },
+              {
+                "ok": "{\"files\":{\"!:\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "\n:abc",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "5e55c2e969dc97dbc2dd79a06aa7c19058c89001dbea35c6bed4845d07bc181f"
+              },
+              {
+                "ok": "{\"files\":{\"\\n:abc\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "::x",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "error": "missing"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "26b5501958fc2ddb1ab105043a00989c23860251f6f32b1b4707c3a97ab1bfdd"
+              },
+              {
+                "ok": "{\"files\":{\"::x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          },
+          {
+            "history": [
+              [
+                "blob",
+                "b",
+                "caf\u00e9"
+              ],
+              [
+                "publish",
+                "s",
+                [
+                  [
+                    "x",
+                    "b"
+                  ]
+                ],
+                null,
+                {}
+              ],
+              [
+                "publish",
+                "child",
+                [
+                  [
+                    "./8:k",
+                    "b"
+                  ]
+                ],
+                "s",
+                {
+                  "keep": true
+                }
+              ],
+              [
+                "read",
+                "child"
+              ],
+              [
+                "read",
+                "s"
+              ]
+            ],
+            "source": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "360c6074bc4da8a08d748da9c29ca6e147a32c6cb1a98b0013c593eee36b1bf2"
+              },
+              {
+                "error": "manifest"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ],
+            "target": [
+              {
+                "ok": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+              },
+              {
+                "ok": "fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7"
+              },
+              {
+                "ok": "360c6074bc4da8a08d748da9c29ca6e147a32c6cb1a98b0013c593eee36b1bf2"
+              },
+              {
+                "ok": "{\"files\":{\"8:k\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{\"keep\":true},\"parent\":\"fac282bdfd416975726e49e3cb0628cbde2abc96360fa40b0a23683d294b95b7\",\"type\":\"capcov.snapshot.v1\"}"
+              },
+              {
+                "ok": "{\"files\":{\"x\":\"850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e\"},\"metadata\":{},\"parent\":null,\"type\":\"capcov.snapshot.v1\"}"
+              }
+            ]
+          }
+        ]
+      },
+      "old_holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    },
+    "path-feedback": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "targeted": {
+        "passed": 12,
+        "total": 12,
+        "misses": []
+      },
+      "old_holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "files": {
+    "src/capcov/cas.py": "1e569cfdb02b6f9fbf15a4cc6625f5a15978948a8e79b31c0ef21487ae2ca4a8",
+    "experiments/rewrite-snapshot/source.py": "cc60f3c1f7612778feab23b0a4611b96e496f15a8bc4066b0a93c5bc4325e768",
+    "experiments/rewrite-snapshot/experiment.py": "def6f7e9be457319bd9316c7b65993f2f548d6442d9291ff538271c60a039255",
+    "experiments/rewrite-snapshot/suites.py": "ab3899ed4db537ce63dd4a33d6184f62d7cb72714c720e5532c0aba2b06b42db",
+    "experiments/rewrite-snapshot/path-unit.cjs": "7b6d5bd14193f5dcf5646accfb823083a2c50a890f66a3f582e2566345d7696b",
+    "experiments/rewrite-snapshot/path-feedback.cjs": "99db4e43a00c886a370642325080022f64c046cb8cbfdb3119bf6a99f373803f",
+    "experiments/rewrite-snapshot/feedback.cjs": "25cf9f4198121c0954c80773d5239b6787e210cd5909cdadcd9abb694cb447f0",
+    "experiments/rewrite-snapshot/unit.cjs": "a8d7ff604723e87aa7ca4518ce635d008c47ec65c23d5ca01d339c61ed5c0d55",
+    "experiments/rewrite-snapshot/initial.cjs": "c1f4f4ea1fc3d7e23f7f59ce876c5069626be3b039e6827764ba9aeec3716a7d"
+  },
+  "node": "v26.7.0",
+  "python": "3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 21.1.8 ]",
+  "arms": {
+    "initial": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "challenge": {
+        "passed": 15,
+        "total": 15,
+        "misses": []
+      },
+      "holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    },
+    "unit": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "challenge": {
+        "passed": 15,
+        "total": 15,
+        "misses": []
+      },
+      "holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    },
+    "feedback": {
+      "unit": {
+        "passed": 4,
+        "total": 4,
+        "misses": []
+      },
+      "challenge": {
+        "passed": 15,
+        "total": 15,
+        "misses": []
+      },
+      "holdout": {
+        "passed": 24,
+        "total": 24,
+        "misses": []
+      }
+    }
+  }
+}
