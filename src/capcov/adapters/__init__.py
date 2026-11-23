@@ -70,6 +70,20 @@ def source_patterns(specs: list[tuple[str, dict | None]]) -> tuple[str, ...]:
     patterns: list[str] = []
     for name, config in specs:
         config = config or {}
+        if config.get("environment_python"):
+            python_environment = config["environment_python"]
+            if (not isinstance(python_environment, dict) or
+                    not isinstance(python_environment.get("file"), str)):
+                raise ValueError("environment_python must name a configuration file")
+            patterns.extend([python_environment["file"], "**/*.py"])
+        if config.get("environment_facts"):
+            facts = config["environment_facts"]
+            inputs = config.get("environment_inputs", [])
+            if not isinstance(facts, str) or not isinstance(inputs, list) or any(
+                not isinstance(item, str) or not item for item in inputs
+            ):
+                raise ValueError("environment_facts must be a path; environment_inputs a list of globs")
+            patterns.extend([facts, *inputs])
         declared = list(config.get("globs") or [])
         if not declared and name == "treesitter-routes":
             declared = list(config.get("files") or [])

@@ -32,7 +32,8 @@
     "tests.test_claim_souffle.SouffleBackendTests",
     "tests.test_faults_checker.EngineTest",
     "tests.claim_semantics.test_reasoning.SouffleSourceTests",
-    "tests.test_behaviors.SouffleBehaviorTests"
+    "tests.test_behaviors.SouffleBehaviorTests",
+    "tests.test_environment_integration.EnvironmentSouffleTests"
    ]
   },
   "shen": {

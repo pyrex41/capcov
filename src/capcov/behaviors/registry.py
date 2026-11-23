@@ -90,7 +90,7 @@ def validate(registry):
     require(registry["format"] == FORMAT, "unsupported behavior registry")
     text(registry["baseline"])
     tables = {
-        "artifacts": index(registry["artifacts"], {"path", "sha256"}),
+        "artifacts": index(registry["artifacts"], {"path", "sha256"}, {"source_snapshot"}),
         "stores": index(registry["stores"], {"physical", "representation", "access", "domain", "ambiguities"}),
         "access_paths": index(registry["access_paths"], {"store", "mode", "writer", "hooks", "scopes", "bypasses", "artifacts"}),
         "behaviors": index(registry["behaviors"], {"purpose", "priority", "entries", "depends_on", "access_paths", "artifacts", "legacy", "target", "obligations"}),
@@ -111,6 +111,11 @@ def validate(registry):
     for a in tables["artifacts"].values():
         path(".", a["path"])
         require(isinstance(a["sha256"], str) and re.fullmatch(r"[0-9a-f]{64}", a["sha256"]), "invalid artifact digest")
+        if "source_snapshot" in a:
+            snapshot = a["source_snapshot"]
+            fields(snapshot, {"root", "derived_from"})
+            path(".", snapshot["root"])
+            require(isinstance(snapshot["derived_from"], dict), "invalid snapshot provenance")
     for s in tables["stores"].values():
         for layer in ("physical", "representation", "access", "domain"):
             require(s[layer], "store layer must name at least one artifact")
@@ -230,7 +235,11 @@ def inspect(registry, root, behaviors):
     for a in tables["artifacts"].values():
         try:
             current = file_hash(root, a["path"])
-        except (OSError, BehaviorError):
+            if "source_snapshot" in a:
+                from capcov.artifacts import source_snapshot_of
+                snapshot = a["source_snapshot"]
+                source_snapshot_of(path(root, snapshot["root"]), snapshot["derived_from"])
+        except (OSError, ValueError, TypeError, KeyError):
             current = None
         if current != a["sha256"]:
             changed.append(a["id"])
