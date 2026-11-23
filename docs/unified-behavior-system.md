@@ -24,6 +24,7 @@ is the executable reference.
 | Reviewed check plan | Consumer | Which command must establish each authored obligation |
 | Execution receipt | `behavior check` | Actual command completion bound to source, scope, inputs and logs |
 | Qualification report | `behavior gate` | Whether all enrolled obligations currently have admissible evidence |
+| Product progress report | `behavior progress` | Reported retained breadth, depth, inventory changes and next product gaps per candidate; not qualification |
 
 No row substitutes for another. A label such as `validated` on a registry claim
 is metadata, not permission to skip a check. A green exit from a consumer's command
@@ -31,6 +32,11 @@ has exactly the meaning of that reviewed command. Pin the executable/toolchain,
 check helpers, environment manifest and all semantic inputs in production plans.
 The command runner does not automatically capture arbitrary inherited environment
 variables or prove that a custom test has meaningful assertions.
+
+[Breadth-first product progress](behavior-progress.md) tracks the entire explicit
+capability inventory across candidates, including missing and unresolved units.
+It schedules product breadth before depth polishing without treating harness work
+or passing test counts as implemented product capabilities.
 
 ## Workflow
 
