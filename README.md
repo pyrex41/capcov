@@ -277,6 +277,8 @@ v1 claim packs stay the default.
 | [IR specification](docs/ir-specification.md) | The R02 grammar, semantics, rules, fixtures and gates; decided and open questions |
 | [Typed claim authority](docs/typed-claim-authority.md) | Claim packs decided by the Shen type checker, and the recorded checker disagreements |
 | [System specifications](docs/system-specifications.md), [operation specifications](docs/operation-specifications.md) | `capcov system` models and their evidence |
+| [Rewrite evaluation pilot](experiments/rewrite-snapshot/README.md) | Replay a Python → JavaScript snapshot-service rewrite; compare ordinary and counterexample-informed repairs (experimental, not a release gate) |
+| [Behavioral induction eval](experiments/semantic-learning/llm/README.md) | Replay an executable hypothesis learned from traces; separate proposal quality, selector judgments, and checked behavior |
 | [Reasoning workbench](docs/reasoning-workbench.md) | `capcov reason`: interfaces, the verification loop, proof and execution boundaries |
 | [Adapters and induction](docs/adapters-and-induction.md), [loop induction](docs/loop-induction.md), [snapshot completion](docs/snapshot-completion.md) | The proof rules behind the workbench |
 | [Validation reports](docs/validation/) | Pinned full-gate runs, one file per revision run |

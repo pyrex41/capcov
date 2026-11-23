@@ -1,0 +1,672 @@
+{
+  "format": "capcov-learning-calibration-v1",
+  "basis": "native-model-execution",
+  "assumptions": [
+    "single pending job",
+    "committed calls only",
+    "workflow returns ok; intermediate responses hidden"
+  ],
+  "runs": [
+    {
+      "fixture": "outbox.ops",
+      "identity": {
+        "model": "f649bfef4946b83ead13eefd77800dcf7f2db45d4904873a84bdeed0aaa7d5c3",
+        "libraries": {
+          "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+          "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+          "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+        },
+        "runtime": {
+          "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+          "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+        },
+        "fuel": 1024
+      },
+      "steps": [
+        {
+          "request": {
+            "command": "send",
+            "args": {
+              "id": "j"
+            },
+            "outcome": "committed",
+            "state": [
+              {
+                "table": "job",
+                "key": "j",
+                "fields": {
+                  "status": "pending",
+                  "payload": "hello"
+                }
+              }
+            ]
+          },
+          "receipt": {
+            "format": "capcov-system-evaluation-v1",
+            "basis": "finite-system-model",
+            "model": "f649bfef4946b83ead13eefd77800dcf7f2db45d4904873a84bdeed0aaa7d5c3",
+            "requests": "fccc288eaa5c2531e448d22f8346612f99a2e02198162a70e1403e3ecb3e50b9",
+            "fuel": 1024,
+            "runtime": {
+              "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+              "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+            },
+            "libraries": {
+              "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+              "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+              "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+            },
+            "results": [
+              {
+                "analysis": [
+                  [
+                    "job"
+                  ],
+                  [],
+                  [
+                    "delivery-attempt"
+                  ]
+                ],
+                "transition": [
+                  "result",
+                  [
+                    [
+                      "row",
+                      "job",
+                      "j",
+                      [
+                        [
+                          "payload",
+                          "hello"
+                        ],
+                        [
+                          "status",
+                          "pending"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "emit",
+                      "delivery-attempt",
+                      "hello"
+                    ]
+                  ],
+                  [
+                    [
+                      "action",
+                      "send",
+                      [
+                        [
+                          "emit",
+                          "delivery-attempt",
+                          "hello"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "admissible": [
+                  [
+                    "result",
+                    [
+                      [
+                        "row",
+                        "job",
+                        "j",
+                        [
+                          [
+                            "payload",
+                            "hello"
+                          ],
+                          [
+                            "status",
+                            "pending"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "emit",
+                        "delivery-attempt",
+                        "hello"
+                      ]
+                    ],
+                    [
+                      [
+                        "action",
+                        "send",
+                        [
+                          [
+                            "emit",
+                            "delivery-attempt",
+                            "hello"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "observed_matches": null,
+                "trace_valid": null
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "command": "send",
+            "args": {
+              "id": "j"
+            },
+            "outcome": "committed",
+            "state": [
+              {
+                "table": "job",
+                "key": "j",
+                "fields": {
+                  "payload": "hello",
+                  "status": "pending"
+                }
+              }
+            ]
+          },
+          "receipt": {
+            "format": "capcov-system-evaluation-v1",
+            "basis": "finite-system-model",
+            "model": "f649bfef4946b83ead13eefd77800dcf7f2db45d4904873a84bdeed0aaa7d5c3",
+            "requests": "fccc288eaa5c2531e448d22f8346612f99a2e02198162a70e1403e3ecb3e50b9",
+            "fuel": 1024,
+            "runtime": {
+              "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+              "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+            },
+            "libraries": {
+              "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+              "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+              "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+            },
+            "results": [
+              {
+                "analysis": [
+                  [
+                    "job"
+                  ],
+                  [],
+                  [
+                    "delivery-attempt"
+                  ]
+                ],
+                "transition": [
+                  "result",
+                  [
+                    [
+                      "row",
+                      "job",
+                      "j",
+                      [
+                        [
+                          "payload",
+                          "hello"
+                        ],
+                        [
+                          "status",
+                          "pending"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "emit",
+                      "delivery-attempt",
+                      "hello"
+                    ]
+                  ],
+                  [
+                    [
+                      "action",
+                      "send",
+                      [
+                        [
+                          "emit",
+                          "delivery-attempt",
+                          "hello"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "admissible": [
+                  [
+                    "result",
+                    [
+                      [
+                        "row",
+                        "job",
+                        "j",
+                        [
+                          [
+                            "payload",
+                            "hello"
+                          ],
+                          [
+                            "status",
+                            "pending"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "emit",
+                        "delivery-attempt",
+                        "hello"
+                      ]
+                    ],
+                    [
+                      [
+                        "action",
+                        "send",
+                        [
+                          [
+                            "emit",
+                            "delivery-attempt",
+                            "hello"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "observed_matches": null,
+                "trace_valid": null
+              }
+            ]
+          }
+        }
+      ],
+      "once": {
+        "result": "ok",
+        "state": [
+          {
+            "table": "job",
+            "key": "j",
+            "fields": {
+              "payload": "hello",
+              "status": "pending"
+            }
+          }
+        ],
+        "effects": [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ]
+        ]
+      },
+      "twice": {
+        "result": "ok",
+        "state": [
+          {
+            "table": "job",
+            "key": "j",
+            "fields": {
+              "payload": "hello",
+              "status": "pending"
+            }
+          }
+        ],
+        "effects": [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ],
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ]
+        ]
+      },
+      "state_only_match": true,
+      "workflow_match": false
+    },
+    {
+      "fixture": "outbox-intended.ops",
+      "identity": {
+        "model": "d16ace4dc893963020f0336b902c7bafde34b87bc56fd3b33e63c20693bd1f78",
+        "libraries": {
+          "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+          "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+          "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+        },
+        "runtime": {
+          "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+          "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+        },
+        "fuel": 1024
+      },
+      "steps": [
+        {
+          "request": {
+            "command": "send",
+            "args": {
+              "id": "j"
+            },
+            "outcome": "committed",
+            "state": [
+              {
+                "table": "job",
+                "key": "j",
+                "fields": {
+                  "status": "pending",
+                  "payload": "hello"
+                }
+              }
+            ]
+          },
+          "receipt": {
+            "format": "capcov-system-evaluation-v1",
+            "basis": "finite-system-model",
+            "model": "d16ace4dc893963020f0336b902c7bafde34b87bc56fd3b33e63c20693bd1f78",
+            "requests": "fccc288eaa5c2531e448d22f8346612f99a2e02198162a70e1403e3ecb3e50b9",
+            "fuel": 1024,
+            "runtime": {
+              "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+              "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+            },
+            "libraries": {
+              "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+              "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+              "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+            },
+            "results": [
+              {
+                "analysis": [
+                  [
+                    "job"
+                  ],
+                  [
+                    "job"
+                  ],
+                  [
+                    "delivery-attempt"
+                  ]
+                ],
+                "transition": [
+                  "result",
+                  [
+                    [
+                      "row",
+                      "job",
+                      "j",
+                      [
+                        [
+                          "payload",
+                          "hello"
+                        ],
+                        [
+                          "status",
+                          "attempted"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    [
+                      "emit",
+                      "delivery-attempt",
+                      "hello"
+                    ],
+                    [
+                      "put",
+                      "job",
+                      "j",
+                      "status",
+                      "attempted"
+                    ]
+                  ],
+                  [
+                    [
+                      "action",
+                      "send",
+                      [
+                        [
+                          "emit",
+                          "delivery-attempt",
+                          "hello"
+                        ]
+                      ]
+                    ],
+                    [
+                      "action",
+                      "mark",
+                      [
+                        [
+                          "put",
+                          "job",
+                          "j",
+                          "status",
+                          "attempted"
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "admissible": [
+                  [
+                    "result",
+                    [
+                      [
+                        "row",
+                        "job",
+                        "j",
+                        [
+                          [
+                            "payload",
+                            "hello"
+                          ],
+                          [
+                            "status",
+                            "attempted"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      [
+                        "emit",
+                        "delivery-attempt",
+                        "hello"
+                      ],
+                      [
+                        "put",
+                        "job",
+                        "j",
+                        "status",
+                        "attempted"
+                      ]
+                    ],
+                    [
+                      [
+                        "action",
+                        "send",
+                        [
+                          [
+                            "emit",
+                            "delivery-attempt",
+                            "hello"
+                          ]
+                        ]
+                      ],
+                      [
+                        "action",
+                        "mark",
+                        [
+                          [
+                            "put",
+                            "job",
+                            "j",
+                            "status",
+                            "attempted"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "observed_matches": null,
+                "trace_valid": null
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "command": "send",
+            "args": {
+              "id": "j"
+            },
+            "outcome": "committed",
+            "state": [
+              {
+                "table": "job",
+                "key": "j",
+                "fields": {
+                  "payload": "hello",
+                  "status": "attempted"
+                }
+              }
+            ]
+          },
+          "receipt": {
+            "format": "capcov-system-evaluation-v1",
+            "basis": "finite-system-model",
+            "model": "d16ace4dc893963020f0336b902c7bafde34b87bc56fd3b33e63c20693bd1f78",
+            "requests": "d2024959b2581ffe34624d0cd9d2a1657c47efbc0c73216cc67fc01708f4c7a0",
+            "fuel": 1024,
+            "runtime": {
+              "shen": "e491844ec1ab25c9ce649abf91b8d7204608fabaf3e8bf80fd0448705f79a4ba",
+              "bifrost": "7c720dc12cae8d2860ad06e49757013dec6883eb4560f315e29c1daf924970d5"
+            },
+            "libraries": {
+              "kernel.shen": "a6cb3eeb7755c030d413f65b5acedad53f86a64cf8cf6fb8cf468d59964c6480",
+              "system.shen": "16ef2e74fa96caa8ec73d20a367b24e92177018fb2e33b54bfb645c83d4e39fa",
+              "system-types.shen": "53beb21f866f1fe9f1ed4c0b7e3f7afbcd783ba9dbd74a0862f2b729dcaa6c17"
+            },
+            "results": [
+              {
+                "analysis": [
+                  [
+                    "job"
+                  ],
+                  [
+                    "job"
+                  ],
+                  [
+                    "delivery-attempt"
+                  ]
+                ],
+                "transition": [
+                  "result",
+                  [
+                    [
+                      "row",
+                      "job",
+                      "j",
+                      [
+                        [
+                          "payload",
+                          "hello"
+                        ],
+                        [
+                          "status",
+                          "attempted"
+                        ]
+                      ]
+                    ]
+                  ],
+                  [],
+                  []
+                ],
+                "admissible": [
+                  [
+                    "result",
+                    [
+                      [
+                        "row",
+                        "job",
+                        "j",
+                        [
+                          [
+                            "payload",
+                            "hello"
+                          ],
+                          [
+                            "status",
+                            "attempted"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [],
+                    []
+                  ]
+                ],
+                "observed_matches": null,
+                "trace_valid": null
+              }
+            ]
+          }
+        }
+      ],
+      "once": {
+        "result": "ok",
+        "state": [
+          {
+            "table": "job",
+            "key": "j",
+            "fields": {
+              "payload": "hello",
+              "status": "attempted"
+            }
+          }
+        ],
+        "effects": [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ]
+        ]
+      },
+      "twice": {
+        "result": "ok",
+        "state": [
+          {
+            "table": "job",
+            "key": "j",
+            "fields": {
+              "payload": "hello",
+              "status": "attempted"
+            }
+          }
+        ],
+        "effects": [
+          [
+            "emit",
+            "delivery-attempt",
+            "hello"
+          ]
+        ]
+      },
+      "state_only_match": true,
+      "workflow_match": true
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "format": "capcov-library-pilot-v1",
+  "contract": "ordered emissions only",
+  "repeat_emits_probe": {
+    "outbox.ops": true,
+    "outbox-intended.ops": false
+  },
+  "rule_costs": {
+    "collapse": 1,
+    "guarded": 2,
+    "keep": 0
+  },
+  "training": {
+    "collapse": {
+      "mismatches": [
+        {
+          "model": "outbox.ops",
+          "history": "aa",
+          "replacement": "a"
+        },
+        {
+          "model": "outbox.ops",
+          "history": "bbb",
+          "replacement": "b"
+        }
+      ],
+      "rewritten_calls": 4
+    },
+    "guarded": {
+      "mismatches": [],
+      "rewritten_calls": 7
+    },
+    "keep": {
+      "mismatches": [],
+      "rewritten_calls": 10
+    }
+  },
+  "selection": {
+    "compression": "collapse",
+    "filter": "guarded",
+    "feedback": "guarded"
+  },
+  "held_out": {
+    "compression": {
+      "mismatches": [
+        {
+          "model": "outbox.ops",
+          "history": "aabb",
+          "replacement": "ab"
+        },
+        {
+          "model": "outbox.ops",
+          "history": "baab",
+          "replacement": "bab"
+        },
+        {
+          "model": "outbox.ops",
+          "history": "abbba",
+          "replacement": "aba"
+        }
+      ],
+      "rewritten_calls": 16
+    },
+    "filter": {
+      "mismatches": [],
+      "rewritten_calls": 21
+    },
+    "feedback": {
+      "mismatches": [],
+      "rewritten_calls": 21
+    }
+  }
+}

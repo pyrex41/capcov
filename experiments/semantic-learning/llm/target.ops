@@ -1,0 +1,7 @@
+[system "device"
+ [[table "cell" ["value"] [] []]]
+ [[command "tick" ["x" "y"] [exists "cell" [argument "x"]]
+   [[named "change" [choose [equal [lookup "cell" [argument "x"] "value"] [argument "y"]]
+     [] [[named "signal" [publish "signal" [argument "y"]]]
+         [named "save" [update "cell" [argument "x"] "value" [argument "y"]]]]]]] [yes]]]
+ []]
