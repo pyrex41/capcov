@@ -729,18 +729,35 @@ def main(argv: list[str] | None = None) -> int:
         from .capabilities.cli import main as capabilities_main
 
         return capabilities_main(actual[1:])
+    if actual and actual[0] == "learn":
+        from .learning_cli import main as learning_main
+
+        return learning_main(actual[1:])
+    if actual and actual[0] == "synthesize":
+        from .synthesis_cli import main as synthesis_main
+        return synthesis_main(actual[1:])
+    if actual and actual[0] == "synthesize-batch":
+        from .synthesis_batch import main as batch_main
+        return batch_main(actual[1:])
+    if actual and actual[0] == "intent":
+        from .intent import main as intent_main
+        return intent_main(actual[1:])
     parser = argparse.ArgumentParser(prog="capcov", description=__doc__)
     parser.add_argument("--quiet", action="store_true")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("behavior", help="recovery, store contracts, Step admission and cutover checks")
     sub.add_parser("system", help="typed Shen systems, simulation, campaigns and conformance checks")
-    sub.add_parser("reason", help="source evidence, sequent proofs, relational modes and replay")
+    sub.add_parser("reason", help="proofs, replay and DreamCoder-style search for agents (reason next/run)")
     sub.add_parser("flows", help="source obligations, flow planning, and browser outcome evidence")
     sub.add_parser("outcomes", help="scoped behavior obligations and fresh pytest evidence")
     sub.add_parser("features", help="FODA feature-model validation, configuration check, coverage rollup")
     sub.add_parser(
         "capabilities", help="reconcile specified, implemented and exercised capabilities"
     )
+    sub.add_parser("learn", help="mine bounded behavioral rules from incumbent observations")
+    sub.add_parser("synthesize", help="invent Boolean functions from siblings and fit or challenge a full contract")
+    sub.add_parser("synthesize-batch", help="summarize bounded observation-only family synthesis inputs")
+    sub.add_parser("intent", help="prepare and adjudicate offline intent evidence packets")
     sub.add_parser("faults", help="judge a recorded fault-injection run against the invariant pack")
 
     def common(p: argparse.ArgumentParser) -> None:
