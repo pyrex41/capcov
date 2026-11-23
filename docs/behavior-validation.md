@@ -58,12 +58,18 @@ bounded checks. It was subsequently removed in favor of the existing authoritati
 Vör -> ShenCheck -> generated-TLA+ lane. Those earlier results do not qualify the
 current lane and are intentionally not used by its gate.
 
-The complete pinned Nix/Earthly gate has not run here. The broad unpinned base
-suite also encountered failures and slow-running classes; its result must not be
-reported as a clean regression run. A fully equipped runner must execute the
-normal repository gate and the example's integrated check plan before this branch
-is treated as ready for production use.
+## Full Nix regression validation (2026-10-31)
 
-Implementation completion and remaining validation/production work are mapped in
-[the follow-up record](behavior-follow-ups.md). The Linux x64 runtime blocker is resolved; cross-platform Nix and full release
-qualification remain outstanding.
+[The revision-bound report](validation/268fa67.md) records the full x86_64-linux
+Nix CI run after correcting the upstream archive filename and extraction
+ownership. All flake checks, all test families, the control scripts, lint and
+package checks pass. The six shard records account for all 2,267 discovered
+tests exactly once; the one existing external-model skip is accepted.
+
+The earlier unpinned/local runs were not clean and are not used to establish
+this result. Native ARM/macOS execution and Earthly container execution remain
+separate validation work. The external ShenCheck/Vör protocol result above
+was obtained at its recorded revision and is not newly rerun by this CI suite.
+
+Implementation completion and remaining production work are mapped in
+[the follow-up record](behavior-follow-ups.md).

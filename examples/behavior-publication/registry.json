@@ -140,7 +140,7 @@
     {
       "id": "shen-runtime-source",
       "path": "nix/tools/shen/shen-scheme.nix",
-      "sha256": "276236d5d92105e46cf4f2a532ca8bb154482694404f48b02caaace451c6e38c"
+      "sha256": "2957c907fdfa68d9fbe32a5fc48a48cbf2a19d10c26a0ad8fdca56a7de5aa3ac"
     },
     {
       "id": "shen-runtime-build",
